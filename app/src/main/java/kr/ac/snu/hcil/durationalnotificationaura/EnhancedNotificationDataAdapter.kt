@@ -4,6 +4,8 @@ import android.content.Context
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
+import kr.ac.snu.hcil.durationalnotificationaura.data.EnhancedAppNotificationData
+import kr.ac.snu.hcil.durationalnotificationaura.ui.enhancedhomescreen.AnimatedENAView
 
 class EnhancedNotificationDataAdapter(context: Context, resourceId: Int)
     : ArrayAdapter<EnhancedAppNotificationData>(context, resourceId){

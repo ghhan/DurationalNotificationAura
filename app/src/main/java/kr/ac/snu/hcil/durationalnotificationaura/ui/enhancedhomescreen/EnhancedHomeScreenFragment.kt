@@ -13,7 +13,7 @@ import android.view.View
 import android.view.ViewGroup
 import kotlinx.android.synthetic.main.enhanced_home_screen_fragment.*
 import kr.ac.snu.hcil.durationalnotificationaura.EnhancedNotificationDataAdapter
-import kr.ac.snu.hcil.durationalnotificationaura.MyNotificationListenerService
+import kr.ac.snu.hcil.durationalnotificationaura.utils.MyNotificationListenerService
 import kr.ac.snu.hcil.durationalnotificationaura.R
 
 class EnhancedHomeScreenFragment : Fragment() {
@@ -68,16 +68,26 @@ class EnhancedHomeScreenFragment : Fragment() {
             when(bundle?.getString("event")){
                 "Initialized" -> {
                     //TODO:
+                    val idArray = bundle.getIntArray("IDs")
+                    val pNArray = bundle.getStringArray("packageNames")
+                    val postTimes = bundle.getLongArray("postTimes")
+
                 }
                 "Posted" -> {
                     //TODO:
+                    val id = bundle.getInt("ID")
+                    val packageName = bundle.getString("packageName")
+                    val postTime = bundle.getLong("postTime")
                 }
                 "Removed" -> {
                     //TODO:
+                    val id = bundle.getInt("ID")
+                    val packageName = bundle.getString("packageName")
+                    val postTime = bundle.getLong("postTime")
                 }
             }
 
-            //TODO: 새로운 MutableMap<String, EnhancedAppNotificationData>
+            //TODO: 새로운 MutableMap<String, EnhancedAppNotificationData>로 viewModel update
             viewModel.setNotificationByApps(mutableMapOf())
         }
     }
