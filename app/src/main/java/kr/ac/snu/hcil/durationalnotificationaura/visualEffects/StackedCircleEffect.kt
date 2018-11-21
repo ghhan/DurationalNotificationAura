@@ -9,11 +9,10 @@ import android.view.animation.AccelerateDecelerateInterpolator
 import kr.ac.snu.hcil.durationalnotificationaura.data.EnhancedNotificationDatum
 import kotlin.math.roundToInt
 
-class StackedCircleEffect(view: View): VisEffect(view){
+class StackedCircleEffect: VisEffect(){
 
     override var params: Map<String, Any> = mapOf()
     override var brushes: Map<String, Paint> = mapOf()
-    private val targetView = view
 
     override var visData: List<EnhancedNotificationDatum> = listOf()
 
@@ -83,10 +82,10 @@ class StackedCircleEffect(view: View): VisEffect(view){
     override fun drawEffect(canvas: Canvas?) {
         if(visData.isEmpty())
             return
-        val width = targetView.width
-        val height = targetView.height
-        val allocatedRadius = allocateRadius(width/4f, width/2f)
         canvas?.apply{
+            val width = canvas.width
+            val height = canvas.height
+            val allocatedRadius = allocateRadius(width/4f, width/2f)
             for(radius:Float in allocatedRadius){
                 drawCircle(
                     width/2.toFloat(),

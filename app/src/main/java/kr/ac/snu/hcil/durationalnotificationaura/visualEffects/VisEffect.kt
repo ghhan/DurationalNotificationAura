@@ -6,7 +6,7 @@ import android.graphics.Paint
 import android.view.View
 import kr.ac.snu.hcil.durationalnotificationaura.data.EnhancedNotificationDatum
 
-abstract class VisEffect(view: View) {
+abstract class VisEffect {
     abstract var params: Map<String, Any>
     abstract var brushes: Map<String, Paint>
     abstract var visData: List<EnhancedNotificationDatum>
