@@ -28,13 +28,11 @@ open class EnhancedNotificationAuraView(context: Context, attrs: AttributeSet?):
         const val ENA_VIEW_TAG = "ENA_VIEW_TAG"
         const val ENA_UPDATE_INTERVAL = 1000L * 30
     }
-    open var enhancedAppNotificationData =
-        EnhancedAppNotificationData("Not Set")
-
+    open var enhancedAppNotificationData = EnhancedAppNotificationData("Not Set")
 }
 
 class AnimatedENAView(context:Context, attrs: AttributeSet?): EnhancedNotificationAuraView(context, attrs){
-
+    
     override var enhancedAppNotificationData: EnhancedAppNotificationData
         get() = super.enhancedAppNotificationData
         set(value) {

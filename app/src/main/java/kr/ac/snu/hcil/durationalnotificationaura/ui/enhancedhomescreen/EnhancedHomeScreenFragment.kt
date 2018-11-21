@@ -51,6 +51,7 @@ class EnhancedHomeScreenFragment : Fragment() {
                 appGrid.adapter = enhancedAppNotificationDataAdapter
             }
         )
+
     }
 
     override fun onResume() {
