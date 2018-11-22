@@ -10,6 +10,7 @@ import kr.ac.snu.hcil.durationalnotificationaura.data.EnhancedNotificationDatum
 import kr.ac.snu.hcil.durationalnotificationaura.ui.enhancedhomescreen.EnhancedNotificationAuraView
 import kr.ac.snu.hcil.durationalnotificationaura.visualEffects.VisEffect
 
+
 class TestViewGroup(context: Context, attributeSet: AttributeSet?): ViewGroup(context, attributeSet) {
 
     /* One View -> One Visual Object (Translations, Alpha, Rotation, Scale)

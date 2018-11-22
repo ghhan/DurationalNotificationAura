@@ -53,6 +53,11 @@ class EnhancedHomeScreenFragment : Fragment() {
         )
     }
 
+//    override fun onCreate(savedInstanceState: Bundle?) {
+//        super.onCreate(savedInstanceState)
+//        activity?.registerReceiver(notificationReceiver, intentFilter)
+//    }
+
     override fun onResume() {
         super.onResume()
         activity?.registerReceiver(notificationReceiver, intentFilter)
