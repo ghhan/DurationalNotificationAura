@@ -9,7 +9,7 @@ import android.view.animation.AccelerateDecelerateInterpolator
 import kr.ac.snu.hcil.durationalnotificationaura.data.EnhancedNotificationDatum
 import kotlin.math.roundToInt
 
-class StackedCircleEffect: VisEffect(){
+class StackedCircleGroupEffect: VisGroupEffect(){
 
     override var params: Map<String, Any> = mapOf()
     override var brushes: Map<String, Paint> = mapOf()

@@ -21,7 +21,11 @@ class TestViewGroup(context: Context, attributeSet: AttributeSet?): ViewGroup(co
         }
     }
 
-    // 얘는 각
+    override fun addView(child: View?, index: Int, params: LayoutParams?) {
+        super.addView(child, index, params)
+    }
+
+    // 얘는 각각 child 추가하는 코드
     override fun drawChild(canvas: Canvas?, child: View?, drawingTime: Long): Boolean {
         return super.drawChild(canvas, child, drawingTime)
         //child.draw(canvas)
