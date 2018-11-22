@@ -6,11 +6,19 @@ import android.util.AttributeSet
 import android.view.View
 import android.view.ViewGroup
 import kr.ac.snu.hcil.durationalnotificationaura.data.EnhancedAppNotificationData
+import kr.ac.snu.hcil.durationalnotificationaura.ui.enhancedhomescreen.AnimatedENAView
 
 class TestViewGroup(context: Context, attributeSet: AttributeSet?): ViewGroup(context, attributeSet) {
 
-    // data 무더기를 받아서 View를 생성하는 모듈
+    /* One View -> One Visual Object (Translations, Alpha, Rotation, Scale)
+     * ViewGroup Controls Multiple Views
+     * ViewGroup Sets Layout of Views, Rendering Order
+     */
+    private var enhancedAppNotificationData : EnhancedAppNotificationData? = null
+
+    //
     fun setEnhancedNotificationData(data: EnhancedAppNotificationData){
+        // data 무더기를 받아서 View를 생성하는 모듈
         data.notificationData.map{
             addView(
                 AnimatedENAView(context, null).apply{ //TODO: View에 data를 먹여줘야 함
@@ -20,7 +28,11 @@ class TestViewGroup(context: Context, attributeSet: AttributeSet?): ViewGroup(co
         }
     }
 
-    // 얘는 각
+    override fun addView(child: View?, index: Int, params: LayoutParams?) {
+        super.addView(child, index, params)
+    }
+
+    // 얘는 각각 child 추가하는 코드
     override fun drawChild(canvas: Canvas?, child: View?, drawingTime: Long): Boolean {
         return super.drawChild(canvas, child, drawingTime)
         //child.draw(canvas)
