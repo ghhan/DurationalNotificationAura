@@ -23,6 +23,8 @@ class TestViewGroup(context: Context, attributeSet: AttributeSet?): ViewGroup(co
     // 얘는 각
     override fun drawChild(canvas: Canvas?, child: View?, drawingTime: Long): Boolean {
         return super.drawChild(canvas, child, drawingTime)
+        //child.draw(canvas)
+        //내가 어떤 child 그릴 지 선택은 아니므로 다른 함수 확인해야함
     }
 
     // child가 invalidated일때
