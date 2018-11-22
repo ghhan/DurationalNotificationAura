@@ -6,7 +6,9 @@ import android.util.AttributeSet
 import android.view.View
 import android.view.ViewGroup
 import kr.ac.snu.hcil.durationalnotificationaura.data.EnhancedAppNotificationData
-import kr.ac.snu.hcil.durationalnotificationaura.ui.enhancedhomescreen.AnimatedENAView
+import kr.ac.snu.hcil.durationalnotificationaura.data.EnhancedNotificationDatum
+import kr.ac.snu.hcil.durationalnotificationaura.ui.enhancedhomescreen.EnhancedNotificationAuraView
+import kr.ac.snu.hcil.durationalnotificationaura.visualEffects.VisEffect
 
 class TestViewGroup(context: Context, attributeSet: AttributeSet?): ViewGroup(context, attributeSet) {
 
@@ -14,22 +16,30 @@ class TestViewGroup(context: Context, attributeSet: AttributeSet?): ViewGroup(co
      * ViewGroup Controls Multiple Views
      * ViewGroup Sets Layout of Views, Rendering Order
      */
-    private var enhancedAppNotificationData : EnhancedAppNotificationData? = null
 
-    //
-    fun setEnhancedNotificationData(data: EnhancedAppNotificationData){
-        // data 무더기를 받아서 View를 생성하는 모듈
-        data.notificationData.map{
+    private var appPackageName: String? = null
+
+    fun setEnhanceData(enhanceData: EnhancedAppNotificationData) {
+        appPackageName = enhanceData.packageName
+        enhanceData.notificationData.forEach{
             addView(
-                AnimatedENAView(context, null).apply{ //TODO: View에 data를 먹여줘야 함
-                },
-                LayoutParams(100, 100) //TODO: Layout Parameter
+                EnhancedNotificationAuraView(context, null).also{ view -> view.setVisualData(it) }
             )
         }
     }
 
-    override fun addView(child: View?, index: Int, params: LayoutParams?) {
-        super.addView(child, index, params)
+    fun setVisualEffects(visualEffects: List<VisEffect>){
+        visualEffects.forEachIndexed{
+            index, visEffect -> (getChildAt(index) as EnhancedNotificationAuraView).setVisualEffect(visEffect)
+        }
+    }
+
+    fun addEnhancedNotificationAuraView(visData: EnhancedNotificationDatum, visEffect: VisEffect){
+        addView(
+            EnhancedNotificationAuraView(context, null).also{
+                    view -> view.setVisualData(visData); view.setVisualEffect(visEffect)
+            }
+        )
     }
 
     // 얘는 각각 child 추가하는 코드
@@ -46,6 +56,13 @@ class TestViewGroup(context: Context, attributeSet: AttributeSet?): ViewGroup(co
 
     // View Group의 전체적인 배치를 결정하는 모듈
     override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        when(changed){
+            true -> {
+
+            }
+            false -> {
+
+            }
+        }
     }
 }
