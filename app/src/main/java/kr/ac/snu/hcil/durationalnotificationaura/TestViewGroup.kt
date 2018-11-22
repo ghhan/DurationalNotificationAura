@@ -6,11 +6,8 @@ import android.util.AttributeSet
 import android.view.View
 import android.view.ViewGroup
 import kr.ac.snu.hcil.durationalnotificationaura.data.EnhancedAppNotificationData
-<<<<<<< HEAD
 import kr.ac.snu.hcil.durationalnotificationaura.ui.enhancedhomescreen.*
-=======
 import kr.ac.snu.hcil.durationalnotificationaura.ui.enhancedhomescreen.AnimatedENAView
->>>>>>> origin/master
 
 class TestViewGroup(context: Context, attributeSet: AttributeSet?): ViewGroup(context, attributeSet) {
 
