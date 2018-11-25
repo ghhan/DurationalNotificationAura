@@ -11,14 +11,17 @@ class MyNotificationListenerService: NotificationListenerService() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        sendBroadcast(
-            Intent(ACTION).apply{
-                putExtra("event", "Initialized")
-                putExtra("IDs", activeNotifications.map{it.id}.toIntArray())
-                putExtra("packageNames", activeNotifications.map{it.packageName}.toTypedArray())
-                putExtra("postTimes", activeNotifications.map{it.postTime}.toLongArray())
-            }
-        )
+        activeNotifications?.let{
+            activeNotis ->
+            sendBroadcast(
+                    Intent(ACTION).apply{
+                        putExtra("event", "Initialized")
+                        putExtra("IDs", activeNotis.map{it.id}.toIntArray())
+                        putExtra("packageNames", activeNotis.map{it.packageName}.toTypedArray())
+                        putExtra("postTimes", activeNotis.map{it.postTime}.toLongArray())
+                    }
+            )
+        }
         return super.onStartCommand(intent, flags, startId)
     }
 
