@@ -15,6 +15,8 @@ import kotlinx.android.synthetic.main.enhanced_home_screen_fragment.*
 import kr.ac.snu.hcil.durationalnotificationaura.EnhancedNotificationDataAdapter
 import kr.ac.snu.hcil.durationalnotificationaura.utils.MyNotificationListenerService
 import kr.ac.snu.hcil.durationalnotificationaura.R
+import kr.ac.snu.hcil.durationalnotificationaura.data.EnhancedAppNotificationData
+import kr.ac.snu.hcil.durationalnotificationaura.data.EnhancedNotificationDatum
 
 class EnhancedHomeScreenFragment : Fragment() {
 
@@ -38,7 +40,7 @@ class EnhancedHomeScreenFragment : Fragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        enhancedAppNotificationDataAdapter = EnhancedNotificationDataAdapter(context!!, R.layout.home_screen_gridview_item)
+        enhancedAppNotificationDataAdapter = EnhancedNotificationDataAdapter(context!!, R.layout.home_screen_gridview_item_new)
 
         activity?.startService(Intent(activity, MyNotificationListenerService::class.java))
 
@@ -67,33 +69,95 @@ class EnhancedHomeScreenFragment : Fragment() {
         activity?.unregisterReceiver(notificationReceiver)
     }
 
+    //packageName이 같은 애들을 모아서 데이터 생성
+
+    private fun initializeEnhancedAppNotiMap(ids: IntArray, packageNames: Array<String>, postTimes: LongArray) =
+        packageNames.distinct().map{
+            distinctStr ->
+            val list = mutableListOf<EnhancedNotificationDatum>()
+            packageNames.forEachIndexed{
+                index, str ->
+                if(distinctStr == str) list.add(EnhancedNotificationDatum("", postTimes[index], 1000L * 60 * 1))
+            }
+            distinctStr to list
+        }.toMap().let{
+            it.map{
+                entry -> entry.key to EnhancedAppNotificationData(entry.key).also{
+                    datum -> datum.notificationData = entry.value
+                }
+            }.toMap()
+        }
+
+    private fun addNewEnhancedNotification(id: Int, packageName: String, postTime: Long): MutableMap<String, EnhancedAppNotificationData>{
+        var currentData: MutableMap<String,EnhancedAppNotificationData>? = viewModel.getNotificationsByApps().value
+        if(currentData != null){
+            if(packageName in currentData.keys){
+                currentData[packageName]!!.notificationData.add(
+                    EnhancedNotificationDatum("", postTime, 1000L * 60 * 1)
+                )
+            }
+            else{
+                currentData[packageName] = EnhancedAppNotificationData(packageName).also{
+                    it.notificationData = mutableListOf(
+                        EnhancedNotificationDatum("", postTime, 1000L * 60 * 1)
+                    )
+                }
+            }
+        }
+        else{
+            currentData = mutableMapOf(
+                packageName to EnhancedAppNotificationData(packageName).also{
+                    it.notificationData = mutableListOf(
+                        EnhancedNotificationDatum("", postTime, 1000L * 60 * 1)
+                    )
+                }
+            )
+        }
+        return currentData
+    }
+
+    private fun dismissNotification(id: Int, packageName: String, postTime: Long):MutableMap<String, EnhancedAppNotificationData>{
+        val currentData: MutableMap<String,EnhancedAppNotificationData>? = viewModel.getNotificationsByApps().value
+
+        return currentData!!.mapValues{
+            if(packageName == it.key)
+                it.value.apply{
+                    notificationData = notificationData.map{
+                        datum -> datum.apply{ lifeCycle = EnhancedNotificationLifeCycle.STATE_3 }
+                    }.toMutableList()
+                }
+            else
+                it.value
+        }.toMutableMap()
+    }
+
     inner class NotificationReceiver: BroadcastReceiver(){
         override fun onReceive(context: Context?, intent: Intent?) {
             val bundle: Bundle? = intent?.extras
+            var newData: MutableMap<String, EnhancedAppNotificationData> = mutableMapOf()
             when(bundle?.getString("event")){
                 "Initialized" -> {
-                    //TODO:
                     val idArray = bundle.getIntArray("IDs")
                     val pNArray = bundle.getStringArray("packageNames")
                     val postTimes = bundle.getLongArray("postTimes")
-
+                    newData = initializeEnhancedAppNotiMap(idArray!!, pNArray!!, postTimes!!).toMutableMap()
                 }
                 "Posted" -> {
                     //TODO:
                     val id = bundle.getInt("ID")
                     val packageName = bundle.getString("packageName")
                     val postTime = bundle.getLong("postTime")
+                    newData = addNewEnhancedNotification(id, packageName!!, postTime)
                 }
                 "Removed" -> {
                     //TODO:
                     val id = bundle.getInt("ID")
                     val packageName = bundle.getString("packageName")
                     val postTime = bundle.getLong("postTime")
+                    newData = dismissNotification(id, packageName!!, postTime)
                 }
             }
-
-            //TODO: 새로운 MutableMap<String, EnhancedAppNotificationData>로 viewModel update
-            viewModel.setNotificationByApps(mutableMapOf())
+            viewModel.setNotificationByApps(newData)
         }
     }
 }

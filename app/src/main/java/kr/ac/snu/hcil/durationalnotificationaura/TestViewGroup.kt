@@ -1,7 +1,6 @@
 package kr.ac.snu.hcil.durationalnotificationaura
 
 import android.content.Context
-import android.graphics.Canvas
 import android.util.AttributeSet
 import android.view.View
 import android.view.ViewGroup
@@ -34,34 +33,26 @@ class TestViewGroup(context: Context, attributeSet: AttributeSet?): ViewGroup(co
         }
     }
 
+    fun setSameVisualEffect(visualEffect: VisEffect) {
+        for (idx in 0 ..(childCount - 1)){
+            (getChildAt(idx) as EnhancedNotificationAuraView).setVisualEffect(visualEffect)
+        }
+    }
+
     fun addEnhancedNotificationAuraView(visData: EnhancedNotificationDatum, visEffect: VisEffect){
         addView(
             EnhancedNotificationAuraView(context, null).also{
                     view -> view.setVisualData(visData); view.setVisualEffect(visEffect)
-            }
+            } as View
         )
-    }
-
-    // 얘는 각각 child 추가하는 코드
-    override fun drawChild(canvas: Canvas?, child: View?, drawingTime: Long): Boolean {
-        return super.drawChild(canvas, child, drawingTime)
-        //child.draw(canvas)
-        //내가 어떤 child 그릴 지 선택은 아니므로 다른 함수 확인해야함
-    }
-
-    // child가 invalidated일때
-    override fun onDescendantInvalidated(child: View, target: View) {
-        super.onDescendantInvalidated(child, target)
     }
 
     // View Group의 전체적인 배치를 결정하는 모듈
     override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
-        when(changed){
-            true -> {
-
-            }
-            false -> {
-
+        if(changed){
+            for(idx in 0..(childCount - 1)){
+                val child : View = getChildAt(idx)
+                child.layout(l, t, r, b)
             }
         }
     }
