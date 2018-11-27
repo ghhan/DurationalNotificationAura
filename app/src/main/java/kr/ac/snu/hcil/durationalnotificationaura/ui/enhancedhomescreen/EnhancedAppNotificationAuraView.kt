@@ -86,32 +86,31 @@ class EnhancedNotificationAuraView(context: Context, attrs: AttributeSet?): View
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
-        visualEffect?.animation?.start()
     }
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
-        visualEffect?.animation?.cancel()
     }
+
     override fun onVisibilityChanged(changedView: View, visibility: Int) {
         super.onVisibilityChanged(changedView, visibility)
         when(visibility){
             View.VISIBLE -> {
-                visualEffect?.animation?.start()
+                visualEffect?.animator?.start()
             }
             View.GONE -> {
-                visualEffect?.animation?.cancel()
+                visualEffect?.animator?.cancel()
             }
             View.INVISIBLE -> {
-                visualEffect?.animation?.pause()
+                visualEffect?.animator?.pause()
             }
         }
     }
     override fun onDraw(canvas: Canvas?) {
         canvas?.apply{
-            visualEffect?.drawEffect(canvas)
+            visualEffect?.drawVisualization(canvas)
         }
         if(dirtyBit){
-            visualEffect?.animation?.let{
+            visualEffect?.animator?.let{
                 if(it.isRunning){
                     it.cancel()
                     it.start()
@@ -124,4 +123,3 @@ class EnhancedNotificationAuraView(context: Context, attrs: AttributeSet?): View
         }
     }
 }
-

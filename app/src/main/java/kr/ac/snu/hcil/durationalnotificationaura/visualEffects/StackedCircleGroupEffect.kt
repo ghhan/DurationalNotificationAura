@@ -13,7 +13,6 @@ class StackedCircleGroupEffect: VisGroupEffect(){
 
     override var params: Map<String, Any> = mapOf()
     override var brushes: Map<String, Paint> = mapOf()
-
     override var visData: List<EnhancedNotificationDatum> = listOf()
 
     private fun allocateRadius(minVal: Float, maxVal: Float): List<Float> {

@@ -45,6 +45,12 @@ class EnhancedHomeScreenFragment : Fragment() {
         activity?.startService(Intent(activity, MyNotificationListenerService::class.java))
 
         viewModel = ViewModelProviders.of(this).get(EnhancedHomeScreenViewModel::class.java)
+
+        val temp = viewModel.getNotificationsByApps().value
+        enhancedAppNotificationDataAdapter.clear()
+        enhancedAppNotificationDataAdapter.addAll(temp!!.values)
+        appGrid.adapter = enhancedAppNotificationDataAdapter
+
         viewModel.getNotificationsByApps().observe(this,
             Observer {
                 //Render Logic

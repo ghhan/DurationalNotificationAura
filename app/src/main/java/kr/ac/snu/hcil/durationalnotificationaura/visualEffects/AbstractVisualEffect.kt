@@ -1,6 +1,7 @@
 package kr.ac.snu.hcil.durationalnotificationaura.visualEffects
 
 import android.animation.AnimatorSet
+import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.view.View
@@ -15,9 +16,14 @@ abstract class VisGroupEffect {
 }
 
 abstract class VisEffect{
-    abstract var params: Map<String, Any>
-    abstract var brushes: Map<String, Paint>
+    
+    abstract var visParams: Map<String, Any>
+    abstract var visBrushes: Map<String, Paint>
     abstract var visData: EnhancedNotificationDatum
-    abstract var animation: AnimatorSet
-    abstract fun drawEffect(canvas: Canvas?)
+    abstract fun drawVisualization(canvas: Canvas?)
+    
+    abstract var animParams: Map<String, Any>
+    abstract var animator: AnimatorSet
+    abstract fun initializeAnimator(target: View)
+    
 }
