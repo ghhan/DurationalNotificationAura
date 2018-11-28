@@ -4,21 +4,24 @@ import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.ViewModel
 import android.os.Handler
+import android.util.Log
 import kr.ac.snu.hcil.durationalnotificationaura.data.EnhancedAppNotificationData
 import kr.ac.snu.hcil.durationalnotificationaura.data.EnhancedNotificationDatum
 import java.util.*
 
 class EnhancedHomeScreenViewModel : ViewModel() {
+
+    companion object {
+        const val TAG = "VIEWMODEL"
+    }
     private var appNotificationLiveData: MutableLiveData<MutableMap<String, EnhancedAppNotificationData>> = MutableLiveData()
     private val mHandler = Handler()
     private var lastUpdateInMillis = Calendar.getInstance().timeInMillis
     private fun updateNotiEnhancement(notiData: EnhancedNotificationDatum, updateInterval: Long): EnhancedNotificationDatum {
         when(notiData.lifeCycle){
             EnhancedNotificationLifeCycle.STATE_2 -> {
-                if(notiData.timeElapsed >= notiData.naturalDecay){
-                    notiData.lifeCycle =
-                            EnhancedNotificationLifeCycle.STATE_5
-                }
+                if(notiData.timeElapsed >= notiData.naturalDecay)
+                    notiData.lifeCycle = EnhancedNotificationLifeCycle.STATE_5
                 else {
                     when (notiData.firstPattern) {
                         EnhancementPattern.DEC -> {
@@ -36,10 +39,8 @@ class EnhancedHomeScreenViewModel : ViewModel() {
                 }
             }
             EnhancedNotificationLifeCycle.STATE_4 -> {
-                if(notiData.timeElapsed >= notiData.naturalDecay){
-                    notiData.lifeCycle =
-                            EnhancedNotificationLifeCycle.STATE_5
-                }
+                if(notiData.timeElapsed >= notiData.naturalDecay)
+                    notiData.lifeCycle = EnhancedNotificationLifeCycle.STATE_5
                 else{
                     when(notiData.secondPattern){
                         EnhancementPattern.DEC -> {
@@ -57,9 +58,7 @@ class EnhancedHomeScreenViewModel : ViewModel() {
                 }
             }
             EnhancedNotificationLifeCycle.STATE_1 -> {
-                // Proceed STATE_1 -> STATE_2
-                notiData.lifeCycle =
-                        EnhancedNotificationLifeCycle.STATE_2
+                notiData.lifeCycle = EnhancedNotificationLifeCycle.STATE_2
                 when(notiData.firstPattern){
                     EnhancementPattern.INC -> notiData.slope = (notiData.upperBound - notiData.enhanceOffset) / notiData.firstSaturationTime
                     EnhancementPattern.DEC -> notiData.slope = (notiData.enhanceOffset - notiData.lowerBound) / notiData.firstSaturationTime
@@ -67,9 +66,7 @@ class EnhancedHomeScreenViewModel : ViewModel() {
                 }
             }
             EnhancedNotificationLifeCycle.STATE_3 -> {
-                // Proceed STATE_3 -> STATE_4
-                notiData.lifeCycle =
-                        EnhancedNotificationLifeCycle.STATE_4
+                notiData.lifeCycle = EnhancedNotificationLifeCycle.STATE_4
                 when(notiData.secondPattern){
                     EnhancementPattern.INC -> notiData.slope = (notiData.upperBound - notiData.currEnhancement) / notiData.secondSaturationTime
                     EnhancementPattern.DEC -> notiData.slope = (notiData.currEnhancement - notiData.lowerBound) / notiData.secondSaturationTime
@@ -77,8 +74,7 @@ class EnhancedHomeScreenViewModel : ViewModel() {
                 }
             }
             EnhancedNotificationLifeCycle.STATE_5 -> {
-                //currently drop to 0
-                notiData.currEnhancement = 0.0
+                notiData.currEnhancement = notiData.lowerBound
             }
         }
         notiData.timeElapsed += updateInterval
@@ -98,7 +94,8 @@ class EnhancedHomeScreenViewModel : ViewModel() {
             }?.toMutableMap()
             lastUpdateInMillis = nowInMillis
             appNotificationLiveData.value = newData
-            mHandler.postDelayed(this, 1000L * 30)
+            Log.d(TAG, "ViewModel Updated at $nowInMillis")
+            mHandler.postDelayed(this, 1000L * 10)
         }
     }
     init{
@@ -119,7 +116,7 @@ class EnhancedHomeScreenViewModel : ViewModel() {
                 while(count >= 0){
                     notificationData.add(
                         EnhancedNotificationDatum(
-                            "default", currTime, currTime + 1000L * 60 * 30
+                            "default", currTime, 1000L * 60 * 10
                         ).apply{
                             firstPattern = EnhancementPattern.INC
                         }

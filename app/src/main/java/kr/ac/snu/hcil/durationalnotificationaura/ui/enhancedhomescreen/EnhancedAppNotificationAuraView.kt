@@ -59,7 +59,6 @@ class AnimatedENAView(context:Context, attrs: AttributeSet?): EnhancedAppNotific
             drawEffect(canvas)
         }
     }
-
 }
 
 class EnhancedNotificationAuraView(context: Context, attrs: AttributeSet?): View(context, attrs){
@@ -72,7 +71,7 @@ class EnhancedNotificationAuraView(context: Context, attrs: AttributeSet?): View
         visualData = visData
         visualEffect?.visData = visData
         dirtyBit = true
-        invalidate()
+        requestLayout()
     }
 
     fun setVisualEffect(visEffect: VisEffect){
@@ -81,7 +80,7 @@ class EnhancedNotificationAuraView(context: Context, attrs: AttributeSet?): View
             visualEffect!!.visData = it
         }
         dirtyBit = true
-        invalidate()
+        requestLayout()
     }
 
     override fun onAttachedToWindow() {
@@ -89,6 +88,11 @@ class EnhancedNotificationAuraView(context: Context, attrs: AttributeSet?): View
     }
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
+    }
+
+    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+        print("$measuredWidth, $measuredHeight")
     }
 
     override fun onVisibilityChanged(changedView: View, visibility: Int) {

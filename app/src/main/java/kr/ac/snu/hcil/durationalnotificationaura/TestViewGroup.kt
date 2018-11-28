@@ -22,7 +22,8 @@ class TestViewGroup(context: Context, attributeSet: AttributeSet?): ViewGroup(co
         appPackageName = enhanceData.packageName
         enhanceData.notificationData.forEach{
             addView(
-                EnhancedNotificationAuraView(context, null).also{ view -> view.setVisualData(it) }
+                EnhancedNotificationAuraView(context, null).also{ view -> view.setVisualData(it) },
+                LayoutParams(200, 200)
             )
         }
     }

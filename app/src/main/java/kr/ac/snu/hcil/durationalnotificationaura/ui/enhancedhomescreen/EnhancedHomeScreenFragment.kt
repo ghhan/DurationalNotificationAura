@@ -23,6 +23,7 @@ class EnhancedHomeScreenFragment : Fragment() {
     companion object {
         fun newInstance() = EnhancedHomeScreenFragment()
         const val ACTION = "kr.ac.snu.hcil.durationalnotificationaura.NOTIFICATION_LISTENER"
+        const val DEFAULT_START_DECAY_AFTER = 1000L * 60 * 10
     }
 
     private lateinit var viewModel: EnhancedHomeScreenViewModel
@@ -43,14 +44,7 @@ class EnhancedHomeScreenFragment : Fragment() {
         enhancedAppNotificationDataAdapter = EnhancedNotificationDataAdapter(context!!, R.layout.home_screen_gridview_item_new)
 
         activity?.startService(Intent(activity, MyNotificationListenerService::class.java))
-
         viewModel = ViewModelProviders.of(this).get(EnhancedHomeScreenViewModel::class.java)
-
-        val temp = viewModel.getNotificationsByApps().value
-        enhancedAppNotificationDataAdapter.clear()
-        enhancedAppNotificationDataAdapter.addAll(temp!!.values)
-        appGrid.adapter = enhancedAppNotificationDataAdapter
-
         viewModel.getNotificationsByApps().observe(this,
             Observer {
                 //Render Logic
@@ -83,7 +77,7 @@ class EnhancedHomeScreenFragment : Fragment() {
             val list = mutableListOf<EnhancedNotificationDatum>()
             packageNames.forEachIndexed{
                 index, str ->
-                if(distinctStr == str) list.add(EnhancedNotificationDatum("", postTimes[index], 1000L * 60 * 1))
+                if(distinctStr == str) list.add(EnhancedNotificationDatum("", postTimes[index], DEFAULT_START_DECAY_AFTER))
             }
             distinctStr to list
         }.toMap().let{
@@ -99,13 +93,13 @@ class EnhancedHomeScreenFragment : Fragment() {
         if(currentData != null){
             if(packageName in currentData.keys){
                 currentData[packageName]!!.notificationData.add(
-                    EnhancedNotificationDatum("", postTime, 1000L * 60 * 1)
+                    EnhancedNotificationDatum("", postTime, DEFAULT_START_DECAY_AFTER)
                 )
             }
             else{
                 currentData[packageName] = EnhancedAppNotificationData(packageName).also{
                     it.notificationData = mutableListOf(
-                        EnhancedNotificationDatum("", postTime, 1000L * 60 * 1)
+                        EnhancedNotificationDatum("", postTime, DEFAULT_START_DECAY_AFTER)
                     )
                 }
             }
@@ -114,7 +108,7 @@ class EnhancedHomeScreenFragment : Fragment() {
             currentData = mutableMapOf(
                 packageName to EnhancedAppNotificationData(packageName).also{
                     it.notificationData = mutableListOf(
-                        EnhancedNotificationDatum("", postTime, 1000L * 60 * 1)
+                        EnhancedNotificationDatum("", postTime, DEFAULT_START_DECAY_AFTER)
                     )
                 }
             )
