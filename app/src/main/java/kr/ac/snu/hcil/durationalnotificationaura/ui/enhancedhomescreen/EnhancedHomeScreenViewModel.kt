@@ -95,7 +95,7 @@ class EnhancedHomeScreenViewModel : ViewModel() {
             lastUpdateInMillis = nowInMillis
             appNotificationLiveData.value = newData
             Log.d(TAG, "ViewModel Updated at $nowInMillis")
-            mHandler.postDelayed(this, 1000L * 10)
+            mHandler.postDelayed(this, 1000L * 15)
         }
     }
     init{
@@ -107,7 +107,8 @@ class EnhancedHomeScreenViewModel : ViewModel() {
             "com.google.android.apps.",
             "com.google.android.youtube",
             "com.google.android.calendar",
-            "com.kakao.talk")
+            "com.kakao.talk"
+        )
         ) {
             val newOne = EnhancedAppNotificationData(pn)
                 .apply{
@@ -116,7 +117,7 @@ class EnhancedHomeScreenViewModel : ViewModel() {
                 while(count >= 0){
                     notificationData.add(
                         EnhancedNotificationDatum(
-                            "default", currTime, 1000L * 60 * 10
+                            "default", currTime - 1000L * 10 * count, 1000L * 60 * 10
                         ).apply{
                             firstPattern = EnhancementPattern.INC
                         }

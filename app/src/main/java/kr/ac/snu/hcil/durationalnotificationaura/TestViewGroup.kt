@@ -18,6 +18,10 @@ class TestViewGroup(context: Context, attributeSet: AttributeSet?): ViewGroup(co
 
     private var appPackageName: String? = null
 
+    init{
+        setWillNotDraw(false)
+    }
+
     fun setEnhanceData(enhanceData: EnhancedAppNotificationData) {
         appPackageName = enhanceData.packageName
         enhanceData.notificationData.forEach{
@@ -46,6 +50,11 @@ class TestViewGroup(context: Context, attributeSet: AttributeSet?): ViewGroup(co
                     view -> view.setVisualData(visData); view.setVisualEffect(visEffect)
             } as View
         )
+    }
+
+    override fun onDescendantInvalidated(child: View, target: View) {
+        super.onDescendantInvalidated(child, target)
+        invalidate()
     }
 
     // View Group의 전체적인 배치를 결정하는 모듈

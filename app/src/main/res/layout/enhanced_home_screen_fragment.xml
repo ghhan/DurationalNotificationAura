@@ -7,8 +7,9 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context=".ui.enhancedhomescreen.EnhancedHomeScreenFragment">
-    <GridView
-            android:id="@+id/appGrid"
+    <kr.ac.snu.hcil.durationalnotificationaura.TestViewGroup
+            android:id="@+id/testViewGroup"
+            android:background="@color/colorPrimary"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:verticalSpacing="10dp"

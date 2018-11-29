@@ -2,7 +2,9 @@ package kr.ac.snu.hcil.durationalnotificationaura.ui.enhancedhomescreen
 
 import android.content.Context
 import android.graphics.Canvas
+import android.graphics.Color
 import android.util.AttributeSet
+import android.util.Log
 import android.view.View
 import kr.ac.snu.hcil.durationalnotificationaura.data.EnhancedAppNotificationData
 import kr.ac.snu.hcil.durationalnotificationaura.data.EnhancedNotificationDatum
@@ -63,15 +65,24 @@ class AnimatedENAView(context:Context, attrs: AttributeSet?): EnhancedAppNotific
 
 class EnhancedNotificationAuraView(context: Context, attrs: AttributeSet?): View(context, attrs){
 
+    companion object {
+        const val TAG = "Notification_Aura_View"
+    }
     private var visualData: EnhancedNotificationDatum? = null
     private var visualEffect: VisEffect? = null
     private var dirtyBit:Boolean = true
+
+    init{
+        setBackgroundColor(Color.TRANSPARENT)
+        setWillNotDraw(false)
+    }
 
     fun setVisualData(visData: EnhancedNotificationDatum){
         visualData = visData
         visualEffect?.visData = visData
         dirtyBit = true
-        requestLayout()
+        invalidate()
+        //requestLayout()
     }
 
     fun setVisualEffect(visEffect: VisEffect){
@@ -80,7 +91,10 @@ class EnhancedNotificationAuraView(context: Context, attrs: AttributeSet?): View
             visualEffect!!.visData = it
         }
         dirtyBit = true
-        requestLayout()
+        visualEffect!!.initializeAnimator(this)
+        invalidate()
+        //requestLayout()
+
     }
 
     override fun onAttachedToWindow() {
@@ -92,7 +106,7 @@ class EnhancedNotificationAuraView(context: Context, attrs: AttributeSet?): View
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
-        print("$measuredWidth, $measuredHeight")
+        Log.d(TAG,"Measure Sequence: $measuredWidth, $measuredHeight")
     }
 
     override fun onVisibilityChanged(changedView: View, visibility: Int) {
@@ -115,11 +129,7 @@ class EnhancedNotificationAuraView(context: Context, attrs: AttributeSet?): View
         }
         if(dirtyBit){
             visualEffect?.animator?.let{
-                if(it.isRunning){
-                    it.cancel()
-                    it.start()
-                }
-                else{
+               if(!it.isRunning){
                     it.start()
                 }
                 dirtyBit = false

@@ -17,6 +17,7 @@ import kr.ac.snu.hcil.durationalnotificationaura.utils.MyNotificationListenerSer
 import kr.ac.snu.hcil.durationalnotificationaura.R
 import kr.ac.snu.hcil.durationalnotificationaura.data.EnhancedAppNotificationData
 import kr.ac.snu.hcil.durationalnotificationaura.data.EnhancedNotificationDatum
+import kr.ac.snu.hcil.durationalnotificationaura.visualEffects.TestVisEffect
 
 class EnhancedHomeScreenFragment : Fragment() {
 
@@ -47,10 +48,20 @@ class EnhancedHomeScreenFragment : Fragment() {
         viewModel = ViewModelProviders.of(this).get(EnhancedHomeScreenViewModel::class.java)
         viewModel.getNotificationsByApps().observe(this,
             Observer {
-                //Render Logic
+                /*
                 enhancedAppNotificationDataAdapter.clear()
                 enhancedAppNotificationDataAdapter.addAll(it!!.values)
                 appGrid.adapter = enhancedAppNotificationDataAdapter
+                */
+                it!!.iterator().next().let{
+                    entry ->
+                    val packageName = entry.key
+                    val data = entry.value
+                    testViewGroup.setEnhanceData(data)
+                    testViewGroup.setVisualEffects(
+                        List(data.notificationData.size){TestVisEffect()}
+                    )
+                }
             }
         )
     }

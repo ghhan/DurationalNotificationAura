@@ -10,6 +10,9 @@ import kr.ac.snu.hcil.durationalnotificationaura.ui.enhancedhomescreen.EnhancedH
 
 class EnhancedHomeScreenActivity : AppCompatActivity() {
 
+    private lateinit var enhancedAppNotificationDataAdapter: EnhancedNotificationDataAdapter
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.enhanced_home_screen_activity)
