@@ -53,15 +53,56 @@ class EnhancedHomeScreenFragment : Fragment() {
                 enhancedAppNotificationDataAdapter.addAll(it!!.values)
                 appGrid.adapter = enhancedAppNotificationDataAdapter
                 */
-                it!!.iterator().next().let{
+                val myIterator = it!!.iterator()
+                myIterator.next().let{
                     entry ->
                     val packageName = entry.key
                     val data = entry.value
-                    testViewGroup.setEnhanceData(data)
-                    testViewGroup.setVisualEffects(
+
+                    testViewGroup1.setEnhanceData(data)
+                    testViewGroup1.setVisualEffects(
+                        List(data.notificationData.size){TestVisEffect()}
+                    )
+
+                }
+                myIterator.next().let{
+                        entry ->
+                    val packageName = entry.key
+                    val data = entry.value
+                    testViewGroup2.setEnhanceData(data)
+                    testViewGroup2.setVisualEffects(
                         List(data.notificationData.size){TestVisEffect()}
                     )
                 }
+
+                myIterator.next().let{
+                        entry ->
+                    val packageName = entry.key
+                    val data = entry.value
+                    testViewGroup3.setEnhanceData(data)
+                    testViewGroup3.setVisualEffects(
+                        List(data.notificationData.size){TestVisEffect()}
+                    )
+                }
+                myIterator.next().let{
+                        entry ->
+                    val packageName = entry.key
+                    val data = entry.value
+                    testViewGroup4.setEnhanceData(data)
+                    testViewGroup4.setVisualEffects(
+                        List(data.notificationData.size){TestVisEffect()}
+                    )
+                }
+                myIterator.next().let{
+                        entry ->
+                    val packageName = entry.key
+                    val data = entry.value
+                    testViewGroup5.setEnhanceData(data)
+                    testViewGroup5.setVisualEffects(
+                        List(data.notificationData.size){TestVisEffect()}
+                    )
+                }
+                
             }
         )
     }

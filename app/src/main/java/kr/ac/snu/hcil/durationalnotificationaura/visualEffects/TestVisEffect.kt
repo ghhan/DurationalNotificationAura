@@ -10,22 +10,23 @@ import android.view.View
 import android.view.animation.AccelerateDecelerateInterpolator
 import kr.ac.snu.hcil.durationalnotificationaura.data.EnhancedNotificationDatum
 import kotlin.math.roundToInt
+import kotlin.random.Random
 
 class TestVisEffect: VisEffect() {
 
     override var visParams: Map<String, Any> = mapOf()
     override var visBrushes: Map<String, Paint> = mapOf(
-        "base" to Paint(Paint.ANTI_ALIAS_FLAG).also{it.style = Paint.Style.FILL_AND_STROKE
-        }
-    )
+        "base" to Paint(Paint.ANTI_ALIAS_FLAG).also{it.style = Paint.Style.FILL_AND_STROKE},
+        "stroke" to Paint(Paint.ANTI_ALIAS_FLAG).also{it.style= Paint.Style.STROKE; it.color = Color.YELLOW})
+
     override var visData: EnhancedNotificationDatum = EnhancedNotificationDatum("", 0, 0)
     override var animParams: Map<String, Any> = mapOf()
     override var animator = AnimatorSet()
 
     private fun getScaleXYAnimation(targetView: View) = ObjectAnimator.ofPropertyValuesHolder(
         targetView,
-        PropertyValuesHolder.ofFloat(View.SCALE_X, 0.3f, 1f),
-        PropertyValuesHolder.ofFloat(View.SCALE_Y, 0.3f, 1f)
+        PropertyValuesHolder.ofFloat(View.SCALE_X, Random.nextFloat(), 1f),
+        PropertyValuesHolder.ofFloat(View.SCALE_Y, Random.nextFloat(), 1f)
     ).apply{
         duration = 2000
         repeatMode = ObjectAnimator.REVERSE
@@ -60,8 +61,12 @@ class TestVisEffect: VisEffect() {
             it.drawCircle(
                 cx, cy, radius,
                 visBrushes["base"]!!.also {
-                        p -> p.color = Color.argb((visData.currEnhancement.toFloat() * 255f).roundToInt(),0, 0, 255)
+                        p -> p.color = Color.argb(100 + (visData.currEnhancement.toFloat() * 155f).roundToInt(),0, 0, 255)
                 }
+            )
+            it.drawCircle(
+                cx, cy, radius,
+                visBrushes["stroke"]!!
             )
         }
     }

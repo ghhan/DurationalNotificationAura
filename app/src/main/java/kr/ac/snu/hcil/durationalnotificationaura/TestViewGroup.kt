@@ -2,6 +2,7 @@ package kr.ac.snu.hcil.durationalnotificationaura
 
 import android.content.Context
 import android.util.AttributeSet
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import kr.ac.snu.hcil.durationalnotificationaura.data.EnhancedAppNotificationData
@@ -15,12 +16,12 @@ class TestViewGroup(context: Context, attributeSet: AttributeSet?): ViewGroup(co
      * ViewGroup Controls Multiple Views
      * ViewGroup Sets Layout of Views, Rendering Order
      */
+    companion object {
+        const val TAG = "TestViewGroup"
+    }
 
     private var appPackageName: String? = null
 
-    init{
-        setWillNotDraw(false)
-    }
 
     fun setEnhanceData(enhanceData: EnhancedAppNotificationData) {
         appPackageName = enhanceData.packageName
@@ -54,7 +55,6 @@ class TestViewGroup(context: Context, attributeSet: AttributeSet?): ViewGroup(co
 
     override fun onDescendantInvalidated(child: View, target: View) {
         super.onDescendantInvalidated(child, target)
-        invalidate()
     }
 
     // View Group의 전체적인 배치를 결정하는 모듈

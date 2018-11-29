@@ -72,11 +72,6 @@ class EnhancedNotificationAuraView(context: Context, attrs: AttributeSet?): View
     private var visualEffect: VisEffect? = null
     private var dirtyBit:Boolean = true
 
-    init{
-        setBackgroundColor(Color.TRANSPARENT)
-        setWillNotDraw(false)
-    }
-
     fun setVisualData(visData: EnhancedNotificationDatum){
         visualData = visData
         visualEffect?.visData = visData
@@ -93,7 +88,7 @@ class EnhancedNotificationAuraView(context: Context, attrs: AttributeSet?): View
         dirtyBit = true
         visualEffect!!.initializeAnimator(this)
         invalidate()
-        //requestLayout()
+        requestLayout()
 
     }
 
@@ -111,6 +106,7 @@ class EnhancedNotificationAuraView(context: Context, attrs: AttributeSet?): View
 
     override fun onVisibilityChanged(changedView: View, visibility: Int) {
         super.onVisibilityChanged(changedView, visibility)
+
         when(visibility){
             View.VISIBLE -> {
                 visualEffect?.animator?.start()
@@ -126,12 +122,18 @@ class EnhancedNotificationAuraView(context: Context, attrs: AttributeSet?): View
     override fun onDraw(canvas: Canvas?) {
         canvas?.apply{
             visualEffect?.drawVisualization(canvas)
+            //Log.d(TAG, "Rendered: ${visualData.hashCode()}")
         }
+
         if(dirtyBit){
             visualEffect?.animator?.let{
-               if(!it.isRunning){
-                    it.start()
+               if(it.isRunning){
+                   it.cancel()
+                   it.start()
                 }
+                else{
+                   it.start()
+               }
                 dirtyBit = false
             }
         }

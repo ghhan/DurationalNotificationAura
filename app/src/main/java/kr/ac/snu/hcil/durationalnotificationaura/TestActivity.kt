@@ -5,7 +5,6 @@ import android.os.Bundle
 import kotlinx.android.synthetic.main.activity_test.*
 import kr.ac.snu.hcil.durationalnotificationaura.data.EnhancedAppNotificationData
 import kr.ac.snu.hcil.durationalnotificationaura.data.EnhancedNotificationDatum
-import kr.ac.snu.hcil.durationalnotificationaura.ui.enhancedhomescreen.EnhancementPattern
 import kr.ac.snu.hcil.durationalnotificationaura.visualEffects.TestVisEffect
 import java.util.*
 import kotlin.math.roundToLong
@@ -43,9 +42,17 @@ class TestActivity : AppCompatActivity() {
             )
         }
 
-        testViewGroup.run{
+
+        testViewGroup1.run{
             setEnhanceData(appEnhancedData)
             setVisualEffects(listOf(TestVisEffect(), TestVisEffect(), TestVisEffect()))
         }
+
+        testViewGroup2.run{
+            setEnhanceData(appEnhancedData)
+            setVisualEffects(listOf(TestVisEffect(), TestVisEffect(), TestVisEffect()))
+        }
+
+
     }
 }
