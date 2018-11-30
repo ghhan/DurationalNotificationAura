@@ -6,14 +6,17 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.view.View
 import android.view.animation.AccelerateDecelerateInterpolator
-import kr.ac.snu.hcil.durationalnotificationaura.data.EnhancedNotificationDatum
+import kr.ac.snu.hcil.durationalnotificationaura.data.NotificationEnhancedData
 import kotlin.math.roundToInt
+
+/* Currently Not In Use
+ */
 
 class StackedCircleGroupEffect: VisGroupEffect(){
 
     override var params: Map<String, Any> = mapOf()
     override var brushes: Map<String, Paint> = mapOf()
-    override var visData: List<EnhancedNotificationDatum> = listOf()
+    override var visData: List<NotificationEnhancedData> = listOf()
 
     private fun allocateRadius(minVal: Float, maxVal: Float): List<Float> {
         return List(visData.size){index -> minVal + index * (maxVal - minVal) / visData.size}

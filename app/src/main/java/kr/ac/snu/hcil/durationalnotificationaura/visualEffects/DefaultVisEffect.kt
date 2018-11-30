@@ -6,20 +6,25 @@ import android.animation.PropertyValuesHolder
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
+import android.util.Log
 import android.view.View
 import android.view.animation.AccelerateDecelerateInterpolator
-import kr.ac.snu.hcil.durationalnotificationaura.data.EnhancedNotificationDatum
+import kr.ac.snu.hcil.durationalnotificationaura.data.NotificationEnhancedData
 import kotlin.math.roundToInt
 import kotlin.random.Random
 
-class TestVisEffect: VisEffect() {
+class DefaultVisEffect: VisEffect() {
+
+    companion object {
+        const val TAG = "VIS_EFFECT"
+    }
 
     override var visParams: Map<String, Any> = mapOf()
     override var visBrushes: Map<String, Paint> = mapOf(
         "base" to Paint(Paint.ANTI_ALIAS_FLAG).also{it.style = Paint.Style.FILL_AND_STROKE},
         "stroke" to Paint(Paint.ANTI_ALIAS_FLAG).also{it.style= Paint.Style.STROKE; it.color = Color.YELLOW})
 
-    override var visData: EnhancedNotificationDatum = EnhancedNotificationDatum("", 0, 0)
+    override var visData: NotificationEnhancedData = NotificationEnhancedData("", 0, 0)
     override var animParams: Map<String, Any> = mapOf()
     override var animator = AnimatorSet()
 
@@ -55,8 +60,10 @@ class TestVisEffect: VisEffect() {
         if(visData.initTime == 0L)
             return
         canvas?.let{
+
             val cx = it.width/2.toFloat()
             val cy = it.height/2.toFloat()
+
             val radius = it.height/2.toFloat() * visData.currEnhancement.toFloat()
             it.drawCircle(
                 cx, cy, radius,
@@ -68,6 +75,7 @@ class TestVisEffect: VisEffect() {
                 cx, cy, radius,
                 visBrushes["stroke"]!!
             )
+            Log.d(TAG, "canvas_w: ${it.width}, canvas_h: ${it.height}, cx: $cx, cy: $cy, r: $radius")
         }
     }
 }

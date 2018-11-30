@@ -1,29 +1,37 @@
-package kr.ac.snu.hcil.durationalnotificationaura
+package kr.ac.snu.hcil.durationalnotificationaura.ui.enhancedhomescreen
 
 import android.content.Context
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.util.AttributeSet
-import android.util.Log
 import android.view.View
 import android.view.ViewGroup
-import kr.ac.snu.hcil.durationalnotificationaura.data.EnhancedAppNotificationData
-import kr.ac.snu.hcil.durationalnotificationaura.data.EnhancedNotificationDatum
-import kr.ac.snu.hcil.durationalnotificationaura.ui.enhancedhomescreen.EnhancedNotificationAuraView
+import kr.ac.snu.hcil.durationalnotificationaura.data.AppNotificationsEnhancedData
+import kr.ac.snu.hcil.durationalnotificationaura.data.NotificationEnhancedData
 import kr.ac.snu.hcil.durationalnotificationaura.visualEffects.VisEffect
 
-class TestViewGroup(context: Context, attributeSet: AttributeSet?): ViewGroup(context, attributeSet) {
+class EnhancedAppAuraView(context: Context, attributeSet: AttributeSet?): ViewGroup(context, attributeSet) {
 
     /* One View -> One Visual Object (Translations, Alpha, Rotation, Scale)
      * ViewGroup Controls Multiple Views
      * ViewGroup Sets Layout of Views, Rendering Order
      */
+    
     companion object {
-        const val TAG = "TestViewGroup"
+        const val TAG = "APP_AURA_VIEW"
+    }
+
+    private val testColor = ColorDrawable(Color.RED)
+    init{
+        clipChildren = false
+        clipToPadding = false
+        clipToOutline = false
     }
 
     private var appPackageName: String? = null
 
-
-    fun setEnhanceData(enhanceData: EnhancedAppNotificationData) {
+    fun setEnhanceData(enhanceData: AppNotificationsEnhancedData) {
         appPackageName = enhanceData.packageName
         enhanceData.notificationData.forEach{
             addView(
@@ -45,7 +53,7 @@ class TestViewGroup(context: Context, attributeSet: AttributeSet?): ViewGroup(co
         }
     }
 
-    fun addEnhancedNotificationAuraView(visData: EnhancedNotificationDatum, visEffect: VisEffect){
+    fun addEnhancedNotificationAuraView(visData: NotificationEnhancedData, visEffect: VisEffect){
         addView(
             EnhancedNotificationAuraView(context, null).also{
                     view -> view.setVisualData(visData); view.setVisualEffect(visEffect)
@@ -57,12 +65,16 @@ class TestViewGroup(context: Context, attributeSet: AttributeSet?): ViewGroup(co
         super.onDescendantInvalidated(child, target)
     }
 
+    override fun onDraw(canvas: Canvas?) {
+        super.onDraw(canvas)
+    }
+
     // View Group의 전체적인 배치를 결정하는 모듈
     override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
         if(changed){
             for(idx in 0..(childCount - 1)){
                 val child : View = getChildAt(idx)
-                child.layout(l, t, r, b)
+                child.layout(0, 0, width, height)
             }
         }
     }

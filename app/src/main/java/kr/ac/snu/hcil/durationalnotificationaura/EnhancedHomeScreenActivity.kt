@@ -1,17 +1,10 @@
 package kr.ac.snu.hcil.durationalnotificationaura
 
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import kr.ac.snu.hcil.durationalnotificationaura.ui.enhancedhomescreen.EnhancedHomeScreenFragment
 
 class EnhancedHomeScreenActivity : AppCompatActivity() {
-
-    private lateinit var enhancedAppNotificationDataAdapter: EnhancedNotificationDataAdapter
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

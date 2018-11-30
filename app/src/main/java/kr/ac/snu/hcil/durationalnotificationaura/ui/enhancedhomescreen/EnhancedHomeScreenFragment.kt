@@ -12,12 +12,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import kotlinx.android.synthetic.main.enhanced_home_screen_fragment.*
-import kr.ac.snu.hcil.durationalnotificationaura.EnhancedNotificationDataAdapter
 import kr.ac.snu.hcil.durationalnotificationaura.utils.MyNotificationListenerService
 import kr.ac.snu.hcil.durationalnotificationaura.R
-import kr.ac.snu.hcil.durationalnotificationaura.data.EnhancedAppNotificationData
-import kr.ac.snu.hcil.durationalnotificationaura.data.EnhancedNotificationDatum
-import kr.ac.snu.hcil.durationalnotificationaura.visualEffects.TestVisEffect
+import kr.ac.snu.hcil.durationalnotificationaura.data.AppNotificationsEnhancedData
+import kr.ac.snu.hcil.durationalnotificationaura.data.NotificationEnhancedData
+import kr.ac.snu.hcil.durationalnotificationaura.data.EnhancedNotificationLifeCycle
+import kr.ac.snu.hcil.durationalnotificationaura.visualEffects.DefaultVisEffect
 
 class EnhancedHomeScreenFragment : Fragment() {
 
@@ -28,7 +28,6 @@ class EnhancedHomeScreenFragment : Fragment() {
     }
 
     private lateinit var viewModel: EnhancedHomeScreenViewModel
-    private lateinit var enhancedAppNotificationDataAdapter: EnhancedNotificationDataAdapter
     private val notificationReceiver = NotificationReceiver()
     private val intentFilter = IntentFilter().also{
         it.addAction(ACTION)}
@@ -42,17 +41,11 @@ class EnhancedHomeScreenFragment : Fragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        enhancedAppNotificationDataAdapter = EnhancedNotificationDataAdapter(context!!, R.layout.home_screen_gridview_item_new)
-
         activity?.startService(Intent(activity, MyNotificationListenerService::class.java))
         viewModel = ViewModelProviders.of(this).get(EnhancedHomeScreenViewModel::class.java)
         viewModel.getNotificationsByApps().observe(this,
             Observer {
-                /*
-                enhancedAppNotificationDataAdapter.clear()
-                enhancedAppNotificationDataAdapter.addAll(it!!.values)
-                appGrid.adapter = enhancedAppNotificationDataAdapter
-                */
+
                 val myIterator = it!!.iterator()
                 myIterator.next().let{
                     entry ->
@@ -61,7 +54,7 @@ class EnhancedHomeScreenFragment : Fragment() {
 
                     testViewGroup1.setEnhanceData(data)
                     testViewGroup1.setVisualEffects(
-                        List(data.notificationData.size){TestVisEffect()}
+                        List(data.notificationData.size){DefaultVisEffect()}
                     )
 
                 }
@@ -71,7 +64,7 @@ class EnhancedHomeScreenFragment : Fragment() {
                     val data = entry.value
                     testViewGroup2.setEnhanceData(data)
                     testViewGroup2.setVisualEffects(
-                        List(data.notificationData.size){TestVisEffect()}
+                        List(data.notificationData.size){DefaultVisEffect()}
                     )
                 }
 
@@ -81,7 +74,7 @@ class EnhancedHomeScreenFragment : Fragment() {
                     val data = entry.value
                     testViewGroup3.setEnhanceData(data)
                     testViewGroup3.setVisualEffects(
-                        List(data.notificationData.size){TestVisEffect()}
+                        List(data.notificationData.size){DefaultVisEffect()}
                     )
                 }
                 myIterator.next().let{
@@ -90,7 +83,7 @@ class EnhancedHomeScreenFragment : Fragment() {
                     val data = entry.value
                     testViewGroup4.setEnhanceData(data)
                     testViewGroup4.setVisualEffects(
-                        List(data.notificationData.size){TestVisEffect()}
+                        List(data.notificationData.size){DefaultVisEffect()}
                     )
                 }
                 myIterator.next().let{
@@ -99,10 +92,9 @@ class EnhancedHomeScreenFragment : Fragment() {
                     val data = entry.value
                     testViewGroup5.setEnhanceData(data)
                     testViewGroup5.setVisualEffects(
-                        List(data.notificationData.size){TestVisEffect()}
+                        List(data.notificationData.size){DefaultVisEffect()}
                     )
                 }
-                
             }
         )
     }
@@ -121,46 +113,44 @@ class EnhancedHomeScreenFragment : Fragment() {
         activity?.unregisterReceiver(notificationReceiver)
     }
 
-    //packageName이 같은 애들을 모아서 데이터 생성
-
     private fun initializeEnhancedAppNotiMap(ids: IntArray, packageNames: Array<String>, postTimes: LongArray) =
         packageNames.distinct().map{
             distinctStr ->
-            val list = mutableListOf<EnhancedNotificationDatum>()
+            val list = mutableListOf<NotificationEnhancedData>()
             packageNames.forEachIndexed{
                 index, str ->
-                if(distinctStr == str) list.add(EnhancedNotificationDatum("", postTimes[index], DEFAULT_START_DECAY_AFTER))
+                if(distinctStr == str) list.add(NotificationEnhancedData("", postTimes[index], DEFAULT_START_DECAY_AFTER))
             }
             distinctStr to list
         }.toMap().let{
             it.map{
-                entry -> entry.key to EnhancedAppNotificationData(entry.key).also{
+                entry -> entry.key to AppNotificationsEnhancedData(entry.key).also{
                     datum -> datum.notificationData = entry.value
                 }
             }.toMap()
         }
 
-    private fun addNewEnhancedNotification(id: Int, packageName: String, postTime: Long): MutableMap<String, EnhancedAppNotificationData>{
-        var currentData: MutableMap<String,EnhancedAppNotificationData>? = viewModel.getNotificationsByApps().value
+    private fun addNewEnhancedNotification(id: Int, packageName: String, postTime: Long): MutableMap<String, AppNotificationsEnhancedData>{
+        var currentData: MutableMap<String,AppNotificationsEnhancedData>? = viewModel.getNotificationsByApps().value
         if(currentData != null){
             if(packageName in currentData.keys){
                 currentData[packageName]!!.notificationData.add(
-                    EnhancedNotificationDatum("", postTime, DEFAULT_START_DECAY_AFTER)
+                    NotificationEnhancedData("", postTime, DEFAULT_START_DECAY_AFTER)
                 )
             }
             else{
-                currentData[packageName] = EnhancedAppNotificationData(packageName).also{
+                currentData[packageName] = AppNotificationsEnhancedData(packageName).also{
                     it.notificationData = mutableListOf(
-                        EnhancedNotificationDatum("", postTime, DEFAULT_START_DECAY_AFTER)
+                        NotificationEnhancedData("", postTime, DEFAULT_START_DECAY_AFTER)
                     )
                 }
             }
         }
         else{
             currentData = mutableMapOf(
-                packageName to EnhancedAppNotificationData(packageName).also{
+                packageName to AppNotificationsEnhancedData(packageName).also{
                     it.notificationData = mutableListOf(
-                        EnhancedNotificationDatum("", postTime, DEFAULT_START_DECAY_AFTER)
+                        NotificationEnhancedData("", postTime, DEFAULT_START_DECAY_AFTER)
                     )
                 }
             )
@@ -168,8 +158,8 @@ class EnhancedHomeScreenFragment : Fragment() {
         return currentData
     }
 
-    private fun dismissNotification(id: Int, packageName: String, postTime: Long):MutableMap<String, EnhancedAppNotificationData>{
-        val currentData: MutableMap<String,EnhancedAppNotificationData>? = viewModel.getNotificationsByApps().value
+    private fun dismissNotification(id: Int, packageName: String, postTime: Long):MutableMap<String, AppNotificationsEnhancedData>{
+        val currentData: MutableMap<String,AppNotificationsEnhancedData>? = viewModel.getNotificationsByApps().value
 
         return currentData!!.mapValues{
             if(packageName == it.key)
@@ -186,7 +176,7 @@ class EnhancedHomeScreenFragment : Fragment() {
     inner class NotificationReceiver: BroadcastReceiver(){
         override fun onReceive(context: Context?, intent: Intent?) {
             val bundle: Bundle? = intent?.extras
-            var newData: MutableMap<String, EnhancedAppNotificationData> = mutableMapOf()
+            var newData: MutableMap<String, AppNotificationsEnhancedData> = mutableMapOf()
             when(bundle?.getString("event")){
                 "Initialized" -> {
                     val idArray = bundle.getIntArray("IDs")

@@ -5,19 +5,21 @@ import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.ViewModel
 import android.os.Handler
 import android.util.Log
-import kr.ac.snu.hcil.durationalnotificationaura.data.EnhancedAppNotificationData
-import kr.ac.snu.hcil.durationalnotificationaura.data.EnhancedNotificationDatum
+import kr.ac.snu.hcil.durationalnotificationaura.data.AppNotificationsEnhancedData
+import kr.ac.snu.hcil.durationalnotificationaura.data.NotificationEnhancedData
+import kr.ac.snu.hcil.durationalnotificationaura.data.EnhancedNotificationLifeCycle
+import kr.ac.snu.hcil.durationalnotificationaura.data.EnhancementPattern
 import java.util.*
 
 class EnhancedHomeScreenViewModel : ViewModel() {
 
     companion object {
-        const val TAG = "VIEWMODEL"
+        const val TAG = "AURA_VIEW_MODEL"
     }
-    private var appNotificationLiveData: MutableLiveData<MutableMap<String, EnhancedAppNotificationData>> = MutableLiveData()
+    private var appNotificationLiveData: MutableLiveData<MutableMap<String, AppNotificationsEnhancedData>> = MutableLiveData()
     private val mHandler = Handler()
     private var lastUpdateInMillis = Calendar.getInstance().timeInMillis
-    private fun updateNotiEnhancement(notiData: EnhancedNotificationDatum, updateInterval: Long): EnhancedNotificationDatum {
+    private fun updateNotiEnhancement(notiData: NotificationEnhancedData, updateInterval: Long): NotificationEnhancedData {
         when(notiData.lifeCycle){
             EnhancedNotificationLifeCycle.STATE_2 -> {
                 if(notiData.timeElapsed >= notiData.naturalDecay)
@@ -99,8 +101,8 @@ class EnhancedHomeScreenViewModel : ViewModel() {
         }
     }
     init{
-        //데이터 하드코드는 여기서 하도록 합시다.
-        val mutableMap : MutableMap<String, EnhancedAppNotificationData> = mutableMapOf()
+        //데이터 하드코드 테스트는 여기서 하도록 합시다.
+        val mutableMap : MutableMap<String, AppNotificationsEnhancedData> = mutableMapOf()
         val currTime = Calendar.getInstance().timeInMillis
         for(pn:String in arrayOf(
             "com.google.android.gm",
@@ -110,13 +112,13 @@ class EnhancedHomeScreenViewModel : ViewModel() {
             "com.kakao.talk"
         )
         ) {
-            val newOne = EnhancedAppNotificationData(pn)
+            val newOne = AppNotificationsEnhancedData(pn)
                 .apply{
                 notificationData = mutableListOf()
                 var count = Random().nextInt(5)
                 while(count >= 0){
                     notificationData.add(
-                        EnhancedNotificationDatum(
+                        NotificationEnhancedData(
                             "default", currTime - 1000L * 10 * count, 1000L * 60 * 10
                         ).apply{
                             firstPattern = EnhancementPattern.INC
@@ -130,10 +132,10 @@ class EnhancedHomeScreenViewModel : ViewModel() {
         setNotificationByApps(mutableMap)
     }
 
-    fun getNotificationsByApps(): LiveData<MutableMap<String, EnhancedAppNotificationData>>{
+    fun getNotificationsByApps(): LiveData<MutableMap<String, AppNotificationsEnhancedData>>{
         return appNotificationLiveData
     }
-    fun setNotificationByApps(data: MutableMap<String, EnhancedAppNotificationData>){
+    fun setNotificationByApps(data: MutableMap<String, AppNotificationsEnhancedData>){
         appNotificationLiveData.value = data
         mHandler.removeCallbacks(autoUpdateRunnable)
         mHandler.post(autoUpdateRunnable)
