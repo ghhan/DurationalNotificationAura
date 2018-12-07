@@ -8,29 +8,27 @@
         tools:context=".TestActivity">
     <kr.ac.snu.hcil.durationalnotificationaura.ui.enhancedhomescreen.EnhancedAppAuraView
             android:id="@+id/testViewGroup1"
-            android:layout_width="200dp"
-            android:layout_height="200dp"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
             android:minWidth="10dp"
             android:minHeight="10dp"
             android:clipChildren="false"
             android:background="#33ff0000"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/testViewGroup2">
+            android:layout_marginTop="8dp" app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/testViewGroup2" android:layout_marginStart="8dp">
     </kr.ac.snu.hcil.durationalnotificationaura.ui.enhancedhomescreen.EnhancedAppAuraView>
     <kr.ac.snu.hcil.durationalnotificationaura.ui.enhancedhomescreen.EnhancedAppAuraView
             android:id="@+id/testViewGroup2"
-            android:layout_width="200dp"
-            android:layout_height="200dp"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
             android:minWidth="10dp"
             android:minHeight="10dp"
             android:clipChildren="false"
             android:background="#3300FF00"
-            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-    >
+            android:layout_marginTop="8dp" android:layout_marginStart="92dp">
     </kr.ac.snu.hcil.durationalnotificationaura.ui.enhancedhomescreen.EnhancedAppAuraView>
 
 </android.support.constraint.ConstraintLayout>
