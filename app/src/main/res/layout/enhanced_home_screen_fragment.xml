@@ -1,62 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout
+<GridLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools"
-        android:id="@+id/enhancedhomescreen"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/gridLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".ui.enhancedhomescreen.EnhancedHomeScreenFragment" android:layout_margin="5dp"
-        android:padding="5dp" tools:layout_editor_absoluteY="86dp" tools:layout_editor_absoluteX="5dp">
-    <GridLayout
-            android:id="@+id/gridLayout"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:columnCount="4"
-            android:rowCount="5"
-            android:padding="0dp" app:layout_constraintTop_toTopOf="parent" android:layout_marginTop="5dp"
-            app:layout_constraintStart_toStartOf="parent" android:layout_marginStart="5dp"
-            app:layout_constraintEnd_toEndOf="parent" android:layout_marginEnd="5dp" android:layout_marginBottom="5dp"
-            app:layout_constraintBottom_toBottomOf="parent">
-        <kr.ac.snu.hcil.durationalnotificationaura.ui.enhancedhomescreen.EnhancedAppAuraView
-                android:id="@+id/testViewGroup1"
-                android:background="#888888"
-                android:layout_columnWeight="1"
-                android:layout_width="50dp"
-                android:layout_height="80dp"
-                android:layout_margin="1dp"
-        />
-        <kr.ac.snu.hcil.durationalnotificationaura.ui.enhancedhomescreen.EnhancedAppAuraView
-                android:id="@+id/testViewGroup2"
-                android:background="#aaaaaa"
-                android:layout_columnWeight="1"
-                android:layout_width="50dp"
-                android:layout_height="80dp"
-                android:layout_margin="1dp"
-        />
-        <kr.ac.snu.hcil.durationalnotificationaura.ui.enhancedhomescreen.EnhancedAppAuraView
-                android:id="@+id/testViewGroup3"
-                android:background="#888888"
-                android:layout_columnWeight="1"
-                android:layout_width="50dp"
-                android:layout_height="80dp"
-                android:layout_margin="1dp"
-        />
-        <kr.ac.snu.hcil.durationalnotificationaura.ui.enhancedhomescreen.EnhancedAppAuraView
-                android:id="@+id/testViewGroup4"
-                android:background="#aaaaaa"
-                android:layout_columnWeight="1"
-                android:layout_width="50dp"
-                android:layout_height="80dp"
-                android:layout_margin="1dp"
-        />
-        <kr.ac.snu.hcil.durationalnotificationaura.ui.enhancedhomescreen.EnhancedAppAuraView
-                android:id="@+id/testViewGroup5"
-                android:background="#aaaaaa"
-                android:layout_columnWeight="1"
-                android:layout_width="50dp"
-                android:layout_height="80dp"
-                android:layout_margin="1dp"
-        />
-    </GridLayout>
-
-</android.support.constraint.ConstraintLayout>
+        android:columnCount="4"
+        android:rowCount="5"
+        tools:context=".ui.enhancedhomescreen.EnhancedHomeScreenFragment"
+>
+    <kr.ac.snu.hcil.durationalnotificationaura.ui.enhancedhomescreen.EnhancedAppAuraView
+        android:id = "@+id/el1"
+        android:layout_rowWeight="1"
+        android:layout_columnWeight="1"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+    />
+    <kr.ac.snu.hcil.durationalnotificationaura.ui.enhancedhomescreen.EnhancedAppAuraView
+            android:id = "@+id/el2"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+    />
+    <kr.ac.snu.hcil.durationalnotificationaura.ui.enhancedhomescreen.EnhancedAppAuraView
+            android:id = "@+id/el3"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+    />
+    <kr.ac.snu.hcil.durationalnotificationaura.ui.enhancedhomescreen.EnhancedAppAuraView
+            android:id = "@+id/el4"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+    />
+    <kr.ac.snu.hcil.durationalnotificationaura.ui.enhancedhomescreen.EnhancedAppAuraView
+            android:id = "@+id/el5"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+    />
+</GridLayout>

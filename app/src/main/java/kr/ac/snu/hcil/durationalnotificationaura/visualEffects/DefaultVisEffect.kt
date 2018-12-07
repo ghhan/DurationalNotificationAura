@@ -41,8 +41,8 @@ class DefaultVisEffect: VisEffect() {
 
     private fun getJitterXYAnimation(targetView: View) = ObjectAnimator.ofPropertyValuesHolder(
         targetView,
-        PropertyValuesHolder.ofFloat(View.TRANSLATION_X, 10f, 0f, -10f, 0f),
-        PropertyValuesHolder.ofFloat(View.TRANSLATION_Y, 10f, 0f, -10f, 0f)
+        PropertyValuesHolder.ofFloat(View.TRANSLATION_X, Random.nextFloat() * 10f, 0f, Random.nextFloat() * -10f, 0f),
+        PropertyValuesHolder.ofFloat(View.TRANSLATION_Y, Random.nextFloat() * 10f, 0f, Random.nextFloat() * -10f, 0f)
     ).apply{
         duration = 1000
         repeatMode = ObjectAnimator.REVERSE
@@ -59,23 +59,23 @@ class DefaultVisEffect: VisEffect() {
     override fun drawVisualization(canvas: Canvas?) {
         if(visData.initTime == 0L)
             return
-        canvas?.let{
 
+        canvas?.let{
             val cx = it.width/2.toFloat()
             val cy = it.height/2.toFloat()
-
             val radius = it.height/2.toFloat() * visData.currEnhancement.toFloat()
+
             it.drawCircle(
                 cx, cy, radius,
                 visBrushes["base"]!!.also {
                         p -> p.color = Color.argb(100 + (visData.currEnhancement.toFloat() * 155f).roundToInt(),0, 0, 255)
                 }
             )
+
             it.drawCircle(
                 cx, cy, radius,
                 visBrushes["stroke"]!!
             )
-            Log.d(TAG, "canvas_w: ${it.width}, canvas_h: ${it.height}, cx: $cx, cy: $cy, r: $radius")
         }
     }
 }

@@ -5,6 +5,7 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.util.AttributeSet
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import kr.ac.snu.hcil.durationalnotificationaura.data.AppNotificationsEnhancedData
@@ -17,26 +18,35 @@ class EnhancedAppAuraView(context: Context, attributeSet: AttributeSet?): ViewGr
      * ViewGroup Controls Multiple Views
      * ViewGroup Sets Layout of Views, Rendering Order
      */
-    
     companion object {
         const val TAG = "APP_AURA_VIEW"
+        const val SIZE = 200
     }
 
-    private val testColor = ColorDrawable(Color.RED)
     init{
-        clipChildren = false
-        clipToPadding = false
-        clipToOutline = false
+
+        //clipChildren = false
+        //clipToPadding = false
+        //clipToOutline = false
     }
 
     private var appPackageName: String? = null
 
     fun setEnhanceData(enhanceData: AppNotificationsEnhancedData) {
         appPackageName = enhanceData.packageName
+
+        //Log.d(TAG, "# of Data: ${enhanceData.notificationData.size}")
+
         enhanceData.notificationData.forEach{
             addView(
-                EnhancedNotificationAuraView(context, null).also{ view -> view.setVisualData(it) },
-                LayoutParams(200, 200)
+                EnhancedNotificationAuraView(context, null).also{
+                        view -> view.setVisualData(it)
+                    view.tag = appPackageName + "_child"
+                },
+                ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT
+                )
             )
         }
     }
@@ -44,12 +54,6 @@ class EnhancedAppAuraView(context: Context, attributeSet: AttributeSet?): ViewGr
     fun setVisualEffects(visualEffects: List<VisEffect>){
         visualEffects.forEachIndexed{
             index, visEffect -> (getChildAt(index) as EnhancedNotificationAuraView).setVisualEffect(visEffect)
-        }
-    }
-
-    fun setSameVisualEffect(visualEffect: VisEffect) {
-        for (idx in 0 ..(childCount - 1)){
-            (getChildAt(idx) as EnhancedNotificationAuraView).setVisualEffect(visualEffect)
         }
     }
 
@@ -65,6 +69,11 @@ class EnhancedAppAuraView(context: Context, attributeSet: AttributeSet?): ViewGr
         super.onDescendantInvalidated(child, target)
     }
 
+    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+        //Log.d(TAG, "After Measurement: width - ${width}px, height - ${height}px")
+    }
+
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
     }
@@ -72,9 +81,13 @@ class EnhancedAppAuraView(context: Context, attributeSet: AttributeSet?): ViewGr
     // View Group의 전체적인 배치를 결정하는 모듈
     override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
         if(changed){
+            Log.d(TAG, "# of Children in a view of id $tag: $childCount")
             for(idx in 0..(childCount - 1)){
                 val child : View = getChildAt(idx)
-                child.layout(0, 0, width, height)
+                val new_r = l + 258
+                val new_b = t + 258
+                Log.d(TAG, "${child.id} -  l: $l, t: $t, r: $r, b: $b")
+                child.layout(0, 0, r - l, b - t)
             }
         }
     }

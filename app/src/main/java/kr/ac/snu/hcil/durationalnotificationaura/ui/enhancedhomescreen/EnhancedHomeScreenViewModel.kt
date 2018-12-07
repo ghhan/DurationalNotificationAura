@@ -114,19 +114,19 @@ class EnhancedHomeScreenViewModel : ViewModel() {
         ) {
             val newOne = AppNotificationsEnhancedData(pn)
                 .apply{
-                notificationData = mutableListOf()
-                var count = Random().nextInt(5)
-                while(count >= 0){
-                    notificationData.add(
-                        NotificationEnhancedData(
-                            "default", currTime - 1000L * 10 * count, 1000L * 60 * 10
-                        ).apply{
-                            firstPattern = EnhancementPattern.INC
-                        }
-                    )
-                    count--
+                    notificationData = mutableListOf()
+                    var count = 1//Random().nextInt(2)
+                    while(count > 0){
+                        notificationData.add(
+                            NotificationEnhancedData(
+                                "default", currTime - 1000L * 10 * count, 1000L * 60 * 10
+                            ).apply{
+                                firstPattern = EnhancementPattern.INC
+                            }
+                        )
+                        count--
+                    }
                 }
-            }
             mutableMap[pn] = newOne
         }
         setNotificationByApps(mutableMap)

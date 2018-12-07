@@ -6,11 +6,15 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.graphics.Color
 import android.os.Bundle
+import android.support.constraint.ConstraintLayout
 import android.support.v4.app.Fragment
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.GridLayout
 import kotlinx.android.synthetic.main.enhanced_home_screen_fragment.*
 import kr.ac.snu.hcil.durationalnotificationaura.utils.MyNotificationListenerService
 import kr.ac.snu.hcil.durationalnotificationaura.R
@@ -25,6 +29,7 @@ class EnhancedHomeScreenFragment : Fragment() {
         fun newInstance() = EnhancedHomeScreenFragment()
         const val ACTION = "kr.ac.snu.hcil.durationalnotificationaura.NOTIFICATION_LISTENER"
         const val DEFAULT_START_DECAY_AFTER = 1000L * 60 * 10
+        const val TAG = "TESTING_FRAGMENT"
     }
 
     private lateinit var viewModel: EnhancedHomeScreenViewModel
@@ -41,62 +46,100 @@ class EnhancedHomeScreenFragment : Fragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
+
         activity?.startService(Intent(activity, MyNotificationListenerService::class.java))
+        activity?.findViewById<GridLayout>(R.id.gridLayout).let{
+            it?.layoutParams = ConstraintLayout.LayoutParams(
+                ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+            )
+            it?.columnCount = 4
+            it?.rowCount = 5
+        }
+
+        gridLayout.let{
+            it.isRowOrderPreserved = true
+            it.isColumnOrderPreserved = true
+        }
+
         viewModel = ViewModelProviders.of(this).get(EnhancedHomeScreenViewModel::class.java)
         viewModel.getNotificationsByApps().observe(this,
             Observer {
-
                 val myIterator = it!!.iterator()
-                myIterator.next().let{
-                    entry ->
-                    val packageName = entry.key
-                    val data = entry.value
+                Log.d(TAG, "Changed # of Elements: ${it.size}}")
+                gridLayout.removeAllViews()
+                //var count = 0
+                while (myIterator.hasNext()) {
+                    myIterator.next().let { entry ->
+                        val packageName = entry.key
+                        val data = entry.value
 
-                    testViewGroup1.setEnhanceData(data)
-                    testViewGroup1.setVisualEffects(
-                        List(data.notificationData.size){DefaultVisEffect()}
-                    )
+                        /*
+                        when(count){
+                            0 -> {
+                                el1.let{ view ->
+                                    view.setBackgroundColor(Color.LTGRAY)
+                                    view.setEnhanceData(data)
+                                    view.setVisualEffects(List(data.notificationData.size) { DefaultVisEffect() })
+                                    view.tag = packageName
+                                }
+                            }
+                            1 -> {
+                                el2.let{ view ->
+                                    view.setBackgroundColor(Color.LTGRAY)
+                                    view.setEnhanceData(data)
+                                    view.setVisualEffects(List(data.notificationData.size) { DefaultVisEffect() })
+                                    view.tag = packageName
+                                }
+                            }
+                            2 -> {
+                                el3.let{ view ->
+                                    view.setBackgroundColor(Color.LTGRAY)
+                                    view.setEnhanceData(data)
+                                    view.setVisualEffects(List(data.notificationData.size) { DefaultVisEffect() })
+                                    view.tag = packageName
+                                }
+                            }
+                            3 -> {
+                                el4.let{ view ->
+                                    view.setBackgroundColor(Color.LTGRAY)
+                                    view.setEnhanceData(data)
+                                    view.setVisualEffects(List(data.notificationData.size) { DefaultVisEffect() })
+                                    view.tag = packageName
+                                }
+                            }
+                            4 -> {
+                                el5.let{ view ->
+                                    view.setBackgroundColor(Color.LTGRAY)
+                                    view.setEnhanceData(data)
+                                    view.setVisualEffects(List(data.notificationData.size) { DefaultVisEffect() })
+                                    view.tag = packageName
+                                }
+                            }
+                            else -> {
 
+                            }
+                        }
+                        count ++
+                        */
+                        gridLayout.addView(
+                            EnhancedAppAuraView(context!!, null).apply{
+                                setBackgroundColor(Color.LTGRAY)
+                                setEnhanceData(data)
+                                setVisualEffects(List(data.notificationData.size) { DefaultVisEffect() })
+                                tag = packageName
+                            },
+                            GridLayout.LayoutParams(
+                                GridLayout.spec(GridLayout.UNDEFINED, 1f), GridLayout.spec(GridLayout.UNDEFINED, 1f)).apply{
+                                width = 100
+                                height = 100
+                            }
+                        )
+                    }
                 }
-                myIterator.next().let{
-                        entry ->
-                    val packageName = entry.key
-                    val data = entry.value
-                    testViewGroup2.setEnhanceData(data)
-                    testViewGroup2.setVisualEffects(
-                        List(data.notificationData.size){DefaultVisEffect()}
-                    )
-                }
-
-                myIterator.next().let{
-                        entry ->
-                    val packageName = entry.key
-                    val data = entry.value
-                    testViewGroup3.setEnhanceData(data)
-                    testViewGroup3.setVisualEffects(
-                        List(data.notificationData.size){DefaultVisEffect()}
-                    )
-                }
-                myIterator.next().let{
-                        entry ->
-                    val packageName = entry.key
-                    val data = entry.value
-                    testViewGroup4.setEnhanceData(data)
-                    testViewGroup4.setVisualEffects(
-                        List(data.notificationData.size){DefaultVisEffect()}
-                    )
-                }
-                myIterator.next().let{
-                        entry ->
-                    val packageName = entry.key
-                    val data = entry.value
-                    testViewGroup5.setEnhanceData(data)
-                    testViewGroup5.setVisualEffects(
-                        List(data.notificationData.size){DefaultVisEffect()}
-                    )
-                }
+                gridLayout.requestLayout()
             }
         )
+
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

@@ -17,11 +17,14 @@ class EnhancedNotificationAuraView(context: Context, attrs: AttributeSet?): View
     private var visualEffect: VisEffect? = null
     private var dirtyBit:Boolean = true
 
+    init{
+    }
+
     fun setVisualData(visData: NotificationEnhancedData){
         visualData = visData
         visualEffect?.visData = visData
         dirtyBit = true
-        invalidate()
+        //invalidate()
         //requestLayout()
     }
 
@@ -32,9 +35,8 @@ class EnhancedNotificationAuraView(context: Context, attrs: AttributeSet?): View
         }
         dirtyBit = true
         visualEffect!!.initializeAnimator(this)
-        invalidate()
-        requestLayout()
-
+        //invalidate()
+        //requestLayout()
     }
 
     override fun onAttachedToWindow() {
@@ -43,12 +45,6 @@ class EnhancedNotificationAuraView(context: Context, attrs: AttributeSet?): View
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
     }
-
-    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
-        Log.d(TAG,"Measure Sequence: $measuredWidth, $measuredHeight")
-    }
-
     override fun onVisibilityChanged(changedView: View, visibility: Int) {
         super.onVisibilityChanged(changedView, visibility)
 
@@ -65,9 +61,10 @@ class EnhancedNotificationAuraView(context: Context, attrs: AttributeSet?): View
         }
     }
     override fun onDraw(canvas: Canvas?) {
-        canvas?.apply{
-            visualEffect?.drawVisualization(canvas)
-            //Log.d(TAG, "Rendered: ${visualData.hashCode()}")
+        canvas?.let{
+            it.drawRGB(255, 0, 0)
+            visualEffect?.drawVisualization(it)
+            Log.d(TAG, "visbility: ${visibility == View.VISIBLE}, $tag, canvas size: ${it.width}, ${it.height}, view size: $width, $height")
         }
 
         if(dirtyBit){
