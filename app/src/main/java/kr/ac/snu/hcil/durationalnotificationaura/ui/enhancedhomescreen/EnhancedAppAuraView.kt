@@ -20,11 +20,9 @@ class EnhancedAppAuraView(context: Context, attributeSet: AttributeSet?): ViewGr
      */
     companion object {
         const val TAG = "APP_AURA_VIEW"
-        const val SIZE = 200
     }
 
     init{
-
         //clipChildren = false
         //clipToPadding = false
         //clipToOutline = false
@@ -34,8 +32,6 @@ class EnhancedAppAuraView(context: Context, attributeSet: AttributeSet?): ViewGr
 
     fun setEnhanceData(enhanceData: AppNotificationsEnhancedData) {
         appPackageName = enhanceData.packageName
-
-        //Log.d(TAG, "# of Data: ${enhanceData.notificationData.size}")
 
         enhanceData.notificationData.forEach{
             addView(
@@ -65,27 +61,12 @@ class EnhancedAppAuraView(context: Context, attributeSet: AttributeSet?): ViewGr
         )
     }
 
-    override fun onDescendantInvalidated(child: View, target: View) {
-        super.onDescendantInvalidated(child, target)
-    }
-
-    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
-        //Log.d(TAG, "After Measurement: width - ${width}px, height - ${height}px")
-    }
-
-    override fun onDraw(canvas: Canvas?) {
-        super.onDraw(canvas)
-    }
-
     // View Group의 전체적인 배치를 결정하는 모듈
     override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
         if(changed){
             Log.d(TAG, "# of Children in a view of id $tag: $childCount")
             for(idx in 0..(childCount - 1)){
                 val child : View = getChildAt(idx)
-                val new_r = l + 258
-                val new_b = t + 258
                 Log.d(TAG, "${child.id} -  l: $l, t: $t, r: $r, b: $b")
                 child.layout(0, 0, r - l, b - t)
             }

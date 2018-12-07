@@ -3,7 +3,7 @@
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
         package="kr.ac.snu.hcil.durationalnotificationaura">
- 
+
     <application
             android:allowBackup="true"
             android:fullBackupContent="true"
@@ -13,13 +13,14 @@
             android:supportsRtl="true"
             android:theme="@style/AppTheme">
         <activity android:name=".EnhancedHomeScreenActivity">
+
+        </activity>
+        <activity android:name=".TestActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
-        </activity>
-        <activity android:name=".TestActivity">
         </activity>
         <service
                 android:name=".utils.MyNotificationListenerService"

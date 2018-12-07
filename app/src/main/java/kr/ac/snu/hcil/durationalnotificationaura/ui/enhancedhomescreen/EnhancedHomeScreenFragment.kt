@@ -34,8 +34,7 @@ class EnhancedHomeScreenFragment : Fragment() {
 
     private lateinit var viewModel: EnhancedHomeScreenViewModel
     private val notificationReceiver = NotificationReceiver()
-    private val intentFilter = IntentFilter().also{
-        it.addAction(ACTION)}
+    private val intentFilter = IntentFilter().also{ it.addAction(ACTION)}
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -48,79 +47,18 @@ class EnhancedHomeScreenFragment : Fragment() {
         super.onActivityCreated(savedInstanceState)
 
         activity?.startService(Intent(activity, MyNotificationListenerService::class.java))
-        activity?.findViewById<GridLayout>(R.id.gridLayout).let{
-            it?.layoutParams = ConstraintLayout.LayoutParams(
-                ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
-            )
-            it?.columnCount = 4
-            it?.rowCount = 5
-        }
-
-        gridLayout.let{
-            it.isRowOrderPreserved = true
-            it.isColumnOrderPreserved = true
-        }
-
         viewModel = ViewModelProviders.of(this).get(EnhancedHomeScreenViewModel::class.java)
         viewModel.getNotificationsByApps().observe(this,
             Observer {
-                val myIterator = it!!.iterator()
-                Log.d(TAG, "Changed # of Elements: ${it.size}}")
+
+                //TODO: To perform better, recycle views
                 gridLayout.removeAllViews()
-                //var count = 0
+
+                val myIterator = it!!.iterator()
                 while (myIterator.hasNext()) {
                     myIterator.next().let { entry ->
                         val packageName = entry.key
                         val data = entry.value
-
-                        /*
-                        when(count){
-                            0 -> {
-                                el1.let{ view ->
-                                    view.setBackgroundColor(Color.LTGRAY)
-                                    view.setEnhanceData(data)
-                                    view.setVisualEffects(List(data.notificationData.size) { DefaultVisEffect() })
-                                    view.tag = packageName
-                                }
-                            }
-                            1 -> {
-                                el2.let{ view ->
-                                    view.setBackgroundColor(Color.LTGRAY)
-                                    view.setEnhanceData(data)
-                                    view.setVisualEffects(List(data.notificationData.size) { DefaultVisEffect() })
-                                    view.tag = packageName
-                                }
-                            }
-                            2 -> {
-                                el3.let{ view ->
-                                    view.setBackgroundColor(Color.LTGRAY)
-                                    view.setEnhanceData(data)
-                                    view.setVisualEffects(List(data.notificationData.size) { DefaultVisEffect() })
-                                    view.tag = packageName
-                                }
-                            }
-                            3 -> {
-                                el4.let{ view ->
-                                    view.setBackgroundColor(Color.LTGRAY)
-                                    view.setEnhanceData(data)
-                                    view.setVisualEffects(List(data.notificationData.size) { DefaultVisEffect() })
-                                    view.tag = packageName
-                                }
-                            }
-                            4 -> {
-                                el5.let{ view ->
-                                    view.setBackgroundColor(Color.LTGRAY)
-                                    view.setEnhanceData(data)
-                                    view.setVisualEffects(List(data.notificationData.size) { DefaultVisEffect() })
-                                    view.tag = packageName
-                                }
-                            }
-                            else -> {
-
-                            }
-                        }
-                        count ++
-                        */
                         gridLayout.addView(
                             EnhancedAppAuraView(context!!, null).apply{
                                 setBackgroundColor(Color.LTGRAY)
@@ -136,9 +74,9 @@ class EnhancedHomeScreenFragment : Fragment() {
                         )
                     }
                 }
-                gridLayout.requestLayout()
             }
         )
+
 
     }
 

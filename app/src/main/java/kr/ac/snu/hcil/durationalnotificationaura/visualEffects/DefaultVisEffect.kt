@@ -16,7 +16,7 @@ import kotlin.random.Random
 class DefaultVisEffect: VisEffect() {
 
     companion object {
-        const val TAG = "VIS_EFFECT"
+        const val TAG = "DEFAULT_VIS_EFFECT"
     }
 
     override var visParams: Map<String, Any> = mapOf()

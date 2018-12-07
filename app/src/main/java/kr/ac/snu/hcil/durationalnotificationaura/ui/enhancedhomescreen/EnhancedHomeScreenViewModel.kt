@@ -115,8 +115,8 @@ class EnhancedHomeScreenViewModel : ViewModel() {
             val newOne = AppNotificationsEnhancedData(pn)
                 .apply{
                     notificationData = mutableListOf()
-                    var count = 1//Random().nextInt(2)
-                    while(count > 0){
+                    var count = Random().nextInt(2)
+                    while(count >= 0){
                         notificationData.add(
                             NotificationEnhancedData(
                                 "default", currTime - 1000L * 10 * count, 1000L * 60 * 10
