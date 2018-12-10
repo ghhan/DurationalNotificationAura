@@ -20,7 +20,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:columnOrderPreserved="true"
-                    android:columnCount="7"
+                    android:columnCount="17"
             >
             </GridLayout>
 

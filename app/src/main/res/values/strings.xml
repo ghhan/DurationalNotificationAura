@@ -1,4 +1,8 @@
 <resources>
     <string name="app_name">DurationalNotificationAura</string>
     <string name="service_name">NotificationListenerService</string>
+    <string name="button_trigger">Trigger</string>
+    <string name="button_interact">Interact</string>
+    <string name="button_reset">Reset</string>
+    <string name="button_resetAll">Reset All</string>
 </resources>

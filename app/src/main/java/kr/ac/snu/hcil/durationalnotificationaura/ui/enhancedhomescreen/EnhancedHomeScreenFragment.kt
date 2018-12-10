@@ -14,6 +14,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
 import android.widget.GridLayout
 import kotlinx.android.synthetic.main.enhanced_home_screen_fragment.*
 import kr.ac.snu.hcil.durationalnotificationaura.utils.MyNotificationListenerService
@@ -33,8 +34,11 @@ class EnhancedHomeScreenFragment : Fragment() {
     }
 
     private lateinit var viewModel: EnhancedHomeScreenViewModel
+
+    private lateinit var packageNameAdapter: ArrayAdapter<String>
     private val notificationReceiver = NotificationReceiver()
     private val intentFilter = IntentFilter().also{ it.addAction(ACTION)}
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -47,18 +51,46 @@ class EnhancedHomeScreenFragment : Fragment() {
         super.onActivityCreated(savedInstanceState)
 
         activity?.startService(Intent(activity, MyNotificationListenerService::class.java))
+
+        packageNameAdapter = ArrayAdapter(context!!, R.layout.simple_spinner_dropdown_item)
+        packageNameAdapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item)
+
+        triggerButton.setOnClickListener{
+            val packageName = packageNameSpinner.prompt
+            //TODO: view 중 packagename이 같은 애의 data를 Stage 1 상태로 삽입
+        }
+
+        interactButton.setOnClickListener {
+                view ->
+            //TODO: view 중 packagename이 같은 애의 data를 수정해서 Stage 2 상태로 전환
+        }
+
+        resetButton.setOnClickListener{ 
+                view ->
+            //TODO: view 중 packagename이 같은 애의 data 자체를 날려야
+        }
+
+        resetAllButton.setOnClickListener{
+                view ->
+            //TODO: view 중 packagename이 같은 애의 data 전체를 날려야
+        }
+
+
         viewModel = ViewModelProviders.of(this).get(EnhancedHomeScreenViewModel::class.java)
         viewModel.getNotificationsByApps().observe(this,
             Observer {
 
                 //TODO: To perform better, recycle views
                 gridLayout.removeAllViews()
+                packageNameAdapter.clear()
 
                 val myIterator = it!!.iterator()
                 while (myIterator.hasNext()) {
                     myIterator.next().let { entry ->
                         val packageName = entry.key
                         val data = entry.value
+
+                        packageNameAdapter.add(packageName)
                         gridLayout.addView(
                             EnhancedAppAuraView(context!!, null).apply{
                                 setBackgroundColor(Color.LTGRAY)
@@ -74,10 +106,10 @@ class EnhancedHomeScreenFragment : Fragment() {
                         )
                     }
                 }
+
+                packageNameSpinner.adapter = packageNameAdapter
             }
         )
-
-
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
