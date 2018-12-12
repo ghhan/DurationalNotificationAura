@@ -1,6 +1,7 @@
 package kr.ac.snu.hcil.durationalnotificationaura.ui.enhancedhomescreen
 
 import android.arch.lifecycle.Observer
+import android.arch.lifecycle.ViewModelProvider
 import android.arch.lifecycle.ViewModelProviders
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -8,12 +9,12 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.Color
 import android.os.Bundle
-import android.support.constraint.ConstraintLayout
 import android.support.v4.app.Fragment
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.ArrayAdapter
 import android.widget.GridLayout
 import kotlinx.android.synthetic.main.enhanced_home_screen_fragment.*
@@ -22,7 +23,10 @@ import kr.ac.snu.hcil.durationalnotificationaura.R
 import kr.ac.snu.hcil.durationalnotificationaura.data.AppNotificationsEnhancedData
 import kr.ac.snu.hcil.durationalnotificationaura.data.NotificationEnhancedData
 import kr.ac.snu.hcil.durationalnotificationaura.data.EnhancedNotificationLifeCycle
+import kr.ac.snu.hcil.durationalnotificationaura.visualEffects.AnimationParams
+import kr.ac.snu.hcil.durationalnotificationaura.visualEffects.AnimationTypes
 import kr.ac.snu.hcil.durationalnotificationaura.visualEffects.DefaultVisEffect
+import kr.ac.snu.hcil.durationalnotificationaura.visualEffects.DerivedVisualEffect
 
 class EnhancedHomeScreenFragment : Fragment() {
 
@@ -34,11 +38,9 @@ class EnhancedHomeScreenFragment : Fragment() {
     }
 
     private lateinit var viewModel: EnhancedHomeScreenViewModel
-
     private lateinit var packageNameAdapter: ArrayAdapter<String>
     private val notificationReceiver = NotificationReceiver()
     private val intentFilter = IntentFilter().also{ it.addAction(ACTION)}
-
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -51,32 +53,27 @@ class EnhancedHomeScreenFragment : Fragment() {
         super.onActivityCreated(savedInstanceState)
 
         activity?.startService(Intent(activity, MyNotificationListenerService::class.java))
-
         packageNameAdapter = ArrayAdapter(context!!, R.layout.simple_spinner_dropdown_item)
         packageNameAdapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item)
 
         triggerButton.setOnClickListener{
-            val packageName = packageNameSpinner.prompt
             //TODO: view 중 packagename이 같은 애의 data를 Stage 1 상태로 삽입
         }
 
         interactButton.setOnClickListener {
-                view ->
             //TODO: view 중 packagename이 같은 애의 data를 수정해서 Stage 2 상태로 전환
         }
 
-        resetButton.setOnClickListener{ 
-                view ->
+        resetButton.setOnClickListener{
             //TODO: view 중 packagename이 같은 애의 data 자체를 날려야
         }
 
         resetAllButton.setOnClickListener{
-                view ->
             //TODO: view 중 packagename이 같은 애의 data 전체를 날려야
         }
 
-
-        viewModel = ViewModelProviders.of(this).get(EnhancedHomeScreenViewModel::class.java)
+        viewModel = ViewModelProviders.of(this, ViewModelProvider.AndroidViewModelFactory(activity!!.application))
+            .get(EnhancedHomeScreenViewModel::class.java)
         viewModel.getNotificationsByApps().observe(this,
             Observer {
 
@@ -95,18 +92,32 @@ class EnhancedHomeScreenFragment : Fragment() {
                             EnhancedAppAuraView(context!!, null).apply{
                                 setBackgroundColor(Color.LTGRAY)
                                 setEnhanceData(data)
-                                setVisualEffects(List(data.notificationData.size) { DefaultVisEffect() })
+                                setVisualEffects(List(data.notificationData.size) {index ->
+                                    DerivedVisualEffect(
+                                        viewModel.paletteMap[packageName]!!,
+                                        this.getChildAt(index),
+                                        mapOf(),
+                                        mapOf(
+                                            AnimationTypes.ALPHA to
+                                                    AnimationParams(
+                                                        arrayOf(0f, 1f).toFloatArray(),
+                                                        1500,
+                                                        AccelerateDecelerateInterpolator()
+                                                    )
+                                        )
+                                    )
+                                })
                                 tag = packageName
                             },
                             GridLayout.LayoutParams(
-                                GridLayout.spec(GridLayout.UNDEFINED, 1f), GridLayout.spec(GridLayout.UNDEFINED, 1f)).apply{
+                                GridLayout.spec(GridLayout.UNDEFINED, 1f), GridLayout.spec(GridLayout.UNDEFINED, 1f)
+                            ).apply{
                                 width = 100
                                 height = 100
                             }
                         )
                     }
                 }
-
                 packageNameSpinner.adapter = packageNameAdapter
             }
         )

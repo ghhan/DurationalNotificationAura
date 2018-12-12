@@ -1,9 +1,16 @@
 package kr.ac.snu.hcil.durationalnotificationaura.ui.enhancedhomescreen
 
+import android.app.Application
+import android.arch.lifecycle.AndroidViewModel
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.ViewModel
+import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.drawable.Drawable
 import android.os.Handler
+import android.support.v7.graphics.Palette
 import android.util.Log
 import kr.ac.snu.hcil.durationalnotificationaura.data.AppNotificationsEnhancedData
 import kr.ac.snu.hcil.durationalnotificationaura.data.NotificationEnhancedData
@@ -11,7 +18,7 @@ import kr.ac.snu.hcil.durationalnotificationaura.data.EnhancedNotificationLifeCy
 import kr.ac.snu.hcil.durationalnotificationaura.data.EnhancementPattern
 import java.util.*
 
-class EnhancedHomeScreenViewModel : ViewModel() {
+class EnhancedHomeScreenViewModel(application: Application) : AndroidViewModel(application) {
 
     companion object {
         const val TAG = "AURA_VIEW_MODEL"
@@ -100,34 +107,58 @@ class EnhancedHomeScreenViewModel : ViewModel() {
             mHandler.postDelayed(this, 1000L * 15)
         }
     }
+
+    var paletteMap: MutableMap<String, Palette> = mutableMapOf()
+    private val bWidth = 80
+    private val bHeight = 80
+
+    private fun getBitmapFromDrawable(drawable: Drawable): Bitmap {
+        val bmp = Bitmap.createBitmap(drawable.intrinsicWidth, drawable.intrinsicHeight, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bmp)
+        drawable.setBounds(0, 0, canvas.width, canvas.height)
+        drawable.draw(canvas)
+        return Bitmap.createScaledBitmap(bmp, bWidth, bHeight, false)
+    }
+
+    private fun initializeLogic(){
+
+    }
+
     init{
         //데이터 하드코드 테스트는 여기서 하도록 합시다.
         val mutableMap : MutableMap<String, AppNotificationsEnhancedData> = mutableMapOf()
         val currTime = Calendar.getInstance().timeInMillis
-        for(pn:String in arrayOf(
-            "com.google.android.gm",
-            "com.google.android.apps.",
-            "com.google.android.youtube",
-            "com.google.android.calendar",
-            "com.kakao.talk"
-        )
-        ) {
-            val newOne = AppNotificationsEnhancedData(pn)
-                .apply{
-                    notificationData = mutableListOf()
-                    var count = Random().nextInt(2)
-                    while(count >= 0){
-                        notificationData.add(
-                            NotificationEnhancedData(
-                                "default", currTime - 1000L * 10 * count, 1000L * 60 * 10
-                            ).apply{
-                                firstPattern = EnhancementPattern.INC
-                            }
-                        )
-                        count--
+
+        val pm = application.packageManager
+        val installedPackages = pm.getInstalledPackages(PackageManager.GET_ACTIVITIES)
+
+        installedPackages.map{
+            pi ->
+            val packageName = pi.packageName
+            val bitmap = getBitmapFromDrawable(pm.getApplicationIcon(packageName))
+            Palette.Builder(bitmap).also{
+                builder -> builder.generate{
+                palette ->
+                palette?.let{ paletteMap[packageName] = it }
+
+                val newOne = AppNotificationsEnhancedData(packageName)
+                    .apply{
+                        notificationData = mutableListOf()
+                        var count = Random().nextInt(2)
+                        while(count >= 0){
+                            notificationData.add(
+                                NotificationEnhancedData(
+                                    "default", currTime - 1000L * 10 * count, 1000L * 60 * 10
+                                ).apply{
+                                    firstPattern = EnhancementPattern.INC
+                                }
+                            )
+                            count--
+                        }
                     }
+                mutableMap[packageName] = newOne
                 }
-            mutableMap[pn] = newOne
+            }
         }
         setNotificationByApps(mutableMap)
     }
