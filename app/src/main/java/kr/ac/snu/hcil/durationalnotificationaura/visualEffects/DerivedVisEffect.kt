@@ -12,6 +12,7 @@ class DerivedVisEffect(
     animParams: Map<AnimationTypes, AnimationParams>)
     :AbstractVisEffect(palette, targetView, visParams, animParams){
 
+
     override fun drawVisualEffect(data: NotificationEnhancedData, canvas: Canvas) {
         val paintMap = getPaintMap()
         canvas.let{
@@ -20,12 +21,12 @@ class DerivedVisEffect(
             val radius = minOf(it.width, it.height).toFloat() * 0.5f * 0.85f * data.currEnhancement.toFloat()
 
             it.drawCircle(
-                cx, cy, radius,
+                0.8f * it.width, 0.2f * it.height, radius,
                 paintMap[ColorSwatches.LIGHT_VIBRANT]!!
             )
 
             it.drawCircle(
-                cx, cy, radius * 0.9f,
+                0.8f * it.width, 0.2f * it.height, radius * 0.9f,
                 paintMap[ColorSwatches.DARK_VIBRANT]!!.apply{
                 }
             )

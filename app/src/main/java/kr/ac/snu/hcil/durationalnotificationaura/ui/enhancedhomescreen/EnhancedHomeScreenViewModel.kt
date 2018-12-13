@@ -23,6 +23,7 @@ class EnhancedHomeScreenViewModel(application: Application) : AndroidViewModel(a
     companion object {
         const val TAG = "AURA_VIEW_MODEL"
     }
+
     private var appNotificationLiveData: MutableLiveData<MutableMap<String, AppNotificationsEnhancedData>> = MutableLiveData()
     private val mHandler = Handler()
     private var lastUpdateInMillis = Calendar.getInstance().timeInMillis
@@ -120,9 +121,6 @@ class EnhancedHomeScreenViewModel(application: Application) : AndroidViewModel(a
         return Bitmap.createScaledBitmap(bmp, bWidth, bHeight, false)
     }
 
-    private fun initializeLogic(){
-
-    }
 
     init{
         //데이터 하드코드 테스트는 여기서 하도록 합시다.

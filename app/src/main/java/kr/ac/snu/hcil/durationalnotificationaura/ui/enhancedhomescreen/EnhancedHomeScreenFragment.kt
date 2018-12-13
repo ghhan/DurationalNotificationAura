@@ -8,6 +8,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.Color
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.view.LayoutInflater
@@ -35,6 +36,15 @@ class EnhancedHomeScreenFragment : Fragment() {
         const val DEFAULT_START_DECAY_AFTER = 1000L * 60 * 10
         const val TAG = "TESTING_FRAGMENT"
     }
+
+    private val pns = arrayOf(
+        "com.google.android.gm",
+        "com.android.providers.calendar",
+        "com.google.android.youtube",
+        "com.google.android.apps.maps"
+    )
+
+    lateinit var drawableMap:Map<String, Drawable>
 
     private lateinit var viewModel: EnhancedHomeScreenViewModel
     private lateinit var packageNameAdapter: ArrayAdapter<String>
@@ -73,6 +83,8 @@ class EnhancedHomeScreenFragment : Fragment() {
             //TODO: view 중 packagename이 같은 애의 data 전체를 날려야
         }
 
+        drawableMap = pns.map{ pn -> pn to context!!.packageManager.getApplicationIcon(pn)}.toMap()
+
         viewModel = ViewModelProviders.of(this, ViewModelProvider.AndroidViewModelFactory(activity!!.application))
             .get(EnhancedHomeScreenViewModel::class.java)
         viewModel.getNotificationsByApps().observe(this,
@@ -88,47 +100,50 @@ class EnhancedHomeScreenFragment : Fragment() {
                         val packageName = entry.key
                         val data = entry.value
 
-                        packageNameAdapter.add(packageName)
-                        gridLayout.addView(
-                            EnhancedAppAuraView(context!!, null).apply{
-                                setBackgroundColor(Color.LTGRAY)
-                                setEnhanceData(data)
-                                setVisualEffects(List(data.notificationData.size) {index ->
-                                    DerivedVisEffect(
-                                        viewModel.paletteMap[packageName]!!,
-                                        this.getChildAt(index),
-                                        mapOf(),
-                                        mapOf(
-                                            AnimationTypes.ALPHA to
-                                                    AnimationParams(
-                                                        arrayOf(0f, 1f).toFloatArray(),
-                                                        3000,
-                                                        AccelerateDecelerateInterpolator()
-                                                    ),
-                                            AnimationTypes.SCALE_X to
-                                                    AnimationParams(
-                                                        arrayOf(0f, 1f).toFloatArray(),
-                                                        3000,
-                                                        LinearInterpolator()
-                                                    ),
-                                            AnimationTypes.SCALE_Y to
-                                                    AnimationParams(
-                                                        arrayOf(0f, 1f).toFloatArray(),
-                                                        3000,
-                                                        LinearInterpolator()
-                                                    )
+                        if(pns.contains(packageName)){
+                            packageNameAdapter.add(packageName)
+                            gridLayout.addView(
+                                EnhancedAppAuraView(context!!, null).apply{
+                                    background = drawableMap[packageName]
+                                    setEnhanceData(data)
+                                    setVisualEffects(List(data.notificationData.size) {index ->
+                                        DerivedVisEffect(
+                                            viewModel.paletteMap[packageName]!!,
+                                            this.getChildAt(index),
+                                            mapOf(),
+                                            mapOf(
+                                                AnimationTypes.ALPHA to
+                                                        AnimationParams(
+                                                            arrayOf(0f, 1f).toFloatArray(),
+                                                            3000,
+                                                            AccelerateDecelerateInterpolator()
+                                                        ),
+                                                AnimationTypes.SCALE_X to
+                                                        AnimationParams(
+                                                            arrayOf(0f, 1f).toFloatArray(),
+                                                            3000,
+                                                            LinearInterpolator()
+                                                        ),
+                                                AnimationTypes.SCALE_Y to
+                                                        AnimationParams(
+                                                            arrayOf(0f, 1f).toFloatArray(),
+                                                            3000,
+                                                            LinearInterpolator()
+                                                        )
+                                            )
                                         )
-                                    )
-                                })
-                                tag = packageName
-                            },
-                            GridLayout.LayoutParams(
-                                GridLayout.spec(GridLayout.UNDEFINED, 1f), GridLayout.spec(GridLayout.UNDEFINED, 1f)
-                            ).apply{
-                                width = 100
-                                height = 200
-                            }
-                        )
+                                    })
+                                    tag = packageName
+                                },
+                                GridLayout.LayoutParams(
+                                    GridLayout.spec(GridLayout.UNDEFINED, 1f), GridLayout.spec(GridLayout.UNDEFINED, 1f)
+                                ).apply{
+                                    width = 100
+                                    height = 200
+                                }
+                            )
+
+                        }
                     }
                 }
                 packageNameSpinner.adapter = packageNameAdapter
