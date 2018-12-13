@@ -6,78 +6,64 @@ import android.util.AttributeSet
 import android.util.Log
 import android.view.View
 import kr.ac.snu.hcil.durationalnotificationaura.data.NotificationEnhancedData
-import kr.ac.snu.hcil.durationalnotificationaura.visualEffects.VisEffect
+import kr.ac.snu.hcil.durationalnotificationaura.visualEffects.AbstractVisEffect
 
 class EnhancedNotificationAuraView(context: Context, attrs: AttributeSet?): View(context, attrs){
 
     companion object {
         const val TAG = "NOTIFICATION_AURA_VIEW"
     }
-    private var visualData: NotificationEnhancedData? = null
-    private var visualEffect: VisEffect? = null
-    private var dirtyBit:Boolean = true
 
     init{
     }
 
+    private var visualData: NotificationEnhancedData? = null
+    private var visualEffect: AbstractVisEffect? = null
+
     fun setVisualData(visData: NotificationEnhancedData){
         visualData = visData
-        visualEffect?.visData = visData
-        dirtyBit = true
-        //invalidate()
-        //requestLayout()
+        visualEffect?.let{
+            if(it.getCurrLifeCycle() != visData.lifeCycle)
+                it.setCurrentStage(visData.lifeCycle)
+        }
     }
 
-    fun setVisualEffect(visEffect: VisEffect){
+    fun setVisualEffect(visEffect: AbstractVisEffect){
         visualEffect = visEffect
         visualData?.let{
-            visualEffect!!.visData = it
+            if(it.lifeCycle != visualEffect!!.getCurrLifeCycle())
+                visualEffect!!.setCurrentStage(it.lifeCycle)
         }
-        dirtyBit = true
-        visualEffect!!.initializeAnimator(this)
-        //invalidate()
-        //requestLayout()
     }
 
-    override fun onAttachedToWindow() {
-        super.onAttachedToWindow()
-    }
-    override fun onDetachedFromWindow() {
-        super.onDetachedFromWindow()
-    }
     override fun onVisibilityChanged(changedView: View, visibility: Int) {
         super.onVisibilityChanged(changedView, visibility)
 
         when(visibility){
             View.VISIBLE -> {
-                visualEffect?.animator?.start()
+                visualEffect?.getAnimatorSet()?.let{
+                    if(it.isPaused) it.resume()
+                    else it.start()
+                }
             }
             View.GONE -> {
-                visualEffect?.animator?.cancel()
+                visualEffect?.getAnimatorSet()?.cancel()
             }
             View.INVISIBLE -> {
-                visualEffect?.animator?.pause()
+                visualEffect?.getAnimatorSet()?.let{
+                    if(it.isRunning) it.pause()
+                }
             }
         }
     }
+
     override fun onDraw(canvas: Canvas?) {
         canvas?.let{
-            it.drawRGB(255, 0, 0)
-            visualEffect?.drawVisualization(it)
-            Log.d(TAG, "visbility: ${visibility == View.VISIBLE}, $tag, canvas size: ${it.width}, ${it.height}, view size: $width, $height")
-        }
-
-        if(dirtyBit){
-            visualEffect?.animator?.let{
-                if(it.isRunning){
-                    it.cancel()
-                    it.start()
-                }
-                else{
-                    it.start()
-                }
-                dirtyBit = false
+            //it.drawRGB(255, 0, 0)
+            visualData?.let{
+                data -> visualEffect?.let{ effect -> effect.drawVisualEffect(data, it)}
             }
+            Log.d(TAG, "visbility: ${visibility == View.VISIBLE}, $tag, canvas size: ${it.width}, ${it.height}, view size: $width, $height")
         }
     }
 }

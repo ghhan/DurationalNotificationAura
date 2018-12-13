@@ -10,11 +10,11 @@ import android.content.IntentFilter
 import android.graphics.Color
 import android.os.Bundle
 import android.support.v4.app.Fragment
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AccelerateDecelerateInterpolator
+import android.view.animation.LinearInterpolator
 import android.widget.ArrayAdapter
 import android.widget.GridLayout
 import kotlinx.android.synthetic.main.enhanced_home_screen_fragment.*
@@ -25,8 +25,7 @@ import kr.ac.snu.hcil.durationalnotificationaura.data.NotificationEnhancedData
 import kr.ac.snu.hcil.durationalnotificationaura.data.EnhancedNotificationLifeCycle
 import kr.ac.snu.hcil.durationalnotificationaura.visualEffects.AnimationParams
 import kr.ac.snu.hcil.durationalnotificationaura.visualEffects.AnimationTypes
-import kr.ac.snu.hcil.durationalnotificationaura.visualEffects.DefaultVisEffect
-import kr.ac.snu.hcil.durationalnotificationaura.visualEffects.DerivedVisualEffect
+import kr.ac.snu.hcil.durationalnotificationaura.visualEffects.DerivedVisEffect
 
 class EnhancedHomeScreenFragment : Fragment() {
 
@@ -55,6 +54,8 @@ class EnhancedHomeScreenFragment : Fragment() {
         activity?.startService(Intent(activity, MyNotificationListenerService::class.java))
         packageNameAdapter = ArrayAdapter(context!!, R.layout.simple_spinner_dropdown_item)
         packageNameAdapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item)
+
+        gridLayout.clipChildren = false
 
         triggerButton.setOnClickListener{
             //TODO: view 중 packagename이 같은 애의 data를 Stage 1 상태로 삽입
@@ -93,7 +94,7 @@ class EnhancedHomeScreenFragment : Fragment() {
                                 setBackgroundColor(Color.LTGRAY)
                                 setEnhanceData(data)
                                 setVisualEffects(List(data.notificationData.size) {index ->
-                                    DerivedVisualEffect(
+                                    DerivedVisEffect(
                                         viewModel.paletteMap[packageName]!!,
                                         this.getChildAt(index),
                                         mapOf(),
@@ -101,8 +102,20 @@ class EnhancedHomeScreenFragment : Fragment() {
                                             AnimationTypes.ALPHA to
                                                     AnimationParams(
                                                         arrayOf(0f, 1f).toFloatArray(),
-                                                        1500,
+                                                        3000,
                                                         AccelerateDecelerateInterpolator()
+                                                    ),
+                                            AnimationTypes.SCALE_X to
+                                                    AnimationParams(
+                                                        arrayOf(0f, 1f).toFloatArray(),
+                                                        3000,
+                                                        LinearInterpolator()
+                                                    ),
+                                            AnimationTypes.SCALE_Y to
+                                                    AnimationParams(
+                                                        arrayOf(0f, 1f).toFloatArray(),
+                                                        3000,
+                                                        LinearInterpolator()
                                                     )
                                         )
                                     )
@@ -113,7 +126,7 @@ class EnhancedHomeScreenFragment : Fragment() {
                                 GridLayout.spec(GridLayout.UNDEFINED, 1f), GridLayout.spec(GridLayout.UNDEFINED, 1f)
                             ).apply{
                                 width = 100
-                                height = 100
+                                height = 200
                             }
                         )
                     }

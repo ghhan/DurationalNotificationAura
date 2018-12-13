@@ -5,7 +5,6 @@ import android.os.Bundle
 import kotlinx.android.synthetic.main.activity_test.*
 import kr.ac.snu.hcil.durationalnotificationaura.data.AppNotificationsEnhancedData
 import kr.ac.snu.hcil.durationalnotificationaura.data.NotificationEnhancedData
-import kr.ac.snu.hcil.durationalnotificationaura.visualEffects.DefaultVisEffect
 import java.util.*
 import kotlin.math.roundToLong
 

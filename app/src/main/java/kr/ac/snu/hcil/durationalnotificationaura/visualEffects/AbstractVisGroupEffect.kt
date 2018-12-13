@@ -9,8 +9,13 @@ import android.view.animation.AccelerateDecelerateInterpolator
 import kr.ac.snu.hcil.durationalnotificationaura.data.NotificationEnhancedData
 import kotlin.math.roundToInt
 
-/* Currently Not In Use
- */
+abstract class VisGroupEffect {
+    abstract var params: Map<String, Any>
+    abstract var brushes: Map<String, Paint>
+    abstract var visData: List<NotificationEnhancedData>
+    abstract var animation: AnimatorSet
+    abstract fun drawEffect(canvas: Canvas?)
+}
 
 class StackedCircleGroupEffect: VisGroupEffect(){
 

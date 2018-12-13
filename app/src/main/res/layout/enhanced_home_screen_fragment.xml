@@ -4,26 +4,32 @@
         xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-    <GridLayout
-            android:id="@+id/gridLayout"
+    <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="389dp"
-            android:rowOrderPreserved="true"
-            android:columnOrderPreserved="false"
-            android:columnCount="4"
-            android:rowCount="5"
-            tools:context=".ui.enhancedhomescreen.EnhancedHomeScreenFragment"
-            app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-    >
-    </GridLayout>
+            android:layout_height="400dp"
+            android:id="@+id/myScrollView"
+            android:layout_marginTop="8dp" app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent" android:layout_marginStart="8dp"
+            app:layout_constraintEnd_toEndOf="parent" android:layout_marginEnd="8dp">
+        <GridLayout
+                android:id="@+id/gridLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:rowOrderPreserved="true"
+                android:columnOrderPreserved="false"
+                android:columnCount="4"
+                tools:context=".ui.enhancedhomescreen.EnhancedHomeScreenFragment"
+                app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+        />
+    </ScrollView>
     <Spinner
             android:id="@+id/packageNameSpinner"
             android:layout_width="wrap_content" android:layout_height="wrap_content"
             android:background="@color/colorSpinnerBG"
             app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toStartOf="@+id/triggerButton"
             android:layout_marginEnd="8dp" android:layout_marginTop="8dp"
-            app:layout_constraintTop_toBottomOf="@+id/gridLayout" android:layout_marginStart="8dp"
+            app:layout_constraintTop_toBottomOf="@+id/myScrollView" android:layout_marginStart="8dp"
             android:layout_marginBottom="8dp" app:layout_constraintBottom_toBottomOf="parent">
     </Spinner>
     <Button
@@ -31,7 +37,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/triggerButton"
-            android:layout_marginTop="8dp" app:layout_constraintTop_toBottomOf="@+id/gridLayout"
+            android:layout_marginTop="8dp" app:layout_constraintTop_toBottomOf="@+id/myScrollView"
             app:layout_constraintEnd_toStartOf="@+id/interactButton" android:layout_marginEnd="8dp"
     />
     <Button
@@ -39,7 +45,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/interactButton" android:layout_marginTop="8dp"
-            app:layout_constraintTop_toBottomOf="@+id/gridLayout" app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/myScrollView" app:layout_constraintEnd_toEndOf="parent"
             android:layout_marginEnd="8dp"
     />
     <Button

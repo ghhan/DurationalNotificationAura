@@ -1,17 +1,13 @@
 package kr.ac.snu.hcil.durationalnotificationaura.ui.enhancedhomescreen
 
 import android.content.Context
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
 import android.util.AttributeSet
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import kr.ac.snu.hcil.durationalnotificationaura.data.AppNotificationsEnhancedData
 import kr.ac.snu.hcil.durationalnotificationaura.data.NotificationEnhancedData
-import kr.ac.snu.hcil.durationalnotificationaura.visualEffects.AbstractAnotherVisEffect
-import kr.ac.snu.hcil.durationalnotificationaura.visualEffects.VisEffect
+import kr.ac.snu.hcil.durationalnotificationaura.visualEffects.AbstractVisEffect
 
 class EnhancedAppAuraView(context: Context, attributeSet: AttributeSet?): ViewGroup(context, attributeSet) {
 
@@ -24,9 +20,7 @@ class EnhancedAppAuraView(context: Context, attributeSet: AttributeSet?): ViewGr
     }
 
     init{
-        //clipChildren = false
-        //clipToPadding = false
-        //clipToOutline = false
+        clipChildren = false
     }
 
     private var appPackageName: String? = null
@@ -36,7 +30,7 @@ class EnhancedAppAuraView(context: Context, attributeSet: AttributeSet?): ViewGr
 
         enhanceData.notificationData.forEach{
             addView(
-                EnhancedNewNotificationAuraView(context, null).also{
+                EnhancedNotificationAuraView(context, null).also{
                         view -> view.setVisualData(it)
                     view.tag = appPackageName + "_child"
                 },
@@ -48,15 +42,15 @@ class EnhancedAppAuraView(context: Context, attributeSet: AttributeSet?): ViewGr
         }
     }
 
-    fun setVisualEffects(visualEffects: List<AbstractAnotherVisEffect>){
+    fun setVisualEffects(visualEffects: List<AbstractVisEffect>){
         visualEffects.forEachIndexed{
-            index, visEffect -> (getChildAt(index) as EnhancedNewNotificationAuraView).setVisualEffect(visEffect)
+            index, visEffect -> (getChildAt(index) as EnhancedNotificationAuraView).setVisualEffect(visEffect)
         }
     }
 
-    fun addEnhancedNotificationAuraView(visData: NotificationEnhancedData, visEffect: AbstractAnotherVisEffect){
+    fun addEnhancedNotificationAuraView(visData: NotificationEnhancedData, visEffect: AbstractVisEffect){
         addView(
-            EnhancedNewNotificationAuraView(context, null).also{
+            EnhancedNotificationAuraView(context, null).also{
                     view -> view.setVisualData(visData); view.setVisualEffect(visEffect)
             } as View
         )
