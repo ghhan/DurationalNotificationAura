@@ -7,7 +7,6 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.support.v4.app.Fragment
@@ -16,8 +15,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.view.animation.LinearInterpolator
+import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.GridLayout
+import android.widget.TextView
 import kotlinx.android.synthetic.main.enhanced_home_screen_fragment.*
 import kr.ac.snu.hcil.durationalnotificationaura.utils.MyNotificationListenerService
 import kr.ac.snu.hcil.durationalnotificationaura.R
@@ -28,13 +29,33 @@ import kr.ac.snu.hcil.durationalnotificationaura.visualEffects.AnimationParams
 import kr.ac.snu.hcil.durationalnotificationaura.visualEffects.AnimationTypes
 import kr.ac.snu.hcil.durationalnotificationaura.visualEffects.DerivedVisEffect
 
-class EnhancedHomeScreenFragment : Fragment() {
+class EnhancedHomeScreenFragment : Fragment(), AdapterView.OnItemSelectedListener {
 
     companion object {
         fun newInstance() = EnhancedHomeScreenFragment()
         const val ACTION = "kr.ac.snu.hcil.durationalnotificationaura.NOTIFICATION_LISTENER"
         const val DEFAULT_START_DECAY_AFTER = 1000L * 60 * 10
         const val TAG = "TESTING_FRAGMENT"
+    }
+
+    override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+        view?.let{
+            val packageName = (it as TextView).text
+            viewModel.getNotificationsByApps().let{
+                livedata -> livedata.value?.let{
+                data ->
+                val notifications = data[packageName]!!.notificationData
+                statusView.text = "${(it as TextView).text}\n" +
+                        "Number of notifications: ${notifications.size}\n" +
+                        "Before Interaction: ${notifications[0]!!.firstPattern}, After Interaction: ${notifications[0]!!.secondPattern}\n" +
+                        "Current Enhancement: ${notifications[0]!!.currEnhancement}"
+            }
+            }
+        }
+    }
+
+    override fun onNothingSelected(parent: AdapterView<*>?) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     private val pns = arrayOf(
@@ -65,22 +86,57 @@ class EnhancedHomeScreenFragment : Fragment() {
         packageNameAdapter = ArrayAdapter(context!!, R.layout.simple_spinner_dropdown_item)
         packageNameAdapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item)
 
-        gridLayout.clipChildren = false
+        gridLayout.let{
+            it.clipChildren = false
+            it.clipToPadding = false
+            it.clipToOutline = false
+        }
 
         triggerButton.setOnClickListener{
             //TODO: view 중 packagename이 같은 애의 data를 Stage 1 상태로 삽입
         }
 
         interactButton.setOnClickListener {
-            //TODO: view 중 packagename이 같은 애의 data를 수정해서 Stage 2 상태로 전환
+            viewModel.getNotificationsByApps().value?.let{
+                    currData ->
+                currData.mapValues {
+                        entry ->
+                    if(entry.key == packageNameSpinner.selectedItem){
+                        entry.value.notificationData.forEach{
+                                data -> data.lifeCycle = EnhancedNotificationLifeCycle.STATE_2
+                        }
+                    }
+                }
+                viewModel.setNotificationByApps(currData)
+            }
         }
 
         resetButton.setOnClickListener{
-            //TODO: view 중 packagename이 같은 애의 data 자체를 날려야
+            viewModel.getNotificationsByApps().value?.let{
+                    currData ->
+                currData.mapValues {
+                        entry ->
+                    if(entry.key == packageNameSpinner.selectedItem){
+                        entry.value.notificationData.forEach{
+                            data -> data.currEnhancement = data.enhanceOffset; data.timeElapsed = 0; data.lifeCycle = EnhancedNotificationLifeCycle.STATE_1
+                        }
+                    }
+                }
+                viewModel.setNotificationByApps(currData)
+            }
         }
 
         resetAllButton.setOnClickListener{
-            //TODO: view 중 packagename이 같은 애의 data 전체를 날려야
+            viewModel.getNotificationsByApps().value?.let{
+                currData ->
+                currData.mapValues {
+                        entry -> entry.value.notificationData.forEach{
+                        data ->
+                    data.currEnhancement = data.enhanceOffset
+                    data.timeElapsed = 0
+                    data.lifeCycle = EnhancedNotificationLifeCycle.STATE_1 } }
+                viewModel.setNotificationByApps(currData)
+            }
         }
 
         drawableMap = pns.map{ pn -> pn to context!!.packageManager.getApplicationIcon(pn)}.toMap()
@@ -149,6 +205,9 @@ class EnhancedHomeScreenFragment : Fragment() {
                 packageNameSpinner.adapter = packageNameAdapter
             }
         )
+
+        packageNameSpinner.onItemSelectedListener = this
+
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

@@ -22,6 +22,7 @@ class EnhancedHomeScreenViewModel(application: Application) : AndroidViewModel(a
 
     companion object {
         const val TAG = "AURA_VIEW_MODEL"
+        const val UPDATE_INTERVAL = 1000L * 15
     }
 
     private var appNotificationLiveData: MutableLiveData<MutableMap<String, AppNotificationsEnhancedData>> = MutableLiveData()
@@ -105,7 +106,7 @@ class EnhancedHomeScreenViewModel(application: Application) : AndroidViewModel(a
             lastUpdateInMillis = nowInMillis
             appNotificationLiveData.value = newData
             Log.d(TAG, "ViewModel Updated at $nowInMillis")
-            mHandler.postDelayed(this, 1000L * 15)
+            mHandler.postDelayed(this, UPDATE_INTERVAL)
         }
     }
 
@@ -126,7 +127,6 @@ class EnhancedHomeScreenViewModel(application: Application) : AndroidViewModel(a
         //데이터 하드코드 테스트는 여기서 하도록 합시다.
         val mutableMap : MutableMap<String, AppNotificationsEnhancedData> = mutableMapOf()
         val currTime = Calendar.getInstance().timeInMillis
-
         val pm = application.packageManager
         val installedPackages = pm.getInstalledPackages(PackageManager.GET_ACTIVITIES)
 
@@ -141,24 +141,50 @@ class EnhancedHomeScreenViewModel(application: Application) : AndroidViewModel(a
 
                 val newOne = AppNotificationsEnhancedData(packageName)
                     .apply{
-                        notificationData = mutableListOf()
-                        var count = Random().nextInt(2)
-                        while(count >= 0){
-                            notificationData.add(
-                                NotificationEnhancedData(
-                                    "default", currTime - 1000L * 10 * count, 1000L * 60 * 10
-                                ).apply{
-                                    firstPattern = EnhancementPattern.INC
-                                }
-                            )
-                            count--
-                        }
+                        val count = Random().nextInt(3) + 1
+                        notificationData = createRandomNotificationData(count, currTime).toMutableList()
                     }
                 mutableMap[packageName] = newOne
                 }
             }
         }
         setNotificationByApps(mutableMap)
+    }
+
+    private fun createRandomNotificationData(count: Int, initTime: Long): List<NotificationEnhancedData> {
+
+        val firsttrend = Random().nextInt() % 3
+        val secondtrend = Random().nextInt() % 3
+
+        return List(count){
+            NotificationEnhancedData(
+                "default",
+                initTime + it * UPDATE_INTERVAL,
+                4 * UPDATE_INTERVAL
+            ).apply{
+                when(firsttrend){
+                    0 -> {
+                        firstPattern = EnhancementPattern.INC
+                    }
+                    1 -> {
+                        firstPattern = EnhancementPattern.DEC
+                        enhanceOffset = 1.0
+                        currEnhancement = enhanceOffset
+                    }
+                    2 -> {
+                        firstPattern = EnhancementPattern.EQ
+                        enhanceOffset = 0.5
+                        currEnhancement = enhanceOffset
+                    }
+                }
+
+                when(secondtrend){
+                    0 -> {firstPattern = EnhancementPattern.INC}
+                    1 -> {firstPattern = EnhancementPattern.DEC}
+                    2 -> {firstPattern = EnhancementPattern.EQ}
+                }
+            }
+        }
     }
 
     fun getNotificationsByApps(): LiveData<MutableMap<String, AppNotificationsEnhancedData>>{

@@ -21,6 +21,8 @@ class EnhancedAppAuraView(context: Context, attributeSet: AttributeSet?): ViewGr
 
     init{
         clipChildren = false
+        clipToOutline = false
+        clipToPadding = false
     }
 
     private var appPackageName: String? = null
@@ -63,7 +65,7 @@ class EnhancedAppAuraView(context: Context, attributeSet: AttributeSet?): ViewGr
             for(idx in 0..(childCount - 1)){
                 val child : View = getChildAt(idx)
                 Log.d(TAG, "${child.id} -  l: $l, t: $t, r: $r, b: $b")
-                child.layout(0, 0, r - l, b - t)
+                child.layout(0, 0, (r - l), (b - t))
             }
         }
     }
