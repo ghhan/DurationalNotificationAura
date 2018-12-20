@@ -58,6 +58,15 @@ class EnhancedAppAuraView(context: Context, attributeSet: AttributeSet?): ViewGr
         )
     }
 
+    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        val widthpixels = View.MeasureSpec.getSize(widthMeasureSpec)
+        val widthmode = View.MeasureSpec.getMode(widthMeasureSpec)
+        val heightpixels = View.MeasureSpec.getSize(heightMeasureSpec)
+        val heightmode = View.MeasureSpec.getMode(heightMeasureSpec)
+
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+    }
+
     // View Group의 전체적인 배치를 결정하는 모듈
     override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
         if(changed){
@@ -65,7 +74,7 @@ class EnhancedAppAuraView(context: Context, attributeSet: AttributeSet?): ViewGr
             for(idx in 0..(childCount - 1)){
                 val child : View = getChildAt(idx)
                 Log.d(TAG, "${child.id} -  l: $l, t: $t, r: $r, b: $b")
-                child.layout(0, 0, (r - l), (b - t))
+                child.layout(0, 0, r - l, b - t)
             }
         }
     }

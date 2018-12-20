@@ -1,5 +1,7 @@
 package kr.ac.snu.hcil.durationalnotificationaura.ui.enhancedhomescreen
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProvider
 import android.arch.lifecycle.ViewModelProviders
@@ -8,8 +10,11 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.drawable.Drawable
+import android.os.Build
 import android.os.Bundle
 import android.support.v4.app.Fragment
+import android.support.v4.app.NotificationCompat
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -25,9 +30,11 @@ import kr.ac.snu.hcil.durationalnotificationaura.R
 import kr.ac.snu.hcil.durationalnotificationaura.data.AppNotificationsEnhancedData
 import kr.ac.snu.hcil.durationalnotificationaura.data.NotificationEnhancedData
 import kr.ac.snu.hcil.durationalnotificationaura.data.EnhancedNotificationLifeCycle
+import kr.ac.snu.hcil.durationalnotificationaura.data.EnhancementPattern
 import kr.ac.snu.hcil.durationalnotificationaura.visualEffects.AnimationParams
 import kr.ac.snu.hcil.durationalnotificationaura.visualEffects.AnimationTypes
 import kr.ac.snu.hcil.durationalnotificationaura.visualEffects.DerivedVisEffect
+import java.util.*
 
 class EnhancedHomeScreenFragment : Fragment(), AdapterView.OnItemSelectedListener {
 
@@ -35,7 +42,9 @@ class EnhancedHomeScreenFragment : Fragment(), AdapterView.OnItemSelectedListene
         fun newInstance() = EnhancedHomeScreenFragment()
         const val ACTION = "kr.ac.snu.hcil.durationalnotificationaura.NOTIFICATION_LISTENER"
         const val DEFAULT_START_DECAY_AFTER = 1000L * 60 * 10
+        const val NOTIFICATION_CHANNEL_ID = "MY_CHANNEL_ID"
         const val TAG = "TESTING_FRAGMENT"
+        const val CHANNEL_ID = "AURA_TESTER"
     }
 
     override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
@@ -48,9 +57,18 @@ class EnhancedHomeScreenFragment : Fragment(), AdapterView.OnItemSelectedListene
                 statusView.text = "${(it as TextView).text}\n" +
                         "Number of notifications: ${notifications.size}\n" +
                         "Before Interaction: ${notifications[0]!!.firstPattern}, After Interaction: ${notifications[0]!!.secondPattern}\n" +
+                        "Current State: ${notifications[0]!!.lifeCycle}\n" +
                         "Current Enhancement: ${notifications[0]!!.currEnhancement}"
+                }
             }
-            }
+        }
+    }
+
+    private fun printShortcuts(){
+        val shortcutIntent = Intent(Intent.ACTION_CREATE_SHORTCUT)
+        val shortcuts = activity!!.packageManager.queryIntentActivities(shortcutIntent, 0)
+        shortcuts.forEach{
+            Log.d(TAG, "name = ${it.activityInfo.name}, package name = ${it.activityInfo.packageName}")
         }
     }
 
@@ -58,7 +76,7 @@ class EnhancedHomeScreenFragment : Fragment(), AdapterView.OnItemSelectedListene
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    private val pns = arrayOf(
+    private var pns = arrayOf(
         "com.google.android.gm",
         "com.android.providers.calendar",
         "com.google.android.youtube",
@@ -72,6 +90,8 @@ class EnhancedHomeScreenFragment : Fragment(), AdapterView.OnItemSelectedListene
     private val notificationReceiver = NotificationReceiver()
     private val intentFilter = IntentFilter().also{ it.addAction(ACTION)}
 
+    var NOTIFICATION_ID = 0
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -83,6 +103,8 @@ class EnhancedHomeScreenFragment : Fragment(), AdapterView.OnItemSelectedListene
         super.onActivityCreated(savedInstanceState)
 
         activity?.startService(Intent(activity, MyNotificationListenerService::class.java))
+        //service가 시작하면, 이미 viewmodel setting은 시작됨 (service의 onstart)
+
         packageNameAdapter = ArrayAdapter(context!!, R.layout.simple_spinner_dropdown_item)
         packageNameAdapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item)
 
@@ -94,6 +116,31 @@ class EnhancedHomeScreenFragment : Fragment(), AdapterView.OnItemSelectedListene
 
         triggerButton.setOnClickListener{
             //TODO: view 중 packagename이 같은 애의 data를 Stage 1 상태로 삽입
+
+            val notificationManager = context!!.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+            val mBuilder = NotificationCompat.Builder(activity!!, CHANNEL_ID).also{
+                    builder ->
+                builder.setSmallIcon(R.drawable.ic_launcher_foreground)
+                builder.setContentTitle("Test Notification")
+                builder.setContentText("Much longer text that cannot fit one line...")
+                builder.setStyle(
+                    NotificationCompat.BigTextStyle().bigText("Much longer text that cannot fit one line...")
+                )
+                builder.priority = NotificationCompat.PRIORITY_DEFAULT
+            }
+
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+                val channel = NotificationChannel(
+                    NOTIFICATION_CHANNEL_ID,
+                    "Here is Readable Title",
+                    NotificationManager.IMPORTANCE_DEFAULT
+                )
+                notificationManager.createNotificationChannel(channel)
+                mBuilder.setChannelId(NOTIFICATION_CHANNEL_ID)
+            }
+
+            notificationManager.notify(NOTIFICATION_ID, mBuilder.build())
         }
 
         interactButton.setOnClickListener {
@@ -139,7 +186,7 @@ class EnhancedHomeScreenFragment : Fragment(), AdapterView.OnItemSelectedListene
             }
         }
 
-        drawableMap = pns.map{ pn -> pn to context!!.packageManager.getApplicationIcon(pn)}.toMap()
+        //drawableMap = pns.map{ pn -> pn to context!!.packageManager.getApplicationIcon(pn)}.toMap()
 
         viewModel = ViewModelProviders.of(this, ViewModelProvider.AndroidViewModelFactory(activity!!.application))
             .get(EnhancedHomeScreenViewModel::class.java)
@@ -156,50 +203,47 @@ class EnhancedHomeScreenFragment : Fragment(), AdapterView.OnItemSelectedListene
                         val packageName = entry.key
                         val data = entry.value
 
-                        if(pns.contains(packageName)){
-                            packageNameAdapter.add(packageName)
-                            gridLayout.addView(
-                                EnhancedAppAuraView(context!!, null).apply{
-                                    background = drawableMap[packageName]
-                                    setEnhanceData(data)
-                                    setVisualEffects(List(data.notificationData.size) {index ->
-                                        DerivedVisEffect(
-                                            viewModel.paletteMap[packageName]!!,
-                                            this.getChildAt(index),
-                                            mapOf(),
-                                            mapOf(
-                                                AnimationTypes.ALPHA to
-                                                        AnimationParams(
-                                                            arrayOf(0f, 1f).toFloatArray(),
-                                                            3000,
-                                                            AccelerateDecelerateInterpolator()
-                                                        ),
-                                                AnimationTypes.SCALE_X to
-                                                        AnimationParams(
-                                                            arrayOf(0f, 1f).toFloatArray(),
-                                                            3000,
-                                                            LinearInterpolator()
-                                                        ),
-                                                AnimationTypes.SCALE_Y to
-                                                        AnimationParams(
-                                                            arrayOf(0f, 1f).toFloatArray(),
-                                                            3000,
-                                                            LinearInterpolator()
-                                                        )
-                                            )
+                        packageNameAdapter.add(packageName)
+                        gridLayout.addView(
+                            EnhancedAppAuraView(context!!, null).apply{
+                                background = viewModel.drawableMap[packageName]
+                                setEnhanceData(data)
+                                setVisualEffects(List(data.notificationData.size) {index ->
+                                    DerivedVisEffect(
+                                        viewModel.paletteMap[packageName]!!,
+                                        this.getChildAt(index),
+                                        mapOf(),
+                                        mapOf(
+                                            AnimationTypes.ALPHA to
+                                                    AnimationParams(
+                                                        arrayOf(0f, 1f).toFloatArray(),
+                                                        3000,
+                                                        AccelerateDecelerateInterpolator()
+                                                    ),
+                                            AnimationTypes.SCALE_X to
+                                                    AnimationParams(
+                                                        arrayOf(0f, 1f).toFloatArray(),
+                                                        3000,
+                                                        LinearInterpolator()
+                                                    ),
+                                            AnimationTypes.SCALE_Y to
+                                                    AnimationParams(
+                                                        arrayOf(0f, 1f).toFloatArray(),
+                                                        3000,
+                                                        LinearInterpolator()
+                                                    )
                                         )
-                                    })
-                                    tag = packageName
-                                },
-                                GridLayout.LayoutParams(
-                                    GridLayout.spec(GridLayout.UNDEFINED, 1f), GridLayout.spec(GridLayout.UNDEFINED, 1f)
-                                ).apply{
-                                    width = 100
-                                    height = 200
-                                }
-                            )
-
-                        }
+                                    )
+                                })
+                                tag = packageName
+                            },
+                            GridLayout.LayoutParams(
+                                GridLayout.spec(GridLayout.UNDEFINED, 1f), GridLayout.spec(GridLayout.UNDEFINED, 1f)
+                            ).apply{
+                                width = 100
+                                height = 500
+                            }
+                        )
                     }
                 }
                 packageNameSpinner.adapter = packageNameAdapter
@@ -207,9 +251,11 @@ class EnhancedHomeScreenFragment : Fragment(), AdapterView.OnItemSelectedListene
         )
 
         packageNameSpinner.onItemSelectedListener = this
+        printShortcuts()
 
     }
 
+    //TODO: 생몰주기 때문에 문제 생길 수 있는지 체크 필요함
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         activity?.registerReceiver(notificationReceiver, intentFilter)
@@ -230,7 +276,9 @@ class EnhancedHomeScreenFragment : Fragment(), AdapterView.OnItemSelectedListene
             val list = mutableListOf<NotificationEnhancedData>()
             packageNames.forEachIndexed{
                 index, str ->
-                if(distinctStr == str) list.add(NotificationEnhancedData("", postTimes[index], DEFAULT_START_DECAY_AFTER))
+                if(distinctStr == str) list.add(
+                    createSingleNotification(postTimes[index], DEFAULT_START_DECAY_AFTER)
+                )
             }
             distinctStr to list
         }.toMap().let{
@@ -246,13 +294,13 @@ class EnhancedHomeScreenFragment : Fragment(), AdapterView.OnItemSelectedListene
         if(currentData != null){
             if(packageName in currentData.keys){
                 currentData[packageName]!!.notificationData.add(
-                    NotificationEnhancedData("", postTime, DEFAULT_START_DECAY_AFTER)
+                    createSingleNotification(postTime, DEFAULT_START_DECAY_AFTER)
                 )
             }
             else{
                 currentData[packageName] = AppNotificationsEnhancedData(packageName).also{
                     it.notificationData = mutableListOf(
-                        NotificationEnhancedData("", postTime, DEFAULT_START_DECAY_AFTER)
+                        createSingleNotification(postTime, DEFAULT_START_DECAY_AFTER)
                     )
                 }
             }
@@ -261,7 +309,7 @@ class EnhancedHomeScreenFragment : Fragment(), AdapterView.OnItemSelectedListene
             currentData = mutableMapOf(
                 packageName to AppNotificationsEnhancedData(packageName).also{
                     it.notificationData = mutableListOf(
-                        NotificationEnhancedData("", postTime, DEFAULT_START_DECAY_AFTER)
+                        createSingleNotification(postTime, DEFAULT_START_DECAY_AFTER)
                     )
                 }
             )
@@ -282,6 +330,39 @@ class EnhancedHomeScreenFragment : Fragment(), AdapterView.OnItemSelectedListene
             else
                 it.value
         }.toMutableMap()
+    }
+
+    private fun createSingleNotification(initTime: Long, naturalDecay: Long): NotificationEnhancedData{
+        val firsttrend = Random().nextInt() % 3
+        val secondtrend = Random().nextInt() % 3
+
+        return NotificationEnhancedData(
+            "default",
+            initTime,
+            naturalDecay
+        ).apply{
+            when(firsttrend){
+                0 -> {
+                    firstPattern = EnhancementPattern.INC
+                }
+                1 -> {
+                    firstPattern = EnhancementPattern.DEC
+                    enhanceOffset = 1.0
+                    currEnhancement = enhanceOffset
+                }
+                2 -> {
+                    firstPattern = EnhancementPattern.EQ
+                    enhanceOffset = 0.5
+                    currEnhancement = enhanceOffset
+                }
+            }
+
+            when(secondtrend){
+                0 -> {firstPattern = EnhancementPattern.INC}
+                1 -> {firstPattern = EnhancementPattern.DEC}
+                2 -> {firstPattern = EnhancementPattern.EQ}
+            }
+        }
     }
 
     inner class NotificationReceiver: BroadcastReceiver(){

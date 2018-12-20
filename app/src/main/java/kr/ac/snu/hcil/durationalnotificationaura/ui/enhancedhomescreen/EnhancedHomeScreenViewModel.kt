@@ -111,6 +111,8 @@ class EnhancedHomeScreenViewModel(application: Application) : AndroidViewModel(a
     }
 
     var paletteMap: MutableMap<String, Palette> = mutableMapOf()
+    var drawableMap: MutableMap<String, Drawable> = mutableMapOf()
+
     private val bWidth = 80
     private val bHeight = 80
 
@@ -122,10 +124,10 @@ class EnhancedHomeScreenViewModel(application: Application) : AndroidViewModel(a
         return Bitmap.createScaledBitmap(bmp, bWidth, bHeight, false)
     }
 
-
     init{
+
         //데이터 하드코드 테스트는 여기서 하도록 합시다.
-        val mutableMap : MutableMap<String, AppNotificationsEnhancedData> = mutableMapOf()
+        //val mutableMap : MutableMap<String, AppNotificationsEnhancedData> = mutableMapOf()
         val currTime = Calendar.getInstance().timeInMillis
         val pm = application.packageManager
         val installedPackages = pm.getInstalledPackages(PackageManager.GET_ACTIVITIES)
@@ -133,22 +135,16 @@ class EnhancedHomeScreenViewModel(application: Application) : AndroidViewModel(a
         installedPackages.map{
             pi ->
             val packageName = pi.packageName
-            val bitmap = getBitmapFromDrawable(pm.getApplicationIcon(packageName))
+            val iconDrawable = pm.getApplicationIcon(packageName)
+            val bitmap = getBitmapFromDrawable(iconDrawable)
+            drawableMap[packageName] = iconDrawable
             Palette.Builder(bitmap).also{
                 builder -> builder.generate{
                 palette ->
                 palette?.let{ paletteMap[packageName] = it }
-
-                val newOne = AppNotificationsEnhancedData(packageName)
-                    .apply{
-                        val count = Random().nextInt(3) + 1
-                        notificationData = createRandomNotificationData(count, currTime).toMutableList()
-                    }
-                mutableMap[packageName] = newOne
                 }
             }
         }
-        setNotificationByApps(mutableMap)
     }
 
     private fun createRandomNotificationData(count: Int, initTime: Long): List<NotificationEnhancedData> {

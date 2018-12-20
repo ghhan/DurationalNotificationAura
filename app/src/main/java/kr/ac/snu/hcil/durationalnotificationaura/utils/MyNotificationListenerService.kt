@@ -1,6 +1,9 @@
 package kr.ac.snu.hcil.durationalnotificationaura.utils
 
+import android.app.NotificationChannel
+import android.app.NotificationChannelGroup
 import android.content.Intent
+import android.os.UserHandle
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import java.util.*
@@ -8,6 +11,10 @@ import java.util.*
 class MyNotificationListenerService: NotificationListenerService() {
     companion object{
         const val ACTION = "kr.ac.snu.hcil.durationalnotificationaura.NOTIFICATION_LISTENER"
+    }
+
+    override fun onListenerConnected() {
+        super.onListenerConnected()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -47,5 +54,23 @@ class MyNotificationListenerService: NotificationListenerService() {
                 putExtra("postTime", Calendar.getInstance().timeInMillis)
             }
         )
+    }
+
+    override fun onNotificationChannelGroupModified(
+        pkg: String?,
+        user: UserHandle?,
+        group: NotificationChannelGroup?,
+        modificationType: Int
+    ) {
+        super.onNotificationChannelGroupModified(pkg, user, group, modificationType)
+    }
+
+    override fun onNotificationChannelModified(
+        pkg: String?,
+        user: UserHandle?,
+        channel: NotificationChannel?,
+        modificationType: Int
+    ) {
+        super.onNotificationChannelModified(pkg, user, channel, modificationType)
     }
 }
