@@ -9,6 +9,8 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Bundle
@@ -186,17 +188,36 @@ class EnhancedHomeScreenFragment : Fragment(), AdapterView.OnItemSelectedListene
             }
         }
 
-        //drawableMap = pns.map{ pn -> pn to context!!.packageManager.getApplicationIcon(pn)}.toMap()
+        for(index in 0..19){
+            gridLayout.addView(
+                EnhancedAppAuraView(context!!, null).apply{
+                    if((index % 8) / 4 == 0){
+                        if(index % 2 == 0 )
+                            background = ColorDrawable(Color.LTGRAY)
+                        else
+                            background = ColorDrawable(Color.GRAY)
+                    }
+                    else{
+                        if(index % 2 == 0 )
+                            background = ColorDrawable(Color.GRAY)
+                        else
+                            background = ColorDrawable(Color.LTGRAY)
+                    }
+                },
+                GridLayout.LayoutParams(
+                    GridLayout.spec(index / 4, 1, GridLayout.CENTER,1f),
+                    GridLayout.spec(index % 4, 1, GridLayout.CENTER,1f)
+                )
+            )
+        }
 
         viewModel = ViewModelProviders.of(this, ViewModelProvider.AndroidViewModelFactory(activity!!.application))
             .get(EnhancedHomeScreenViewModel::class.java)
         viewModel.getNotificationsByApps().observe(this,
             Observer {
 
-                //TODO: To perform better, recycle views
-                gridLayout.removeAllViews()
                 packageNameAdapter.clear()
-
+                var counter = 0
                 val myIterator = it!!.iterator()
                 while (myIterator.hasNext()) {
                     myIterator.next().let { entry ->
@@ -204,55 +225,46 @@ class EnhancedHomeScreenFragment : Fragment(), AdapterView.OnItemSelectedListene
                         val data = entry.value
 
                         packageNameAdapter.add(packageName)
-                        gridLayout.addView(
-                            EnhancedAppAuraView(context!!, null).apply{
-                                background = viewModel.drawableMap[packageName]
-                                setEnhanceData(data)
-                                setVisualEffects(List(data.notificationData.size) {index ->
-                                    DerivedVisEffect(
-                                        viewModel.paletteMap[packageName]!!,
-                                        this.getChildAt(index),
-                                        mapOf(),
-                                        mapOf(
-                                            AnimationTypes.ALPHA to
-                                                    AnimationParams(
-                                                        arrayOf(0f, 1f).toFloatArray(),
-                                                        3000,
-                                                        AccelerateDecelerateInterpolator()
-                                                    ),
-                                            AnimationTypes.SCALE_X to
-                                                    AnimationParams(
-                                                        arrayOf(0f, 1f).toFloatArray(),
-                                                        3000,
-                                                        LinearInterpolator()
-                                                    ),
-                                            AnimationTypes.SCALE_Y to
-                                                    AnimationParams(
-                                                        arrayOf(0f, 1f).toFloatArray(),
-                                                        3000,
-                                                        LinearInterpolator()
-                                                    )
-                                        )
+                        (gridLayout.getChildAt(counter) as EnhancedAppAuraView).let{ view ->
+                            view.tag = packageName
+                            view.background = viewModel.drawableMap[packageName]
+                            view.setEnhanceData(data)
+                            view.setVisualEffects(List(data.notificationData.size) {index ->
+                                DerivedVisEffect(
+                                    viewModel.paletteMap[packageName]!!,
+                                    view.getChildAt(index),
+                                    mapOf(),
+                                    mapOf(
+                                        AnimationTypes.ALPHA to
+                                                AnimationParams(
+                                                    arrayOf(0f, 1f).toFloatArray(),
+                                                    3000,
+                                                    AccelerateDecelerateInterpolator()
+                                                ),
+                                        AnimationTypes.SCALE_X to
+                                                AnimationParams(
+                                                    arrayOf(0f, 1f).toFloatArray(),
+                                                    3000,
+                                                    LinearInterpolator()
+                                                ),
+                                        AnimationTypes.SCALE_Y to
+                                                AnimationParams(
+                                                    arrayOf(0f, 1f).toFloatArray(),
+                                                    3000,
+                                                    LinearInterpolator()
+                                                )
                                     )
-                                })
-                                tag = packageName
-                            },
-                            GridLayout.LayoutParams(
-                                GridLayout.spec(GridLayout.UNDEFINED, 1f), GridLayout.spec(GridLayout.UNDEFINED, 1f)
-                            ).apply{
-                                width = 100
-                                height = 500
-                            }
-                        )
+                                )
+                            })
+                        }
+                        counter++
                     }
                 }
                 packageNameSpinner.adapter = packageNameAdapter
             }
         )
-
         packageNameSpinner.onItemSelectedListener = this
         printShortcuts()
-
     }
 
     //TODO: 생몰주기 때문에 문제 생길 수 있는지 체크 필요함

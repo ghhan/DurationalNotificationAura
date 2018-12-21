@@ -5,6 +5,7 @@ import android.util.AttributeSet
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
+import android.widget.GridLayout
 import kr.ac.snu.hcil.durationalnotificationaura.data.AppNotificationsEnhancedData
 import kr.ac.snu.hcil.durationalnotificationaura.data.NotificationEnhancedData
 import kr.ac.snu.hcil.durationalnotificationaura.visualEffects.AbstractVisEffect
@@ -30,16 +31,19 @@ class EnhancedAppAuraView(context: Context, attributeSet: AttributeSet?): ViewGr
     fun setEnhanceData(enhanceData: AppNotificationsEnhancedData) {
         appPackageName = enhanceData.packageName
 
+        //TODO: Recycle children
+        removeAllViews()
         enhanceData.notificationData.forEach{
             addView(
-                EnhancedNotificationAuraView(context, null).also{
-                        view -> view.setVisualData(it)
-                    view.tag = appPackageName + "_child"
-                },
-                ViewGroup.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.MATCH_PARENT
-                )
+                EnhancedNotificationAuraView(context, null)
+                    .also { view ->
+                        view.setVisualData(it)
+                        view.tag = appPackageName + "_child"
+                        view.layoutParams = ViewGroup.LayoutParams(
+                            ViewGroup.LayoutParams.MATCH_PARENT,
+                            ViewGroup.LayoutParams.MATCH_PARENT
+                        )
+                    }
             )
         }
     }
@@ -64,7 +68,21 @@ class EnhancedAppAuraView(context: Context, attributeSet: AttributeSet?): ViewGr
         val heightpixels = View.MeasureSpec.getSize(heightMeasureSpec)
         val heightmode = View.MeasureSpec.getMode(heightMeasureSpec)
 
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+        val columnCount = (parent as GridLayout).columnCount
+        //TODO: consider device orientation
+
+        super.onMeasure(
+            View.MeasureSpec.makeMeasureSpec(widthpixels/columnCount, View.MeasureSpec.EXACTLY),
+            View.MeasureSpec.makeMeasureSpec(widthpixels/columnCount, View.MeasureSpec.EXACTLY)
+        )
+
+        for(idx in 0..(childCount-1)){
+            val child = getChildAt(idx)
+            child.measure(
+                View.MeasureSpec.makeMeasureSpec(measuredWidth, View.MeasureSpec.EXACTLY),
+                View.MeasureSpec.makeMeasureSpec(measuredHeight, View.MeasureSpec.EXACTLY)
+            )
+        }
     }
 
     // View Group의 전체적인 배치를 결정하는 모듈
