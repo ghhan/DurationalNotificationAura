@@ -98,7 +98,9 @@ class EnhancedHomeScreenFragment : Fragment(), AdapterView.OnItemSelectedListene
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        return inflater.inflate(R.layout.enhanced_home_screen_fragment, container, false)
+        return inflater.inflate(R.layout.enhanced_home_screen_fragment, container, false).also{
+
+        }
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -207,7 +209,9 @@ class EnhancedHomeScreenFragment : Fragment(), AdapterView.OnItemSelectedListene
                 GridLayout.LayoutParams(
                     GridLayout.spec(index / 4, 1, GridLayout.CENTER,1f),
                     GridLayout.spec(index % 4, 1, GridLayout.CENTER,1f)
-                )
+                ).also{
+                    param -> param.width = 250; param.height=250
+                }
             )
         }
 
