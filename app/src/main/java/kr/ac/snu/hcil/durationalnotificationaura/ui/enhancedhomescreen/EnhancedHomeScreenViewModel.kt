@@ -128,10 +128,12 @@ class EnhancedHomeScreenViewModel(application: Application) : AndroidViewModel(a
 
     init{
         //데이터 하드코드 테스트는 여기서 하도록 합시다.
-        //val mutableMap : MutableMap<String, AppNotificationsEnhancedData> = mutableMapOf()
+        val mutableMap : MutableMap<String, AppNotificationsEnhancedData> = mutableMapOf()
         val currTime = Calendar.getInstance().timeInMillis
         val pm = application.packageManager
         val installedPackages = pm.getInstalledPackages(PackageManager.GET_ACTIVITIES)
+
+
 
         installedPackages.map{
             pi ->
@@ -143,9 +145,18 @@ class EnhancedHomeScreenViewModel(application: Application) : AndroidViewModel(a
                 builder -> builder.generate{
                 palette ->
                 palette?.let{ paletteMap[packageName] = it } // Palette builder asynctask call back function
+                val newOne = AppNotificationsEnhancedData(packageName)
+                        .apply{
+                            val count = Random().nextInt(3) + 1
+                            notificationData = createRandomNotificationData(count, currTime).toMutableList()
+                        }
+                mutableMap[packageName] = newOne
                 }
+
             }
         }
+
+        setNotificationByApps(mutableMap)
     }
 
     private fun createRandomNotificationData(count: Int, initTime: Long): List<NotificationEnhancedData> {

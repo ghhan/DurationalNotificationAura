@@ -237,6 +237,7 @@ class EnhancedHomeScreenFragment : Fragment(), AdapterView.OnItemSelectedListene
                         val data = entry.value
 
                         packageNameAdapter.add(packageName)
+                        gridLayout.addView(EnhancedAppAuraView(context!!, null))
                         (gridLayout.getChildAt(counter) as EnhancedAppAuraView).let{ view ->
                             view.tag = packageName
                             view.background = viewModel.drawableMap[packageName]

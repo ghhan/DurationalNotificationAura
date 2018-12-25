@@ -75,7 +75,7 @@ class EnhancedAppAuraView(context: Context, attributeSet: AttributeSet?): ViewGr
             View.MeasureSpec.makeMeasureSpec(widthpixels/columnCount, View.MeasureSpec.EXACTLY)
         )
 
-        /*
+
         for(idx in 0..(childCount-1)){
             val child = getChildAt(idx)
             child.measure(
@@ -83,7 +83,7 @@ class EnhancedAppAuraView(context: Context, attributeSet: AttributeSet?): ViewGr
                 View.MeasureSpec.makeMeasureSpec(measuredHeight, View.MeasureSpec.EXACTLY)
             )
         }
-        */
+
     }
 
     // View Group의 전체적인 배치를 결정하는 모듈
