@@ -89,7 +89,7 @@ class EnhancedAppAuraView(context: Context, attributeSet: AttributeSet?): ViewGr
     // View Group의 전체적인 배치를 결정하는 모듈
     override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
         if(changed){
-            Log.d(TAG, "# of Children in a view of id $tag: $childCount")
+//            Log.d(TAG, "# of Children in a view of id $tag: $childCount")
             for(idx in 0..(childCount - 1)){
                 val child : View = getChildAt(idx)
                 Log.d(TAG, "${child.id} -  l: $l, t: $t, r: $r, b: $b")
