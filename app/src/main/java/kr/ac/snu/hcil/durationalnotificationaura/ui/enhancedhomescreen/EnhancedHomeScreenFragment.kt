@@ -147,6 +147,7 @@ class EnhancedHomeScreenFragment : Fragment(), AdapterView.OnItemSelectedListene
             notificationManager.notify(NOTIFICATION_ID, mBuilder.build())
         }
 
+        // Set selected View's Noti Data to STATE_2, "Triggered But Not Interacted"
         interactButton.setOnClickListener {
             viewModel.getNotificationsByApps().value?.let{
                     currData ->
@@ -154,7 +155,7 @@ class EnhancedHomeScreenFragment : Fragment(), AdapterView.OnItemSelectedListene
                         entry ->
                     if(entry.key == packageNameSpinner.selectedItem){
                         entry.value.notificationData.forEach{
-                                data -> data.lifeCycle = EnhancedNotificationLifeCycle.STATE_2
+                                data -> data.lifeCycle = EnhancedNotificationLifeCycle.STATE_2 // TODO Interacted -> Not State_3?
                         }
                     }
                 }
@@ -162,6 +163,7 @@ class EnhancedHomeScreenFragment : Fragment(), AdapterView.OnItemSelectedListene
             }
         }
 
+        // Set selected View's Noti Data to STATE_1, "Just Triggered"
         resetButton.setOnClickListener{
             viewModel.getNotificationsByApps().value?.let{
                     currData ->
@@ -169,7 +171,10 @@ class EnhancedHomeScreenFragment : Fragment(), AdapterView.OnItemSelectedListene
                         entry ->
                     if(entry.key == packageNameSpinner.selectedItem){
                         entry.value.notificationData.forEach{
-                            data -> data.currEnhancement = data.enhanceOffset; data.timeElapsed = 0; data.lifeCycle = EnhancedNotificationLifeCycle.STATE_1
+                                data ->
+                            data.currEnhancement = data.enhanceOffset;
+                            data.timeElapsed = 0;
+                            data.lifeCycle = EnhancedNotificationLifeCycle.STATE_1
                         }
                     }
                 }
@@ -177,6 +182,7 @@ class EnhancedHomeScreenFragment : Fragment(), AdapterView.OnItemSelectedListene
             }
         }
 
+        // Set all Views' Noti Data to STATE_1, "Just Triggered" and reinitialize all parameters
         resetAllButton.setOnClickListener{
             viewModel.getNotificationsByApps().value?.let{
                 currData ->
@@ -190,6 +196,7 @@ class EnhancedHomeScreenFragment : Fragment(), AdapterView.OnItemSelectedListene
             }
         }
 
+        // Grid Layout ChildViews(EnhacedAppAuraView) Design Logic
         for(index in 0..19){
             gridLayout.addView(
                 EnhancedAppAuraView(context!!, null).apply{
@@ -215,6 +222,7 @@ class EnhancedHomeScreenFragment : Fragment(), AdapterView.OnItemSelectedListene
             )
         }
 
+        // Live Data View Model Observer Logic: Updates packageNameAdapter and Aura Views Animation according to EHSViewModel
         viewModel = ViewModelProviders.of(this, ViewModelProvider.AndroidViewModelFactory(activity!!.application))
             .get(EnhancedHomeScreenViewModel::class.java)
         viewModel.getNotificationsByApps().observe(this,
@@ -305,6 +313,7 @@ class EnhancedHomeScreenFragment : Fragment(), AdapterView.OnItemSelectedListene
             }.toMap()
         }
 
+    // Creates and Adds newly generated notification to View Model
     private fun addNewEnhancedNotification(id: Int, packageName: String, postTime: Long): MutableMap<String, AppNotificationsEnhancedData>{
         var currentData: MutableMap<String,AppNotificationsEnhancedData>? = viewModel.getNotificationsByApps().value
         if(currentData != null){
@@ -333,6 +342,7 @@ class EnhancedHomeScreenFragment : Fragment(), AdapterView.OnItemSelectedListene
         return currentData
     }
 
+    // Changes notiData status of dismissed Notification to STATE_3, "Just Interacted"
     private fun dismissNotification(id: Int, packageName: String, postTime: Long):MutableMap<String, AppNotificationsEnhancedData>{
         val currentData: MutableMap<String,AppNotificationsEnhancedData>? = viewModel.getNotificationsByApps().value
 
@@ -348,6 +358,7 @@ class EnhancedHomeScreenFragment : Fragment(), AdapterView.OnItemSelectedListene
         }.toMutableMap()
     }
 
+    // Currently randomly generates a single notification
     private fun createSingleNotification(initTime: Long, naturalDecay: Long): NotificationEnhancedData{
         val firsttrend = Random().nextInt() % 3
         val secondtrend = Random().nextInt() % 3

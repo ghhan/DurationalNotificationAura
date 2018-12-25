@@ -11,6 +11,7 @@
             android:roundIcon="@mipmap/ic_launcher_round"
             android:supportsRtl="true"
             android:theme="@style/AppTheme">
+
         <activity android:name=".EnhancedHomeScreenActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
@@ -20,7 +21,8 @@
         </activity>
         <activity android:name=".TestActivity">
         </activity>
-
+        <activity android:name=".ColorTestActivity">
+        </activity>
         <service
                 android:name=".utils.MyNotificationListenerService"
                 android:label="@string/service_name"
@@ -30,8 +32,7 @@
             </intent-filter>
         </service>
 
-        <activity android:name=".ColorTestActivity">
-        </activity>
+
     </application>
 
 </manifest>

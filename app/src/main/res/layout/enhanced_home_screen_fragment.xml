@@ -30,17 +30,12 @@
                 app:layout_constraintEnd_toEndOf="parent"
         />
     </ScrollView>
+
     <Spinner
-            android:id="@+id/packageNameSpinner"
-            android:layout_width="match_parent"
-            android:layout_height="28dp"
-            android:background="@color/colorSpinnerBG"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginTop="8dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/guideline" app:layout_constraintHorizontal_bias="0.0"/>
+        android:id="@+id/packageNameSpinner"
+        android:layout_width="match_parent"
+        android:layout_height="28dp"
+        android:background="@color/colorSpinnerBG" />
     <Button
             android:text="@string/button_trigger"
             android:textSize="12sp"
@@ -54,16 +49,22 @@
             android:layout_marginBottom="8dp"
             app:layout_constraintBottom_toBottomOf="parent" android:layout_marginTop="4dp"
             app:layout_constraintTop_toBottomOf="@+id/statusView"/>
+
     <Button
-            android:text="@string/button_interact"
-            android:textSize="12sp"
-            android:layout_width="0dp"
-            android:layout_height="50dp"
-            android:id="@+id/interactButton"
-            app:layout_constraintEnd_toStartOf="@+id/resetButton" android:layout_marginEnd="4dp"
-            app:layout_constraintStart_toEndOf="@+id/triggerButton" android:layout_marginStart="4dp"
-            android:layout_marginBottom="8dp" app:layout_constraintBottom_toBottomOf="parent"
-            android:layout_marginTop="4dp" app:layout_constraintTop_toBottomOf="@+id/statusView"/>
+        android:id="@+id/interactButton"
+        android:layout_width="0dp"
+        android:layout_height="50dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="4dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginTop="4dp"
+        android:text="@string/button_interact"
+        android:textSize="12sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/resetButton"
+        app:layout_constraintStart_toEndOf="@+id/triggerButton"
+        app:layout_constraintTop_toBottomOf="@+id/statusView" />
+
     <Button
             android:text="@string/button_reset"
             android:textSize="12sp"
