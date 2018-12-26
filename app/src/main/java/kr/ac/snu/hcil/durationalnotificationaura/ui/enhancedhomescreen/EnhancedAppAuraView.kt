@@ -30,7 +30,6 @@ class EnhancedAppAuraView(context: Context, attributeSet: AttributeSet?): ViewGr
 
     fun setEnhanceData(enhanceData: AppNotificationsEnhancedData) {
         appPackageName = enhanceData.packageName
-
         //TODO: Recycle children
         removeAllViews()
         enhanceData.notificationData.forEach{
@@ -84,6 +83,7 @@ class EnhancedAppAuraView(context: Context, attributeSet: AttributeSet?): ViewGr
                 View.MeasureSpec.makeMeasureSpec(measuredHeight, View.MeasureSpec.EXACTLY)
             )
         }
+
     }
 
     // View Group의 전체적인 배치를 결정하는 모듈
@@ -94,7 +94,9 @@ class EnhancedAppAuraView(context: Context, attributeSet: AttributeSet?): ViewGr
                 val child : View = getChildAt(idx)
                 Log.d(TAG, "${child.id} -  l: $l, t: $t, r: $r, b: $b")
                 child.layout(0, 0, r - l, b - t)
+                //child.layout(0,0,250,250)
             }
         }
     }
+
 }
