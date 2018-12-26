@@ -57,7 +57,7 @@ class EnhancedNotificationAuraView(context: Context, attrs: AttributeSet?): View
             }
         }
     }
-
+    
     override fun onDraw(canvas: Canvas?) {
         canvas?.let{
 //            it.drawRGB(0, 255, 255) // for debug
