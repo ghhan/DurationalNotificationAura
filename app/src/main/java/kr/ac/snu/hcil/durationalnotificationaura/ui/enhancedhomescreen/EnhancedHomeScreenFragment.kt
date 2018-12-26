@@ -190,8 +190,6 @@ class EnhancedHomeScreenFragment : Fragment(), AdapterView.OnItemSelectedListene
             .get(EnhancedHomeScreenViewModel::class.java)
         viewModel.getNotificationsByApps().observe(this,
             Observer {
-                //gridLayout.removeAllViews()
-                //packageNameAdapter.clear()
 
                 it?.let{
                     appNotiData ->

@@ -12,11 +12,6 @@
             android:supportsRtl="true"
             android:theme="@style/AppTheme">
         <activity android:name=".EnhancedHomeScreenActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <action android:name="android.intent.action.VIEW"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
-            </intent-filter>
         </activity>
         <activity android:name=".TestActivity">
         </activity>
@@ -31,6 +26,13 @@
         </service>
 
         <activity android:name=".ColorTestActivity">
+        </activity>
+        <activity android:name=".ScreenSlidePagerActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
         </activity>
     </application>
 
