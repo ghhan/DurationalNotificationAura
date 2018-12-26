@@ -22,28 +22,80 @@ class EnhancedAppAuraView(context: Context, attributeSet: AttributeSet?): ViewGr
 
     init{
         clipChildren = false
-        clipToOutline = false
-        clipToPadding = false
+        //clipToOutline = false
+        //clipToPadding = false
     }
 
     private var appPackageName: String? = null
+    private var notificationIDs: MutableList<Int> = mutableListOf()
+
+    private fun findViewWithId(id: Int): View?{
+        val currentSize = childCount
+        for(index:Int in 0..(currentSize-1)){
+            val child = getChildAt(index)
+            if(child.id == id)
+                return child
+        }
+        return null
+    }
 
     fun setEnhanceData(enhanceData: AppNotificationsEnhancedData) {
-        appPackageName = enhanceData.packageName
-        //TODO: Recycle children
-        removeAllViews()
-        enhanceData.notificationData.forEach{
-            addView(
-                EnhancedNotificationAuraView(context, null)
-                    .also { view ->
-                        view.setVisualData(it)
-                        view.tag = appPackageName + "_child"
-                        view.layoutParams = ViewGroup.LayoutParams(
-                            ViewGroup.LayoutParams.MATCH_PARENT,
-                            ViewGroup.LayoutParams.MATCH_PARENT
-                        )
-                    }
-            )
+        if(appPackageName == null){
+            appPackageName = enhanceData.packageName
+            enhanceData.notificationData.forEach{
+                notificationIDs.add(it.id)
+                addView(
+                    EnhancedNotificationAuraView(context, null)
+                        .also { view ->
+                            view.setVisualData(it)
+                            view.tag = it.id
+                            view.id = it.id
+                            view.layoutParams = ViewGroup.LayoutParams(
+                                ViewGroup.LayoutParams.MATCH_PARENT,
+                                ViewGroup.LayoutParams.MATCH_PARENT
+                            )
+                        }
+                )
+            }
+        }
+        else{
+            //update logic
+            val update = enhanceData.notificationData.filter{
+                data -> (data.id in notificationIDs)
+            }
+
+            update.forEach{
+                data ->
+                findViewWithId(data.id)?.let{
+                    view -> (view as EnhancedNotificationAuraView).setVisualData(data)
+                }
+            }
+
+            val add = enhanceData.notificationData.filterNot{
+                    data -> (data.id in notificationIDs)
+            }
+
+            add.forEach{
+                notificationIDs.add(it.id)
+                addView(
+                    EnhancedNotificationAuraView(context, null)
+                        .also { view ->
+                            view.setVisualData(it)
+                            view.tag = it.id
+                            view.id = it.id
+                            view.layoutParams = ViewGroup.LayoutParams(
+                                ViewGroup.LayoutParams.MATCH_PARENT,
+                                ViewGroup.LayoutParams.MATCH_PARENT
+                            )
+                        }
+                )
+            }
+
+            //TODO: remove logic
+            val remove = notificationIDs.filterNot{
+                    id -> id in enhanceData.notificationData.map{notiData -> notiData.id}
+            }
+
         }
     }
 
@@ -75,7 +127,7 @@ class EnhancedAppAuraView(context: Context, attributeSet: AttributeSet?): ViewGr
             View.MeasureSpec.makeMeasureSpec(widthpixels/columnCount, View.MeasureSpec.EXACTLY)
         )
 
-        /*
+
         for(idx in 0..(childCount-1)){
             val child = getChildAt(idx)
             child.measure(
@@ -83,18 +135,22 @@ class EnhancedAppAuraView(context: Context, attributeSet: AttributeSet?): ViewGr
                 View.MeasureSpec.makeMeasureSpec(measuredHeight, View.MeasureSpec.EXACTLY)
             )
         }
-        */
+
     }
 
     // View Group의 전체적인 배치를 결정하는 모듈
     override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
+        val leftPadding = 0
+        val rightPadding = 0
+        val topPadding = 0
+        val bottomPadding = 0
+
         if(changed){
             Log.d(TAG, "# of Children in a view of id $tag: $childCount")
             for(idx in 0..(childCount - 1)){
                 val child : View = getChildAt(idx)
                 Log.d(TAG, "${child.id} -  l: $l, t: $t, r: $r, b: $b")
-                child.layout(0, 0, r - l, b - t)
-                //child.layout(0,0,250,250)
+                child.layout(leftPadding, topPadding, (r - l) - rightPadding, (b - t) - bottomPadding)
             }
         }
     }

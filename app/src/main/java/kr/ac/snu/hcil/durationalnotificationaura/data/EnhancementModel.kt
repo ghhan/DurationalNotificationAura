@@ -8,6 +8,7 @@ abstract class AbstractEnhancedData{
     abstract val naturalDecay: Long
 }
 data class NotificationEnhancedData(
+    val id: Int,
     override val typeOfEnhancement: String,
     override val initTime: Long,
     override val naturalDecay: Long

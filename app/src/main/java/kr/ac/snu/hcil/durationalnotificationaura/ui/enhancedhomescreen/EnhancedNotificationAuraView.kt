@@ -15,7 +15,7 @@ class EnhancedNotificationAuraView(context: Context, attrs: AttributeSet?): View
     }
 
     init{
-        clipToOutline = false
+        //clipToOutline = false
     }
 
     private var visualData: NotificationEnhancedData? = null
@@ -27,6 +27,9 @@ class EnhancedNotificationAuraView(context: Context, attrs: AttributeSet?): View
             if(it.getCurrLifeCycle() != visData.lifeCycle)
                 it.setCurrentStage(visData.lifeCycle)
         }
+
+        invalidate()
+        requestLayout()
     }
 
     fun setVisualEffect(visEffect: AbstractVisEffect){
@@ -60,7 +63,7 @@ class EnhancedNotificationAuraView(context: Context, attrs: AttributeSet?): View
 
     override fun onDraw(canvas: Canvas?) {
         canvas?.let{
-            it.drawRGB(0, 255, 255)
+            it.drawRGB(200, 200, 200)
             visualData?.let{
                 data -> visualEffect?.drawVisualEffect(data, it)
             }

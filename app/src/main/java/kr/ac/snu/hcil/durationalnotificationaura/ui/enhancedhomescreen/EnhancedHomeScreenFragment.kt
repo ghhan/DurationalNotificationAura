@@ -56,11 +56,11 @@ class EnhancedHomeScreenFragment : Fragment(), AdapterView.OnItemSelectedListene
                 livedata -> livedata.value?.let{
                 data ->
                 val notifications = data[packageName]!!.notificationData
-                statusView.text = "${(it as TextView).text}\n" +
+                statusView.text = "${(it).text}\n" +
                         "Number of notifications: ${notifications.size}\n" +
-                        "Before Interaction: ${notifications[0]!!.firstPattern}, After Interaction: ${notifications[0]!!.secondPattern}\n" +
-                        "Current State: ${notifications[0]!!.lifeCycle}\n" +
-                        "Current Enhancement: ${notifications[0]!!.currEnhancement}"
+                        "Before Interaction: ${notifications[0].firstPattern}, After Interaction: ${notifications[0].secondPattern}\n" +
+                        "Current State: ${notifications[0].lifeCycle}\n" +
+                        "Current Enhancement: ${notifications[0].currEnhancement}"
                 }
             }
         }
@@ -78,13 +78,6 @@ class EnhancedHomeScreenFragment : Fragment(), AdapterView.OnItemSelectedListene
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    private var pns = arrayOf(
-        "com.google.android.gm",
-        "com.android.providers.calendar",
-        "com.google.android.youtube",
-        "com.google.android.apps.maps"
-    )
-
     lateinit var drawableMap:Map<String, Drawable>
 
     private lateinit var viewModel: EnhancedHomeScreenViewModel
@@ -99,7 +92,6 @@ class EnhancedHomeScreenFragment : Fragment(), AdapterView.OnItemSelectedListene
         savedInstanceState: Bundle?
     ): View {
         return inflater.inflate(R.layout.enhanced_home_screen_fragment, container, false).also{
-
         }
     }
 
@@ -114,8 +106,8 @@ class EnhancedHomeScreenFragment : Fragment(), AdapterView.OnItemSelectedListene
 
         gridLayout.let{
             it.clipChildren = false
-            it.clipToPadding = false
-            it.clipToOutline = false
+            //it.clipToPadding = false
+            //it.clipToOutline = false
         }
 
         triggerButton.setOnClickListener{
@@ -145,6 +137,10 @@ class EnhancedHomeScreenFragment : Fragment(), AdapterView.OnItemSelectedListene
             }
 
             notificationManager.notify(NOTIFICATION_ID, mBuilder.build())
+            if (NOTIFICATION_ID < Int.MAX_VALUE)
+                NOTIFICATION_ID++
+            else
+                NOTIFICATION_ID = 0
         }
 
         interactButton.setOnClickListener {
@@ -190,78 +186,91 @@ class EnhancedHomeScreenFragment : Fragment(), AdapterView.OnItemSelectedListene
             }
         }
 
-        for(index in 0..19){
-            gridLayout.addView(
-                EnhancedAppAuraView(context!!, null).apply{
-                    if((index % 8) / 4 == 0){
-                        if(index % 2 == 0 )
-                            background = ColorDrawable(Color.LTGRAY)
-                        else
-                            background = ColorDrawable(Color.GRAY)
-                    }
-                    else{
-                        if(index % 2 == 0 )
-                            background = ColorDrawable(Color.GRAY)
-                        else
-                            background = ColorDrawable(Color.LTGRAY)
-                    }
-                },
-                GridLayout.LayoutParams(
-                    GridLayout.spec(index / 4, 1, GridLayout.CENTER,1f),
-                    GridLayout.spec(index % 4, 1, GridLayout.CENTER,1f)
-                ).also{
-                    param -> param.width = 250; param.height=250
-                }
-            )
-        }
-
         viewModel = ViewModelProviders.of(this, ViewModelProvider.AndroidViewModelFactory(activity!!.application))
             .get(EnhancedHomeScreenViewModel::class.java)
         viewModel.getNotificationsByApps().observe(this,
             Observer {
+                //gridLayout.removeAllViews()
+                //packageNameAdapter.clear()
 
-                packageNameAdapter.clear()
-                var counter = 0
-                val myIterator = it!!.iterator()
-                while (myIterator.hasNext()) {
-                    myIterator.next().let { entry ->
+                it?.let{
+                    appNotiData ->
+                    appNotiData.map{
+                        entry ->
                         val packageName = entry.key
                         val data = entry.value
+                        val targetView = findViewWithPackageName(gridLayout, packageName)
+                        if(targetView != null) {
+                            (targetView as EnhancedAppAuraView).let{
+                                view ->
+                                //view.tag = packageName
+                                //view.background = viewModel.drawableMap[packageName]
 
-                        packageNameAdapter.add(packageName)
-                        (gridLayout.getChildAt(counter) as EnhancedAppAuraView).let{ view ->
-                            view.tag = packageName
-                            view.background = viewModel.drawableMap[packageName]
-                            view.setEnhanceData(data)
-                            view.setVisualEffects(List(data.notificationData.size) {index ->
-                                DerivedVisEffect(
-                                    viewModel.paletteMap[packageName]!!,
-                                    view.getChildAt(index),
-                                    mapOf(),
-                                    mapOf(
-                                        AnimationTypes.ALPHA to
-                                                AnimationParams(
-                                                    arrayOf(0f, 1f).toFloatArray(),
-                                                    3000,
-                                                    AccelerateDecelerateInterpolator()
-                                                ),
-                                        AnimationTypes.SCALE_X to
-                                                AnimationParams(
-                                                    arrayOf(0f, 1f).toFloatArray(),
-                                                    3000,
-                                                    LinearInterpolator()
-                                                ),
-                                        AnimationTypes.SCALE_Y to
-                                                AnimationParams(
-                                                    arrayOf(0f, 1f).toFloatArray(),
-                                                    3000,
-                                                    LinearInterpolator()
-                                                )
+                                view.setEnhanceData(data)
+                                view.setVisualEffects(List(data.notificationData.size) { index ->
+                                    DerivedVisEffect(
+                                        viewModel.paletteMap[packageName]!!,
+                                        view.getChildAt(index),
+                                        mapOf(),
+                                        mapOf(
+                                            AnimationTypes.ALPHA to
+                                                    AnimationParams(
+                                                        arrayOf(0f, 1f).toFloatArray(),
+                                                        3000,
+                                                        AccelerateDecelerateInterpolator()
+                                                    ),
+                                            AnimationTypes.SCALE_X to
+                                                    AnimationParams(
+                                                        arrayOf(0f, 1f).toFloatArray(),
+                                                        3000,
+                                                        LinearInterpolator()
+                                                    ),
+                                            AnimationTypes.SCALE_Y to
+                                                    AnimationParams(
+                                                        arrayOf(0f, 1f).toFloatArray(),
+                                                        3000,
+                                                        LinearInterpolator()
+                                                    )
+                                        )
                                     )
-                                )
+                                })
+                            }
+                        }
+                        else {
+                            gridLayout.addView(EnhancedAppAuraView(context!!, null).also{ view ->
+                                view.tag = packageName
+                                packageNameAdapter.add(packageName)
+                                view.background = viewModel.drawableMap[packageName]
+                                view.setEnhanceData(data)
+                                view.setVisualEffects(List(data.notificationData.size) {index ->
+                                    DerivedVisEffect(
+                                        viewModel.paletteMap[packageName]!!,
+                                        view.getChildAt(index),
+                                        mapOf(),
+                                        mapOf(
+                                            AnimationTypes.ALPHA to
+                                                    AnimationParams(
+                                                        arrayOf(0f, 1f).toFloatArray(),
+                                                        3000,
+                                                        AccelerateDecelerateInterpolator()
+                                                    ),
+                                            AnimationTypes.SCALE_X to
+                                                    AnimationParams(
+                                                        arrayOf(0f, 1f).toFloatArray(),
+                                                        3000,
+                                                        LinearInterpolator()
+                                                    ),
+                                            AnimationTypes.SCALE_Y to
+                                                    AnimationParams(
+                                                        arrayOf(0f, 1f).toFloatArray(),
+                                                        3000,
+                                                        LinearInterpolator()
+                                                    )
+                                        )
+                                    )
+                                })
                             })
                         }
-                        counter++
                     }
                 }
                 packageNameSpinner.adapter = packageNameAdapter
@@ -269,6 +278,16 @@ class EnhancedHomeScreenFragment : Fragment(), AdapterView.OnItemSelectedListene
         )
         packageNameSpinner.onItemSelectedListener = this
         printShortcuts()
+    }
+
+    private fun findViewWithPackageName(parent:ViewGroup, packageName: String): View?{
+        val currentSize = parent.childCount
+        for(index:Int in 0..(currentSize - 1)){
+            val child = parent.getChildAt(index)
+            if(child.tag == packageName)
+                return child
+        }
+        return null
     }
 
     //TODO: 생몰주기 때문에 문제 생길 수 있는지 체크 필요함
@@ -293,7 +312,7 @@ class EnhancedHomeScreenFragment : Fragment(), AdapterView.OnItemSelectedListene
             packageNames.forEachIndexed{
                 index, str ->
                 if(distinctStr == str) list.add(
-                    createSingleNotification(postTimes[index], DEFAULT_START_DECAY_AFTER)
+                    createSingleNotification(ids[index], postTimes[index], DEFAULT_START_DECAY_AFTER)
                 )
             }
             distinctStr to list
@@ -310,13 +329,13 @@ class EnhancedHomeScreenFragment : Fragment(), AdapterView.OnItemSelectedListene
         if(currentData != null){
             if(packageName in currentData.keys){
                 currentData[packageName]!!.notificationData.add(
-                    createSingleNotification(postTime, DEFAULT_START_DECAY_AFTER)
+                    createSingleNotification(id, postTime, DEFAULT_START_DECAY_AFTER)
                 )
             }
             else{
                 currentData[packageName] = AppNotificationsEnhancedData(packageName).also{
                     it.notificationData = mutableListOf(
-                        createSingleNotification(postTime, DEFAULT_START_DECAY_AFTER)
+                        createSingleNotification(id, postTime, DEFAULT_START_DECAY_AFTER)
                     )
                 }
             }
@@ -325,7 +344,7 @@ class EnhancedHomeScreenFragment : Fragment(), AdapterView.OnItemSelectedListene
             currentData = mutableMapOf(
                 packageName to AppNotificationsEnhancedData(packageName).also{
                     it.notificationData = mutableListOf(
-                        createSingleNotification(postTime, DEFAULT_START_DECAY_AFTER)
+                        createSingleNotification(id, postTime, DEFAULT_START_DECAY_AFTER)
                     )
                 }
             )
@@ -348,11 +367,12 @@ class EnhancedHomeScreenFragment : Fragment(), AdapterView.OnItemSelectedListene
         }.toMutableMap()
     }
 
-    private fun createSingleNotification(initTime: Long, naturalDecay: Long): NotificationEnhancedData{
+    private fun createSingleNotification(id: Int, initTime: Long, naturalDecay: Long): NotificationEnhancedData{
         val firsttrend = Random().nextInt() % 3
         val secondtrend = Random().nextInt() % 3
 
         return NotificationEnhancedData(
+            id,
             "default",
             initTime,
             naturalDecay

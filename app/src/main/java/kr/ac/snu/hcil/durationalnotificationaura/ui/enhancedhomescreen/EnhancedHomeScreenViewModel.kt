@@ -154,6 +154,7 @@ class EnhancedHomeScreenViewModel(application: Application) : AndroidViewModel(a
 
         return List(count){
             NotificationEnhancedData(
+                it,
                 "default",
                 initTime + it * UPDATE_INTERVAL,
                 4 * UPDATE_INTERVAL

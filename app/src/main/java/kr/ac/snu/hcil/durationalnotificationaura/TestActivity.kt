@@ -16,6 +16,7 @@ class TestActivity : AppCompatActivity() {
         val appEnhancedData = AppNotificationsEnhancedData("kr.ac.snu.hcil.testViewGroup").apply{
             notificationData = mutableListOf(
                 NotificationEnhancedData(
+                    0,
                     "default",
                      Calendar.getInstance().timeInMillis,
                     1000L * 60 * 60 * 1
@@ -23,6 +24,7 @@ class TestActivity : AppCompatActivity() {
                     it.currEnhancement = 0.8
                     it.timeElapsed = (0.8 * it.naturalDecay).roundToLong() },
                 NotificationEnhancedData(
+                    1,
                     "default",
                     Calendar.getInstance().timeInMillis,
                     1000L * 60 * 60 * 1
@@ -30,6 +32,7 @@ class TestActivity : AppCompatActivity() {
                     it.currEnhancement = 0.5
                     it.timeElapsed = (0.5 * it.naturalDecay).roundToLong() },
                 NotificationEnhancedData(
+                    2,
                     "default",
                     Calendar.getInstance().timeInMillis,
                     1000L * 60 * 60 * 1
