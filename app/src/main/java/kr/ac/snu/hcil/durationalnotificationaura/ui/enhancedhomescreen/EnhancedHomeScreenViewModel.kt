@@ -31,7 +31,7 @@ class EnhancedHomeScreenViewModel(application: Application) : AndroidViewModel(a
     private fun updateNotiEnhancement(notiData: NotificationEnhancedData, updateInterval: Long): NotificationEnhancedData {
         when(notiData.lifeCycle){
             EnhancedNotificationLifeCycle.STATE_2 -> {
-                if (notiData.timeElapsed >= notiData.naturalDecay)
+                if(notiData.timeElapsed >= notiData.naturalDecay)
                     notiData.lifeCycle = EnhancedNotificationLifeCycle.STATE_5
                 else {
                     when (notiData.firstPattern) {
@@ -50,7 +50,7 @@ class EnhancedHomeScreenViewModel(application: Application) : AndroidViewModel(a
                 }
             }
             EnhancedNotificationLifeCycle.STATE_4 -> {
-                if (notiData.timeElapsed >= notiData.naturalDecay)
+                if(notiData.timeElapsed >= notiData.naturalDecay)
                     notiData.lifeCycle = EnhancedNotificationLifeCycle.STATE_5
                 else{
                     when(notiData.secondPattern){
@@ -91,8 +91,6 @@ class EnhancedHomeScreenViewModel(application: Application) : AndroidViewModel(a
         notiData.timeElapsed += updateInterval
         return notiData
     }
-
-    // Updates appNotificationLiveData and keeps calling back itself
     private val autoUpdateRunnable = object: Runnable{
         override fun run() {
             val nowInMillis = Calendar.getInstance().timeInMillis
@@ -127,6 +125,7 @@ class EnhancedHomeScreenViewModel(application: Application) : AndroidViewModel(a
     }
 
     init{
+
         //데이터 하드코드 테스트는 여기서 하도록 합시다.
         //val mutableMap : MutableMap<String, AppNotificationsEnhancedData> = mutableMapOf()
         val currTime = Calendar.getInstance().timeInMillis
@@ -142,7 +141,7 @@ class EnhancedHomeScreenViewModel(application: Application) : AndroidViewModel(a
             Palette.Builder(bitmap).also{
                 builder -> builder.generate{
                 palette ->
-                palette?.let{ paletteMap[packageName] = it } // Palette builder asynctask call back function
+                palette?.let{ paletteMap[packageName] = it }
                 }
             }
         }
