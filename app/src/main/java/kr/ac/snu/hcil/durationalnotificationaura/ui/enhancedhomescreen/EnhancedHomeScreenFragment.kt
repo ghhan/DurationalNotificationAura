@@ -33,11 +33,9 @@ import kr.ac.snu.hcil.durationalnotificationaura.data.AppNotificationsEnhancedDa
 import kr.ac.snu.hcil.durationalnotificationaura.data.NotificationEnhancedData
 import kr.ac.snu.hcil.durationalnotificationaura.data.EnhancedNotificationLifeCycle
 import kr.ac.snu.hcil.durationalnotificationaura.data.EnhancementPattern
-import kr.ac.snu.hcil.durationalnotificationaura.ui.enhancedhomescreen.EnhancedHomeScreenFragment.Companion.DEFAULT_START_DECAY_AFTER
 import kr.ac.snu.hcil.durationalnotificationaura.visualEffects.AnimationParams
 import kr.ac.snu.hcil.durationalnotificationaura.visualEffects.AnimationTypes
 import kr.ac.snu.hcil.durationalnotificationaura.visualEffects.DerivedVisEffect
-import kr.ac.snu.hcil.durationalnotificationaura.visualEffects.DerivedVisEffect2
 import java.util.*
 
 class EnhancedHomeScreenFragment : Fragment(), AdapterView.OnItemSelectedListener {
@@ -189,8 +187,7 @@ class EnhancedHomeScreenFragment : Fragment(), AdapterView.OnItemSelectedListene
             viewModel.getNotificationsByApps().value?.let{
                 currData ->
                 currData.mapValues {
-                        entry ->
-                    entry.value.notificationData.forEach{
+                        entry -> entry.value.notificationData.forEach{
                         data ->
                     data.currEnhancement = data.enhanceOffset
                     data.timeElapsed = 0
@@ -215,13 +212,13 @@ class EnhancedHomeScreenFragment : Fragment(), AdapterView.OnItemSelectedListene
                         else
                             background = ColorDrawable(Color.LTGRAY)
                     }
-                } //,
-//                GridLayout.LayoutParams(
-//                    GridLayout.spec(index / 4, 1, GridLayout.CENTER,1f),
-//                    GridLayout.spec(index % 4, 1, GridLayout.CENTER,1f)
-//                ).also{
-//                    param -> param.width = 250; param.height=250
-//                } // just for debug
+                },
+                GridLayout.LayoutParams(
+                    GridLayout.spec(index / 4, 1, GridLayout.CENTER,1f),
+                    GridLayout.spec(index % 4, 1, GridLayout.CENTER,1f)
+                ).also{
+                    param -> param.width = 250; param.height=250
+                }
             )
         }
 
@@ -238,45 +235,42 @@ class EnhancedHomeScreenFragment : Fragment(), AdapterView.OnItemSelectedListene
                     myIterator.next().let { entry ->
                         val packageName = entry.key
                         val data = entry.value
-                        if (data.notificationData.size > 0 && counter < 20) { // Only show visual effects of those with notifications
-                        packageNameAdapter.add(packageName)
 
-//                        gridLayout.addView(EnhancedAppAuraView(context!!, null)) // just for debug
-                        (gridLayout.getChildAt(counter) as EnhancedAppAuraView).let { view ->
+                        packageNameAdapter.add(packageName)
+                        gridLayout.addView(EnhancedAppAuraView(context!!, null))
+                        (gridLayout.getChildAt(counter) as EnhancedAppAuraView).let{ view ->
                             view.tag = packageName
                             view.background = viewModel.drawableMap[packageName]
                             view.setEnhanceData(data)
-
-                                view.setVisualEffects(List(data.notificationData.size) { index ->
-                                    DerivedVisEffect(
-                                            viewModel.paletteMap[packageName]!!,
-                                            view.getChildAt(index),
-                                            mapOf(),
-                                            mapOf(
-                                                    AnimationTypes.ALPHA to
-                                                            AnimationParams(
-                                                                    arrayOf(0f, 1f).toFloatArray(),
-                                                                    3000,
-                                                                    AccelerateDecelerateInterpolator()
-                                                            ),
-                                                    AnimationTypes.SCALE_X to
-                                                            AnimationParams(
-                                                                    arrayOf(0f, 1f).toFloatArray(),
-                                                                    3000,
-                                                                    LinearInterpolator()
-                                                            ),
-                                                    AnimationTypes.SCALE_Y to
-                                                            AnimationParams(
-                                                                    arrayOf(0f, 1f).toFloatArray(),
-                                                                    3000,
-                                                                    LinearInterpolator()
-                                                            )
-                                            )
+                            view.setVisualEffects(List(data.notificationData.size) {index ->
+                                DerivedVisEffect(
+                                    viewModel.paletteMap[packageName]!!,
+                                    view.getChildAt(index),
+                                    mapOf(),
+                                    mapOf(
+                                        AnimationTypes.ALPHA to
+                                                AnimationParams(
+                                                    arrayOf(0f, 1f).toFloatArray(),
+                                                    3000,
+                                                    AccelerateDecelerateInterpolator()
+                                                ),
+                                        AnimationTypes.SCALE_X to
+                                                AnimationParams(
+                                                    arrayOf(0f, 1f).toFloatArray(),
+                                                    3000,
+                                                    LinearInterpolator()
+                                                ),
+                                        AnimationTypes.SCALE_Y to
+                                                AnimationParams(
+                                                    arrayOf(0f, 1f).toFloatArray(),
+                                                    3000,
+                                                    LinearInterpolator()
+                                                )
                                     )
-                                })
-                            }
-                            counter++
+                                )
+                            })
                         }
+                        counter++
                     }
                 }
                 packageNameSpinner.adapter = packageNameAdapter

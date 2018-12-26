@@ -145,15 +145,12 @@ class EnhancedHomeScreenViewModel(application: Application) : AndroidViewModel(a
                 builder -> builder.generate{
                 palette ->
                 palette?.let{ paletteMap[packageName] = it } // Palette builder asynctask call back function
-
-
                 val newOne = AppNotificationsEnhancedData(packageName)
                         .apply{
                             val count = Random().nextInt(3) + 1
                             notificationData = createRandomNotificationData(count, currTime).toMutableList()
                         }
                 mutableMap[packageName] = newOne
-
                 }
 
             }
