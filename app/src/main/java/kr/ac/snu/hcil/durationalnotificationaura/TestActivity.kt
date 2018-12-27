@@ -13,7 +13,7 @@ class TestActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_test)
-        val appEnhancedData = AppNotificationsEnhancedData("kr.ac.snu.hcil.testViewGroup").apply{
+        val appEnhancedData = AppNotificationsEnhancedData("kr.ac.snu.hcil.testViewGroup", 0).apply{
             notificationData = mutableListOf(
                 NotificationEnhancedData(
                     0,

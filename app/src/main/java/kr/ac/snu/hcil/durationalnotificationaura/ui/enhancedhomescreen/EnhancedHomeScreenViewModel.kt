@@ -1,10 +1,7 @@
 package kr.ac.snu.hcil.durationalnotificationaura.ui.enhancedhomescreen
 
 import android.app.Application
-import android.arch.lifecycle.AndroidViewModel
-import android.arch.lifecycle.LiveData
-import android.arch.lifecycle.MutableLiveData
-import android.arch.lifecycle.ViewModel
+import android.arch.lifecycle.*
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
@@ -12,10 +9,7 @@ import android.graphics.drawable.Drawable
 import android.os.Handler
 import android.support.v7.graphics.Palette
 import android.util.Log
-import kr.ac.snu.hcil.durationalnotificationaura.data.AppNotificationsEnhancedData
-import kr.ac.snu.hcil.durationalnotificationaura.data.NotificationEnhancedData
-import kr.ac.snu.hcil.durationalnotificationaura.data.EnhancedNotificationLifeCycle
-import kr.ac.snu.hcil.durationalnotificationaura.data.EnhancementPattern
+import kr.ac.snu.hcil.durationalnotificationaura.data.*
 import java.util.*
 
 class EnhancedHomeScreenViewModel(application: Application) : AndroidViewModel(application) {
@@ -25,9 +19,12 @@ class EnhancedHomeScreenViewModel(application: Application) : AndroidViewModel(a
         const val UPDATE_INTERVAL = 1000L * 15
     }
 
+    //LiveData
     private var appNotificationLiveData: MutableLiveData<MutableMap<String, AppNotificationsEnhancedData>> = MutableLiveData()
     private val mHandler = Handler()
     private var lastUpdateInMillis = Calendar.getInstance().timeInMillis
+    private var currentScreenNumber: MutableLiveData<Int> = MutableLiveData()
+
     private fun updateNotiEnhancement(notiData: NotificationEnhancedData, updateInterval: Long): NotificationEnhancedData {
         when(notiData.lifeCycle){
             EnhancedNotificationLifeCycle.STATE_2 -> {
@@ -127,8 +124,6 @@ class EnhancedHomeScreenViewModel(application: Application) : AndroidViewModel(a
     init{
 
         //데이터 하드코드 테스트는 여기서 하도록 합시다.
-        //val mutableMap : MutableMap<String, AppNotificationsEnhancedData> = mutableMapOf()
-        val currTime = Calendar.getInstance().timeInMillis
         val pm = application.packageManager
         val installedPackages = pm.getInstalledPackages(PackageManager.GET_ACTIVITIES)
 
@@ -147,51 +142,31 @@ class EnhancedHomeScreenViewModel(application: Application) : AndroidViewModel(a
         }
     }
 
-    private fun createRandomNotificationData(count: Int, initTime: Long): List<NotificationEnhancedData> {
-
-        val firsttrend = Random().nextInt() % 3
-        val secondtrend = Random().nextInt() % 3
-
-        return List(count){
-            NotificationEnhancedData(
-                it,
-                "default",
-                initTime + it * UPDATE_INTERVAL,
-                4 * UPDATE_INTERVAL
-            ).apply{
-                when(firsttrend){
-                    0 -> {
-                        firstPattern = EnhancementPattern.INC
-                    }
-                    1 -> {
-                        firstPattern = EnhancementPattern.DEC
-                        enhanceOffset = 1.0
-                        currEnhancement = enhanceOffset
-                    }
-                    2 -> {
-                        firstPattern = EnhancementPattern.EQ
-                        enhanceOffset = 0.5
-                        currEnhancement = enhanceOffset
-                    }
-                }
-
-                when(secondtrend){
-                    0 -> {firstPattern = EnhancementPattern.INC}
-                    1 -> {firstPattern = EnhancementPattern.DEC}
-                    2 -> {firstPattern = EnhancementPattern.EQ}
-                }
-            }
-        }
+    fun getCurrentScreenNumber():LiveData<Int>{
+        return currentScreenNumber
     }
 
-    fun getNotificationsByApps(): LiveData<MutableMap<String, AppNotificationsEnhancedData>>{
+    fun setCurrentScreenNumber(position: Int){
+        currentScreenNumber.value = position
+    }
+
+    fun getNotificationByApps(): LiveData<MutableMap<String, AppNotificationsEnhancedData>>{
         return appNotificationLiveData
     }
+
     fun setNotificationByApps(data: MutableMap<String, AppNotificationsEnhancedData>){
         appNotificationLiveData.value = data
         mHandler.removeCallbacks(autoUpdateRunnable)
         mHandler.post(autoUpdateRunnable)
     }
+
+    fun getEnhancementDataInCurrentScreen(position: Int): LiveData<MutableMap<String, AppNotificationsEnhancedData>> =
+        Transformations.map(appNotificationLiveData){
+            enhancementMap -> enhancementMap.filter{
+                it.value.screenNumber == position
+            }.toMutableMap()
+        }
+
     override fun onCleared() {
         super.onCleared()
         mHandler.removeCallbacks(autoUpdateRunnable)

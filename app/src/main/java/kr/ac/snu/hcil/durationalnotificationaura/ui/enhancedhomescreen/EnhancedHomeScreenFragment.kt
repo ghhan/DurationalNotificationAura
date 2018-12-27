@@ -9,8 +9,6 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Bundle
@@ -24,7 +22,6 @@ import android.view.animation.AccelerateDecelerateInterpolator
 import android.view.animation.LinearInterpolator
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
-import android.widget.GridLayout
 import android.widget.TextView
 import kotlinx.android.synthetic.main.enhanced_home_screen_fragment.*
 import kr.ac.snu.hcil.durationalnotificationaura.utils.MyNotificationListenerService
@@ -32,11 +29,10 @@ import kr.ac.snu.hcil.durationalnotificationaura.R
 import kr.ac.snu.hcil.durationalnotificationaura.data.AppNotificationsEnhancedData
 import kr.ac.snu.hcil.durationalnotificationaura.data.NotificationEnhancedData
 import kr.ac.snu.hcil.durationalnotificationaura.data.EnhancedNotificationLifeCycle
-import kr.ac.snu.hcil.durationalnotificationaura.data.EnhancementPattern
+import kr.ac.snu.hcil.durationalnotificationaura.utils.NotificationRandomGenerator
 import kr.ac.snu.hcil.durationalnotificationaura.visualEffects.AnimationParams
 import kr.ac.snu.hcil.durationalnotificationaura.visualEffects.AnimationTypes
 import kr.ac.snu.hcil.durationalnotificationaura.visualEffects.DerivedVisEffect
-import java.util.*
 
 class EnhancedHomeScreenFragment : Fragment(), AdapterView.OnItemSelectedListener {
 
@@ -52,7 +48,7 @@ class EnhancedHomeScreenFragment : Fragment(), AdapterView.OnItemSelectedListene
     override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
         view?.let{
             val packageName = (it as TextView).text
-            viewModel.getNotificationsByApps().let{
+            viewModel.getEnhancementDataInCurrentScreen(screenNumber).let{
                 livedata -> livedata.value?.let{
                 data ->
                 val notifications = data[packageName]!!.notificationData
@@ -66,13 +62,7 @@ class EnhancedHomeScreenFragment : Fragment(), AdapterView.OnItemSelectedListene
         }
     }
 
-    private fun printShortcuts(){
-        val shortcutIntent = Intent(Intent.ACTION_CREATE_SHORTCUT)
-        val shortcuts = activity!!.packageManager.queryIntentActivities(shortcutIntent, 0)
-        shortcuts.forEach{
-            Log.d(TAG, "name = ${it.activityInfo.name}, package name = ${it.activityInfo.packageName}")
-        }
-    }
+
 
     override fun onNothingSelected(parent: AdapterView<*>?) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
@@ -82,10 +72,10 @@ class EnhancedHomeScreenFragment : Fragment(), AdapterView.OnItemSelectedListene
 
     private lateinit var viewModel: EnhancedHomeScreenViewModel
     private lateinit var packageNameAdapter: ArrayAdapter<String>
+    private var screenNumber = 0
     private val notificationReceiver = NotificationReceiver()
     private val intentFilter = IntentFilter().also{ it.addAction(ACTION)}
-
-    var NOTIFICATION_ID = 0
+    private var generatedNotificationID = 0
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -97,6 +87,8 @@ class EnhancedHomeScreenFragment : Fragment(), AdapterView.OnItemSelectedListene
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
+
+        screenNumber = arguments!!.getInt("screenNumber", 0)
 
         activity?.startService(Intent(activity, MyNotificationListenerService::class.java))
         //service가 시작하면, 이미 viewmodel setting은 시작됨 (service의 onstart)
@@ -136,15 +128,15 @@ class EnhancedHomeScreenFragment : Fragment(), AdapterView.OnItemSelectedListene
                 mBuilder.setChannelId(NOTIFICATION_CHANNEL_ID)
             }
 
-            notificationManager.notify(NOTIFICATION_ID, mBuilder.build())
-            if (NOTIFICATION_ID < Int.MAX_VALUE)
-                NOTIFICATION_ID++
+            notificationManager.notify(generatedNotificationID, mBuilder.build())
+            if (generatedNotificationID < Int.MAX_VALUE)
+                generatedNotificationID++
             else
-                NOTIFICATION_ID = 0
+                generatedNotificationID = 0
         }
 
         interactButton.setOnClickListener {
-            viewModel.getNotificationsByApps().value?.let{
+            viewModel.getEnhancementDataInCurrentScreen(screenNumber).value?.let{
                     currData ->
                 currData.mapValues {
                         entry ->
@@ -159,7 +151,7 @@ class EnhancedHomeScreenFragment : Fragment(), AdapterView.OnItemSelectedListene
         }
 
         resetButton.setOnClickListener{
-            viewModel.getNotificationsByApps().value?.let{
+            viewModel.getEnhancementDataInCurrentScreen(screenNumber).value?.let{
                     currData ->
                 currData.mapValues {
                         entry ->
@@ -174,7 +166,7 @@ class EnhancedHomeScreenFragment : Fragment(), AdapterView.OnItemSelectedListene
         }
 
         resetAllButton.setOnClickListener{
-            viewModel.getNotificationsByApps().value?.let{
+            viewModel.getEnhancementDataInCurrentScreen(screenNumber).value?.let{
                 currData ->
                 currData.mapValues {
                         entry -> entry.value.notificationData.forEach{
@@ -186,11 +178,12 @@ class EnhancedHomeScreenFragment : Fragment(), AdapterView.OnItemSelectedListene
             }
         }
 
+
+
         viewModel = ViewModelProviders.of(this, ViewModelProvider.AndroidViewModelFactory(activity!!.application))
             .get(EnhancedHomeScreenViewModel::class.java)
-        viewModel.getNotificationsByApps().observe(this,
+        viewModel.getEnhancementDataInCurrentScreen(screenNumber).observe(this,
             Observer {
-
                 it?.let{
                     appNotiData ->
                     appNotiData.map{
@@ -201,9 +194,6 @@ class EnhancedHomeScreenFragment : Fragment(), AdapterView.OnItemSelectedListene
                         if(targetView != null) {
                             (targetView as EnhancedAppAuraView).let{
                                 view ->
-                                //view.tag = packageName
-                                //view.background = viewModel.drawableMap[packageName]
-
                                 view.setEnhanceData(data)
                                 view.setVisualEffects(List(data.notificationData.size) { index ->
                                     DerivedVisEffect(
@@ -275,7 +265,6 @@ class EnhancedHomeScreenFragment : Fragment(), AdapterView.OnItemSelectedListene
             }
         )
         packageNameSpinner.onItemSelectedListener = this
-        printShortcuts()
     }
 
     private fun findViewWithPackageName(parent:ViewGroup, packageName: String): View?{
@@ -310,7 +299,7 @@ class EnhancedHomeScreenFragment : Fragment(), AdapterView.OnItemSelectedListene
             packageNames.forEachIndexed{
                 index, str ->
                 if(distinctStr == str) list.add(
-                    createSingleNotification(ids[index], postTimes[index], DEFAULT_START_DECAY_AFTER)
+                    NotificationRandomGenerator.newRandomNotification(ids[index], postTimes[index], DEFAULT_START_DECAY_AFTER)
                 )
             }
             distinctStr to list
@@ -323,26 +312,26 @@ class EnhancedHomeScreenFragment : Fragment(), AdapterView.OnItemSelectedListene
         }
 
     private fun addNewEnhancedNotification(id: Int, packageName: String, postTime: Long): MutableMap<String, AppNotificationsEnhancedData>{
-        var currentData: MutableMap<String,AppNotificationsEnhancedData>? = viewModel.getNotificationsByApps().value
+        var currentData: MutableMap<String,AppNotificationsEnhancedData>? = viewModel.getEnhancementDataInCurrentScreen(screenNumber).value
         if(currentData != null){
             if(packageName in currentData.keys){
                 currentData[packageName]!!.notificationData.add(
-                    createSingleNotification(id, postTime, DEFAULT_START_DECAY_AFTER)
+                    NotificationRandomGenerator.newRandomNotification(id, postTime, DEFAULT_START_DECAY_AFTER)
                 )
             }
             else{
-                currentData[packageName] = AppNotificationsEnhancedData(packageName).also{
+                currentData[packageName] = AppNotificationsEnhancedData(packageName, screenNumber).also{
                     it.notificationData = mutableListOf(
-                        createSingleNotification(id, postTime, DEFAULT_START_DECAY_AFTER)
+                        NotificationRandomGenerator.newRandomNotification(id, postTime, DEFAULT_START_DECAY_AFTER)
                     )
                 }
             }
         }
         else{
             currentData = mutableMapOf(
-                packageName to AppNotificationsEnhancedData(packageName).also{
+                packageName to AppNotificationsEnhancedData(packageName, screenNumber).also{
                     it.notificationData = mutableListOf(
-                        createSingleNotification(id, postTime, DEFAULT_START_DECAY_AFTER)
+                        NotificationRandomGenerator.newRandomNotification(id, postTime, DEFAULT_START_DECAY_AFTER)
                     )
                 }
             )
@@ -351,7 +340,7 @@ class EnhancedHomeScreenFragment : Fragment(), AdapterView.OnItemSelectedListene
     }
 
     private fun dismissNotification(id: Int, packageName: String, postTime: Long):MutableMap<String, AppNotificationsEnhancedData>{
-        val currentData: MutableMap<String,AppNotificationsEnhancedData>? = viewModel.getNotificationsByApps().value
+        val currentData: MutableMap<String,AppNotificationsEnhancedData>? = viewModel.getEnhancementDataInCurrentScreen(screenNumber).value
 
         return currentData!!.mapValues{
             if(packageName == it.key)
@@ -363,40 +352,6 @@ class EnhancedHomeScreenFragment : Fragment(), AdapterView.OnItemSelectedListene
             else
                 it.value
         }.toMutableMap()
-    }
-
-    private fun createSingleNotification(id: Int, initTime: Long, naturalDecay: Long): NotificationEnhancedData{
-        val firsttrend = Random().nextInt() % 3
-        val secondtrend = Random().nextInt() % 3
-
-        return NotificationEnhancedData(
-            id,
-            "default",
-            initTime,
-            naturalDecay
-        ).apply{
-            when(firsttrend){
-                0 -> {
-                    firstPattern = EnhancementPattern.INC
-                }
-                1 -> {
-                    firstPattern = EnhancementPattern.DEC
-                    enhanceOffset = 1.0
-                    currEnhancement = enhanceOffset
-                }
-                2 -> {
-                    firstPattern = EnhancementPattern.EQ
-                    enhanceOffset = 0.5
-                    currEnhancement = enhanceOffset
-                }
-            }
-
-            when(secondtrend){
-                0 -> {firstPattern = EnhancementPattern.INC}
-                1 -> {firstPattern = EnhancementPattern.DEC}
-                2 -> {firstPattern = EnhancementPattern.EQ}
-            }
-        }
     }
 
     inner class NotificationReceiver: BroadcastReceiver(){

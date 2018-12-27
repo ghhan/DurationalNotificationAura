@@ -31,6 +31,8 @@ data class NotificationEnhancedData(
     var currEnhancement = enhanceOffset
 }
 
-class AppNotificationsEnhancedData(var packageName: String) {
+class AppNotificationsEnhancedData(val packageName: String,
+                                   var screenNumber: Int = -1,
+                                   var positionInScreen: Pair<Int, Int> = Pair(0, 0)) {
     var notificationData : MutableList<NotificationEnhancedData> = mutableListOf()
 }
