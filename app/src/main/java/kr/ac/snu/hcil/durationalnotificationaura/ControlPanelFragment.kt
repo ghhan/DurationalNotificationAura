@@ -1,13 +1,18 @@
 package kr.ac.snu.hcil.durationalnotificationaura
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProvider
 import android.arch.lifecycle.ViewModelProviders
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
+import android.os.Build
 import android.os.Bundle
 import android.support.v4.app.Fragment
+import android.support.v4.app.NotificationCompat
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -26,11 +31,19 @@ import kr.ac.snu.hcil.durationalnotificationaura.utils.NotificationRandomGenerat
 
 class ControlPanelFragment: Fragment(), AdapterView.OnItemSelectedListener {
 
+    companion object {
+        const val ACTION = "kr.ac.snu.hcil.durationalnotificationaura.NOTIFICATION_LISTENER"
+        const val NOTIFICATION_CHANNEL_ID = "MY_CHANNEL_ID"
+        const val CHANNEL_ID = "AURA_TESTER"
+    }
 
     private lateinit var viewModel: EnhancedHomeScreenViewModel
-    private lateinit var packagesInPage: MutableMap<Int, List<String>>
     private lateinit var packageNameAdapter: ArrayAdapter<String>
     var screenNumber = 0
+    private val notificationReceiver = NotificationReceiver()
+    private val intentFilter = IntentFilter().also{ it.addAction(ACTION)}
+    private var generatedNotificationID = 0
+
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
@@ -52,7 +65,6 @@ class ControlPanelFragment: Fragment(), AdapterView.OnItemSelectedListener {
                 }?.forEach{
                     filteredEntry -> packageNameAdapter.add(filteredEntry.key)
                 }
-                packageNameAdapter.addAll(*(packagesInPage[0]!!.toTypedArray()))
                 packageNameSpinner.adapter = packageNameAdapter
             }
         )
@@ -69,10 +81,91 @@ class ControlPanelFragment: Fragment(), AdapterView.OnItemSelectedListener {
                             filteredEntry -> packageNameAdapter.add(filteredEntry.key)
                     }
                 }
-                packageNameAdapter.addAll(*(packagesInPage[0]!!.toTypedArray()))
                 packageNameSpinner.adapter = packageNameAdapter
             }
         )
+
+        triggerButton.setOnClickListener{
+            //TODO: view 중 packagename이 같은 애의 data를 Stage 1 상태로 삽입
+
+            val notificationManager = context!!.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+            val mBuilder = NotificationCompat.Builder(activity!!, CHANNEL_ID).also{
+                    builder ->
+                builder.setSmallIcon(R.drawable.ic_launcher_foreground)
+                builder.setContentTitle("Test Notification")
+                builder.setContentText("Much longer text that cannot fit one line...")
+                builder.setStyle(
+                    NotificationCompat.BigTextStyle().bigText("Much longer text that cannot fit one line...")
+                )
+                builder.priority = NotificationCompat.PRIORITY_DEFAULT
+            }
+
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+                val channel = NotificationChannel(
+                    NOTIFICATION_CHANNEL_ID,
+                    "Here is Readable Title",
+                    NotificationManager.IMPORTANCE_DEFAULT
+                )
+                notificationManager.createNotificationChannel(channel)
+                mBuilder.setChannelId(NOTIFICATION_CHANNEL_ID)
+            }
+
+            notificationManager.notify(generatedNotificationID, mBuilder.build())
+            if (generatedNotificationID < Int.MAX_VALUE)
+                generatedNotificationID++
+            else
+                generatedNotificationID = 0
+        }
+
+        interactButton.setOnClickListener {
+            viewModel.getEnhancementDataInCurrentScreen(screenNumber).value?.let{
+                    currData ->
+                currData.mapValues {
+                        entry ->
+                    if(entry.key == packageNameSpinner.selectedItem){
+                        entry.value.notificationData.forEach{
+                                data -> data.lifeCycle = EnhancedNotificationLifeCycle.STATE_2
+                        }
+                    }
+                }
+                viewModel.setNotificationByApps(currData)
+            }
+        }
+
+        resetButton.setOnClickListener{
+            viewModel.getEnhancementDataInCurrentScreen(screenNumber).value?.let{
+                    currData ->
+                currData.mapValues {
+                        entry ->
+                    if(entry.key == packageNameSpinner.selectedItem){
+                        entry.value.notificationData.forEach{
+                                data -> data.currEnhancement = data.enhanceOffset; data.timeElapsed = 0; data.lifeCycle = EnhancedNotificationLifeCycle.STATE_1
+                        }
+                    }
+                }
+                viewModel.setNotificationByApps(currData)
+            }
+        }
+
+        resetAllButton.setOnClickListener{
+            viewModel.getEnhancementDataInCurrentScreen(screenNumber).value?.let{
+                    currData ->
+                currData.mapValues {
+                        entry: Map.Entry<String, AppNotificationsEnhancedData>  ->
+                    if(entry.value.screenNumber == screenNumber){
+                        entry.value.notificationData.forEach{
+                                data ->
+                            data.currEnhancement = data.enhanceOffset
+                            data.timeElapsed = 0
+                            data.lifeCycle = EnhancedNotificationLifeCycle.STATE_1 }
+                    }
+                }
+                viewModel.setNotificationByApps(currData)
+            }
+        }
+
+
     }
 
     private fun printShortcuts(){
@@ -173,6 +266,20 @@ class ControlPanelFragment: Fragment(), AdapterView.OnItemSelectedListener {
             else
                 it.value
         }.toMutableMap()
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        activity?.registerReceiver(notificationReceiver, intentFilter)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        activity?.registerReceiver(notificationReceiver, intentFilter)
+    }
+    override fun onDestroy() {
+        super.onDestroy()
+        activity?.unregisterReceiver(notificationReceiver)
     }
 
     inner class NotificationReceiver: BroadcastReceiver(){
