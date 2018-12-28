@@ -1,35 +1,18 @@
 package kr.ac.snu.hcil.durationalnotificationaura.ui.enhancedhomescreen
 
-import android.app.NotificationChannel
-import android.app.NotificationManager
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProvider
 import android.arch.lifecycle.ViewModelProviders
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
-import android.graphics.drawable.Drawable
-import android.os.Build
 import android.os.Bundle
 import android.support.v4.app.Fragment
-import android.support.v4.app.NotificationCompat
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.view.animation.LinearInterpolator
-import android.widget.AdapterView
 import android.widget.ArrayAdapter
-import android.widget.TextView
 import kotlinx.android.synthetic.main.enhanced_home_screen_fragment.*
-import kr.ac.snu.hcil.durationalnotificationaura.utils.MyNotificationListenerService
 import kr.ac.snu.hcil.durationalnotificationaura.R
-import kr.ac.snu.hcil.durationalnotificationaura.data.AppNotificationsEnhancedData
-import kr.ac.snu.hcil.durationalnotificationaura.data.NotificationEnhancedData
-import kr.ac.snu.hcil.durationalnotificationaura.data.EnhancedNotificationLifeCycle
-import kr.ac.snu.hcil.durationalnotificationaura.utils.NotificationRandomGenerator
 import kr.ac.snu.hcil.durationalnotificationaura.visualEffects.AnimationParams
 import kr.ac.snu.hcil.durationalnotificationaura.visualEffects.AnimationTypes
 import kr.ac.snu.hcil.durationalnotificationaura.visualEffects.DerivedVisEffect
@@ -44,7 +27,7 @@ class EnhancedHomeScreenFragment : Fragment() {
 
     private lateinit var viewModel: EnhancedHomeScreenViewModel
     private lateinit var packageNameAdapter: ArrayAdapter<String>
-    private var screenNumber = 0
+    private var screenNumber = -1
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -54,11 +37,13 @@ class EnhancedHomeScreenFragment : Fragment() {
         }
     }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        screenNumber = arguments!!.getInt("screenNumber", -1)
+    }
+
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-
-        screenNumber = arguments!!.getInt("screenNumber", 0)
-
         gridLayout.let{
             it.clipChildren = false
             //it.clipToPadding = false
