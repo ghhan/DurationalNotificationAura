@@ -122,7 +122,6 @@ class EnhancedHomeScreenViewModel(application: Application) : AndroidViewModel(a
     }
 
     init{
-
         //데이터 하드코드 테스트는 여기서 하도록 합시다.
         val pm = application.packageManager
         val installedPackages = pm.getInstalledPackages(PackageManager.GET_ACTIVITIES)

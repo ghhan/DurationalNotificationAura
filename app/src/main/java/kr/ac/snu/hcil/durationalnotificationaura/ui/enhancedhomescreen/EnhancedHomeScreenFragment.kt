@@ -50,8 +50,11 @@ class EnhancedHomeScreenFragment : Fragment() {
             //it.clipToOutline = false
         }
 
-        viewModel = ViewModelProviders.of(this, ViewModelProvider.AndroidViewModelFactory(activity!!.application))
-            .get(EnhancedHomeScreenViewModel::class.java)
+        viewModel = activity?.run{
+            ViewModelProviders.of(this, ViewModelProvider.AndroidViewModelFactory(application))
+                .get(EnhancedHomeScreenViewModel::class.java)
+        } ?: throw Exception("Invalid Activity")
+
         viewModel.getEnhancementDataInCurrentScreen(screenNumber).observe(this,
             Observer {
                 it?.let{
@@ -97,7 +100,6 @@ class EnhancedHomeScreenFragment : Fragment() {
                         else {
                             gridLayout.addView(EnhancedAppAuraView(context!!, null).also{ view ->
                                 view.tag = packageName
-                                packageNameAdapter.add(packageName)
                                 view.background = viewModel.drawableMap[packageName]
                                 view.setEnhanceData(data)
                                 view.setVisualEffects(List(data.notificationData.size) {index ->

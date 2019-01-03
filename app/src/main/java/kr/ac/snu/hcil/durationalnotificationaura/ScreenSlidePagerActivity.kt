@@ -1,6 +1,5 @@
 package kr.ac.snu.hcil.durationalnotificationaura
 
-import android.arch.lifecycle.AndroidViewModel
 import android.arch.lifecycle.ViewModelProvider
 import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle

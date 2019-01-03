@@ -39,7 +39,7 @@ class ControlPanelFragment: Fragment(), AdapterView.OnItemSelectedListener {
 
     private lateinit var viewModel: EnhancedHomeScreenViewModel
     private lateinit var packageNameAdapter: ArrayAdapter<String>
-    var screenNumber = 0
+    private var currScreenNumber = 0
     private val notificationReceiver = NotificationReceiver()
     private val intentFilter = IntentFilter().also{ it.addAction(ACTION)}
     private var generatedNotificationID = 0
@@ -54,14 +54,17 @@ class ControlPanelFragment: Fragment(), AdapterView.OnItemSelectedListener {
 
         activity?.startService(Intent(activity, MyNotificationListenerService::class.java))
 
-        viewModel = ViewModelProviders.of(this, ViewModelProvider.AndroidViewModelFactory(activity!!.application))
-            .get(EnhancedHomeScreenViewModel::class.java)
+        viewModel = activity?.run{
+            ViewModelProviders.of(this, ViewModelProvider.AndroidViewModelFactory(application))
+                .get(EnhancedHomeScreenViewModel::class.java)
+        } ?: throw Exception("Invalid Activity")
+
         viewModel.getNotificationByApps().observe(this,
             Observer{
                 dataMap ->
                 packageNameAdapter.clear()
                 dataMap?.filter{
-                    it.value.screenNumber == this.screenNumber
+                    it.value.screenNumber == this.currScreenNumber
                 }?.forEach{
                     filteredEntry -> packageNameAdapter.add(filteredEntry.key)
                 }
@@ -74,7 +77,7 @@ class ControlPanelFragment: Fragment(), AdapterView.OnItemSelectedListener {
                     data -> data?.let{
                     screenNum ->
                     packageNameAdapter.clear()
-                    this.screenNumber = screenNum
+                    this.currScreenNumber = screenNum
                     viewModel.getNotificationByApps().value?.filter{
                         it.value.screenNumber == screenNum
                     }?.forEach{
@@ -119,53 +122,69 @@ class ControlPanelFragment: Fragment(), AdapterView.OnItemSelectedListener {
         }
 
         interactButton.setOnClickListener {
-            viewModel.getEnhancementDataInCurrentScreen(screenNumber).value?.let{
+            viewModel.getEnhancementDataInCurrentScreen(currScreenNumber).value?.let{
                     currData ->
-                currData.mapValues {
+                val newData = currData.mapValues {
                         entry ->
                     if(entry.key == packageNameSpinner.selectedItem){
-                        entry.value.notificationData.forEach{
-                                data -> data.lifeCycle = EnhancedNotificationLifeCycle.STATE_2
+                        entry.value.apply{
+                            notificationData.forEach{
+                                    data -> data.lifeCycle = EnhancedNotificationLifeCycle.STATE_2
+                            }
                         }
                     }
-                }
-                viewModel.setNotificationByApps(currData)
+                    else{
+                        entry.value
+                    }
+                }.toMutableMap()
+                viewModel.setNotificationByApps(newData)
             }
         }
 
         resetButton.setOnClickListener{
-            viewModel.getEnhancementDataInCurrentScreen(screenNumber).value?.let{
+            viewModel.getEnhancementDataInCurrentScreen(currScreenNumber).value?.let{
                     currData ->
-                currData.mapValues {
+                val newData = currData.mapValues {
                         entry ->
                     if(entry.key == packageNameSpinner.selectedItem){
-                        entry.value.notificationData.forEach{
-                                data -> data.currEnhancement = data.enhanceOffset; data.timeElapsed = 0; data.lifeCycle = EnhancedNotificationLifeCycle.STATE_1
+                        entry.value.apply{
+                            notificationData.forEach{
+                                    data -> data.currEnhancement = data.enhanceOffset
+                                data.timeElapsed = 0
+                                data.lifeCycle = EnhancedNotificationLifeCycle.STATE_1
+                            }
                         }
                     }
-                }
-                viewModel.setNotificationByApps(currData)
+                    else{
+                        entry.value
+                    }
+                }.toMutableMap()
+                viewModel.setNotificationByApps(newData)
             }
         }
 
         resetAllButton.setOnClickListener{
-            viewModel.getEnhancementDataInCurrentScreen(screenNumber).value?.let{
+            viewModel.getEnhancementDataInCurrentScreen(currScreenNumber).value?.let{
                     currData ->
-                currData.mapValues {
+                val newData = currData.mapValues {
                         entry: Map.Entry<String, AppNotificationsEnhancedData>  ->
-                    if(entry.value.screenNumber == screenNumber){
-                        entry.value.notificationData.forEach{
-                                data ->
-                            data.currEnhancement = data.enhanceOffset
-                            data.timeElapsed = 0
-                            data.lifeCycle = EnhancedNotificationLifeCycle.STATE_1 }
+                    if(entry.value.screenNumber == currScreenNumber){
+                        entry.value.apply{
+                            notificationData.forEach{
+                                    data ->
+                                data.currEnhancement = data.enhanceOffset
+                                data.timeElapsed = 0
+                                data.lifeCycle = EnhancedNotificationLifeCycle.STATE_1
+                            }
+                        }
                     }
-                }
-                viewModel.setNotificationByApps(currData)
+                    else{
+                        entry.value
+                    }
+                }.toMutableMap()
+                viewModel.setNotificationByApps(newData)
             }
         }
-
-
     }
 
     private fun printShortcuts(){
@@ -234,7 +253,7 @@ class ControlPanelFragment: Fragment(), AdapterView.OnItemSelectedListener {
                 )
             }
             else{
-                currentData[packageName] = AppNotificationsEnhancedData(packageName, screenNumber).also{
+                currentData[packageName] = AppNotificationsEnhancedData(packageName, currScreenNumber).also{
                     it.notificationData = mutableListOf(
                         NotificationRandomGenerator.newRandomNotification(id, postTime, EnhancedHomeScreenFragment.DEFAULT_START_DECAY_AFTER)
                     )
@@ -243,7 +262,7 @@ class ControlPanelFragment: Fragment(), AdapterView.OnItemSelectedListener {
         }
         else{
             currentData = mutableMapOf(
-                packageName to AppNotificationsEnhancedData(packageName, screenNumber).also{
+                packageName to AppNotificationsEnhancedData(packageName, currScreenNumber).also{
                     it.notificationData = mutableListOf(
                         NotificationRandomGenerator.newRandomNotification(id, postTime, EnhancedHomeScreenFragment.DEFAULT_START_DECAY_AFTER)
                     )
