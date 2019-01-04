@@ -23,11 +23,13 @@
                 android:rowOrderPreserved="true"
                 android:columnOrderPreserved="true"
                 android:columnCount="4"
+                android:rowCount="5"
                 tools:context=".ui.enhancedhomescreen.EnhancedHomeScreenFragment"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-        />
+        >
+        </GridLayout>
     </ScrollView>
 </android.support.constraint.ConstraintLayout>
 
