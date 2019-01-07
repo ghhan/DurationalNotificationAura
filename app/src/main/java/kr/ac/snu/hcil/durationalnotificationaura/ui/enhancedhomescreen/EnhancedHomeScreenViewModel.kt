@@ -125,7 +125,61 @@ class EnhancedHomeScreenViewModel(application: Application) : AndroidViewModel(a
         //데이터 하드코드 테스트는 여기서 하도록 합시다.
         val pm = application.packageManager
         val installedPackages = pm.getInstalledPackages(PackageManager.GET_ACTIVITIES)
+        val installedApplications = pm.getInstalledApplications(PackageManager.GET_META_DATA)
 
+        installedApplications.map{
+            applicationInfo ->
+            val appName = applicationInfo.packageName
+            val iconDrawable = pm.getApplicationIcon(appName)
+            val bitmap = getBitmapFromDrawable(iconDrawable)
+            drawableMap[appName] = iconDrawable
+            Palette.Builder(bitmap).also{
+                    builder -> builder.generate{
+                    palette ->
+                palette?.let{ paletteMap[appName] = it }
+            }
+            }
+        }
+
+        val random = Random()
+        val mutableMap = mutableMapOf<String, AppNotificationsEnhancedData>()
+
+        var currScreenNum = 0
+        var currPosNum = 0
+
+        for(ai in installedApplications.shuffled()){
+            val appName = ai.packageName
+            val randInt = random.nextInt()
+
+            if(currScreenNum == 5){
+                mutableMap[appName] = AppNotificationsEnhancedData(
+                    appName
+                )
+            }
+            else{
+                if(randInt % 2 == 0){
+                    mutableMap[appName] = AppNotificationsEnhancedData(
+                        appName,
+                        currScreenNum,
+                        Pair( currPosNum % 4, currPosNum / 4)
+                    )
+                }
+                else{
+                    mutableMap[appName] = AppNotificationsEnhancedData(
+                        appName
+                    )
+                }
+
+                currPosNum++
+                if(currPosNum == 20){
+                    currScreenNum++
+                    currPosNum = 0
+                }
+            }
+        }
+        setNotificationByApps(mutableMap)
+
+        /*
         installedPackages.map{
             pi ->
             val packageName = pi.packageName
@@ -177,6 +231,7 @@ class EnhancedHomeScreenViewModel(application: Application) : AndroidViewModel(a
             }
         }
         setNotificationByApps(mutableMap)
+        */
     }
 
     fun getCurrentScreenNumber():LiveData<Int>{
