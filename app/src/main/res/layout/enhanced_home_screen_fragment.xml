@@ -16,7 +16,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             android:layout_marginBottom="8dp" app:layout_constraintBottom_toBottomOf="parent">
-        <GridLayout
+        <kr.ac.snu.hcil.durationalnotificationaura.ui.enhancedhomescreen.EnhancedAppGridLayout
                 android:id="@+id/gridLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -29,7 +29,7 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
         >
-        </GridLayout>
+        </kr.ac.snu.hcil.durationalnotificationaura.ui.enhancedhomescreen.EnhancedAppGridLayout>
     </ScrollView>
 </android.support.constraint.ConstraintLayout>
 

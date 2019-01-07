@@ -26,9 +26,9 @@ class EnhancedAppAuraView(context: Context, attributeSet: AttributeSet?): ViewGr
         //clipToPadding = false
     }
 
-    private var appPackageName: String? = null
+    var appPackageName: String? = null
     private var notificationIDs: MutableList<Int> = mutableListOf()
-    private var appPosition: Pair<Int, Int>? = null
+    var appPosition: Pair<Int, Int>? = null
 
     private fun findViewWithId(id: Int): View?{
         val currentSize = childCount
@@ -39,10 +39,6 @@ class EnhancedAppAuraView(context: Context, attributeSet: AttributeSet?): ViewGr
         }
         return null
     }
-
-    fun getAppPackageName(): String? = appPackageName
-    fun getAppPosition(): Pair<Int, Int>? = appPosition
-
     fun setEnhanceData(enhanceData: AppNotificationsEnhancedData) {
         if(appPackageName == null){
             appPackageName = enhanceData.packageName
@@ -100,7 +96,6 @@ class EnhancedAppAuraView(context: Context, attributeSet: AttributeSet?): ViewGr
             val remove = notificationIDs.filterNot{
                     id -> id in enhanceData.notificationData.map{notiData -> notiData.id}
             }
-
         }
     }
 

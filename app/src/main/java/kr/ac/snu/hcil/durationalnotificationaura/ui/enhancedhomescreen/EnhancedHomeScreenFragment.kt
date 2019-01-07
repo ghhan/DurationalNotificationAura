@@ -33,8 +33,7 @@ class EnhancedHomeScreenFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        return inflater.inflate(R.layout.enhanced_home_screen_fragment, container, false).also{
-        }
+        return inflater.inflate(R.layout.enhanced_home_screen_fragment, container, false)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -98,6 +97,7 @@ class EnhancedHomeScreenFragment : Fragment() {
                             }
                         }
                         else {
+                            /*
                             gridLayout.addView(EnhancedAppAuraView(context!!, null).also{ view ->
                                 view.tag = packageName
                                 view.background = viewModel.drawableMap[packageName]
@@ -130,6 +130,40 @@ class EnhancedHomeScreenFragment : Fragment() {
                                     )
                                 })
                             })
+                            */
+                            (gridLayout.getChildAt(data.positionInScreen.first + data.positionInScreen.second * 4) as EnhancedAppAuraView).let{
+                                view ->
+                                view.tag = packageName
+                                view.background = viewModel.drawableMap[packageName]
+                                view.setEnhanceData(data)
+                                view.setVisualEffects(List(data.notificationData.size) {index ->
+                                    DerivedVisEffect(
+                                        viewModel.paletteMap[packageName]!!,
+                                        view.getChildAt(index),
+                                        mapOf(),
+                                        mapOf(
+                                            AnimationTypes.ALPHA to
+                                                    AnimationParams(
+                                                        arrayOf(0f, 1f).toFloatArray(),
+                                                        3000,
+                                                        AccelerateDecelerateInterpolator()
+                                                    ),
+                                            AnimationTypes.SCALE_X to
+                                                    AnimationParams(
+                                                        arrayOf(0f, 1f).toFloatArray(),
+                                                        3000,
+                                                        LinearInterpolator()
+                                                    ),
+                                            AnimationTypes.SCALE_Y to
+                                                    AnimationParams(
+                                                        arrayOf(0f, 1f).toFloatArray(),
+                                                        3000,
+                                                        LinearInterpolator()
+                                                    )
+                                        )
+                                    )
+                                })
+                            }
                         }
                     }
                 }

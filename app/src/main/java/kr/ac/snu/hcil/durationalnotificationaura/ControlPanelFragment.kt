@@ -208,13 +208,23 @@ class ControlPanelFragment: Fragment(), AdapterView.OnItemSelectedListener {
             viewModel.getNotificationByApps().let{
                     livedata -> livedata.value?.let{
                     data ->
-                val notifications = data[packageName]!!.notificationData
-                statusView.text = "${(it).text}\n" +
-                        "Number of notifications: ${notifications.size}\n" +
-                        "Before Interaction: ${notifications[0].firstPattern}, After Interaction: ${notifications[0].secondPattern}\n" +
-                        "Current State: ${notifications[0].lifeCycle}\n" +
-                        "Current Enhancement: ${notifications[0].currEnhancement}"
-            }
+                data[packageName]!!.notificationData.let{
+                    notifications ->
+                    if(notifications.size == 0){
+                        statusView.text = "${(it).text}\n" +
+                                "Number of notifications: ${notifications.size}\n"+
+                                "Position: ${data[packageName]!!.positionInScreen}"
+                    }
+                    else{
+                        statusView.text = "${(it).text}\n" +
+                                "Number of notifications: ${notifications.size}\n" +
+                                "Position: ${data[packageName]!!.positionInScreen}"+
+                                "Before Interaction: ${notifications[0].firstPattern}, After Interaction: ${notifications[0].secondPattern}\n" +
+                                "Current State: ${notifications[0].lifeCycle}\n" +
+                                "Current Enhancement: ${notifications[0].currEnhancement}"
+                    }
+                }
+                }
             }
         }
     }
@@ -223,26 +233,51 @@ class ControlPanelFragment: Fragment(), AdapterView.OnItemSelectedListener {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    private fun initializeEnhancedAppNotiMap(ids: IntArray, packageNames: Array<String>, postTimes: LongArray) =
-        packageNames.distinct().map{
-                distinctStr ->
-            val list = mutableListOf<NotificationEnhancedData>()
-            packageNames.forEachIndexed{
-                    index, str ->
-                if(distinctStr == str) list.add(
-                    NotificationRandomGenerator.newRandomNotification(ids[index], postTimes[index],
-                        EnhancedHomeScreenFragment.DEFAULT_START_DECAY_AFTER
+    private fun initializeEnhancedAppNotiMap(ids: IntArray, packageNames: Array<String>, postTimes: LongArray):MutableMap<String,AppNotificationsEnhancedData>{
+
+        val dataMap: MutableMap<String, AppNotificationsEnhancedData>? = viewModel.getNotificationByApps().value
+
+        if(dataMap != null){
+            val distinctPackageNames = packageNames.distinct()
+            distinctPackageNames.forEach{
+                    distinctPN ->
+                val list = mutableListOf<NotificationEnhancedData>()
+                packageNames.forEachIndexed{
+                        index, str ->
+                    if(distinctPN == str) list.add(
+                        NotificationRandomGenerator.newRandomNotification(ids[index], postTimes[index],
+                            EnhancedHomeScreenFragment.DEFAULT_START_DECAY_AFTER
+                        )
                     )
-                )
+                }
+
+                dataMap[distinctPN]?.let{
+                        currData -> currData.notificationData = list
+                }
             }
-            distinctStr to list
-        }.toMap().let{
-            it.map{
-                    entry -> entry.key to AppNotificationsEnhancedData(entry.key, 0).also{
-                    datum -> datum.notificationData = entry.value
-            }
-            }.toMap()
+            return dataMap
         }
+        else{
+            return packageNames.distinct().map{
+                    distinctStr ->
+                val list = mutableListOf<NotificationEnhancedData>()
+                packageNames.forEachIndexed{
+                        index, str ->
+                    if(distinctStr == str) list.add(
+                        NotificationRandomGenerator.newRandomNotification(ids[index], postTimes[index],
+                            EnhancedHomeScreenFragment.DEFAULT_START_DECAY_AFTER
+                        )
+                    )
+                }
+                distinctStr to list
+            }.toMap().let{
+                it.map{
+                        entry -> entry.key to AppNotificationsEnhancedData(entry.key, 0).also{
+                        datum -> datum.notificationData = entry.value }
+                }
+            }.toMap().toMutableMap()
+        }
+    }
 
     private fun addNewEnhancedNotification(id: Int, packageName: String, postTime: Long): MutableMap<String, AppNotificationsEnhancedData>{
         var currentData: MutableMap<String,AppNotificationsEnhancedData>? = viewModel.getNotificationByApps().value

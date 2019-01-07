@@ -139,6 +139,44 @@ class EnhancedHomeScreenViewModel(application: Application) : AndroidViewModel(a
                 }
             }
         }
+
+        val random = Random()
+        val mutableMap = mutableMapOf<String, AppNotificationsEnhancedData>()
+
+        var currScreenNum = 0
+        var currPosNum = 0
+
+        for(pi in installedPackages.shuffled()){
+            val packageName = pi.packageName
+            val randInt = random.nextInt()
+
+            if(currScreenNum == 5){
+                mutableMap[packageName] = AppNotificationsEnhancedData(
+                    packageName
+                )
+            }
+            else{
+                if(randInt % 2 == 0){
+                    mutableMap[packageName] = AppNotificationsEnhancedData(
+                        packageName,
+                        currScreenNum,
+                        Pair( currPosNum % 4, currPosNum / 4)
+                    )
+                }
+                else{
+                    mutableMap[packageName] = AppNotificationsEnhancedData(
+                        packageName
+                    )
+                }
+
+                currPosNum++
+                if(currPosNum == 20){
+                    currScreenNum++
+                    currPosNum = 0
+                }
+            }
+        }
+        setNotificationByApps(mutableMap)
     }
 
     fun getCurrentScreenNumber():LiveData<Int>{
