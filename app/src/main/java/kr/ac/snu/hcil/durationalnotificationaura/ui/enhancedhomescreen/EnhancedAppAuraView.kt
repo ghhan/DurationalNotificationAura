@@ -21,7 +21,7 @@ class EnhancedAppAuraView(context: Context, attributeSet: AttributeSet?): ViewGr
     }
 
     init{
-        clipChildren = false
+        //clipChildren = false
         //clipToOutline = false
         //clipToPadding = false
     }
