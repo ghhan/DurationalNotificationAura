@@ -28,8 +28,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-        >
-        </kr.ac.snu.hcil.durationalnotificationaura.ui.enhancedhomescreen.EnhancedAppGridLayout>
+        />
     </ScrollView>
 </android.support.constraint.ConstraintLayout>
 

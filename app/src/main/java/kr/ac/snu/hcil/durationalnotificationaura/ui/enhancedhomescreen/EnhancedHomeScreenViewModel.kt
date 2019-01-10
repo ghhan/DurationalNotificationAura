@@ -147,6 +147,29 @@ class EnhancedHomeScreenViewModel(application: Application) : AndroidViewModel(a
         var currScreenNum = 0
         var currPosNum = 0
 
+        val mustAppList = listOf(
+            "kr.ac.snu.hcil.durationalnotificationaura",
+            "com.kakao.talk",
+            "com.android.phone",
+            "com.google.android.gm",
+            "com.android.mms",
+            "com.facebook.mlite",
+            "com.android.providers.calendar",
+            "com.google.android.apps.maps"
+        )
+
+        for(ai in installedApplications){
+            val appName = ai.packageName
+            if(appName in mustAppList){
+                mutableMap[appName] = AppNotificationsEnhancedData(
+                    appName,
+                    currScreenNum,
+                    Pair( currPosNum % 4, currPosNum / 4)
+                )
+                currPosNum++
+            }
+        }
+
         for(ai in installedApplications.shuffled()){
             val appName = ai.packageName
             val randInt = random.nextInt()
@@ -156,7 +179,11 @@ class EnhancedHomeScreenViewModel(application: Application) : AndroidViewModel(a
                     appName
                 )
             }
+
             else{
+                if(appName in mustAppList)
+                    continue
+
                 if(randInt % 2 == 0){
                     mutableMap[appName] = AppNotificationsEnhancedData(
                         appName,
@@ -177,6 +204,7 @@ class EnhancedHomeScreenViewModel(application: Application) : AndroidViewModel(a
                 }
             }
         }
+
         setNotificationByApps(mutableMap)
 
         /*
