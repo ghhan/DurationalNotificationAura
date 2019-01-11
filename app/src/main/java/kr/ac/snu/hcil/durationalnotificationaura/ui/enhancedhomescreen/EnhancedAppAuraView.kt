@@ -6,6 +6,7 @@ import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.GridLayout
+import com.mikhaellopez.circularimageview.CircularImageView
 import kr.ac.snu.hcil.durationalnotificationaura.data.AppNotificationsEnhancedData
 import kr.ac.snu.hcil.durationalnotificationaura.data.NotificationEnhancedData
 import kr.ac.snu.hcil.durationalnotificationaura.visualEffects.AbstractVisEffect
@@ -39,6 +40,11 @@ class EnhancedAppAuraView(context: Context, attributeSet: AttributeSet?): ViewGr
         }
         return null
     }
+
+    fun setImageView(imageView: CircularImageView){
+        addView(imageView)
+    }
+
     fun setEnhanceData(enhanceData: AppNotificationsEnhancedData) {
         if(appPackageName == null){
             appPackageName = enhanceData.packageName
@@ -89,7 +95,7 @@ class EnhancedAppAuraView(context: Context, attributeSet: AttributeSet?): ViewGr
                                 ViewGroup.LayoutParams.MATCH_PARENT
                             )
                         }
-                )
+                , childCount - 1)
             }
 
             //TODO: remove logic
@@ -101,7 +107,10 @@ class EnhancedAppAuraView(context: Context, attributeSet: AttributeSet?): ViewGr
 
     fun setVisualEffects(visualEffects: List<AbstractVisEffect>){
         visualEffects.forEachIndexed{
-            index, visEffect -> (getChildAt(index) as EnhancedNotificationAuraView).setVisualEffect(visEffect)
+            index, visEffect ->
+            val view = getChildAt(index)
+            if(view is EnhancedNotificationAuraView)
+                view.setVisualEffect(visEffect)
         }
     }
 
@@ -140,17 +149,25 @@ class EnhancedAppAuraView(context: Context, attributeSet: AttributeSet?): ViewGr
 
     // View Group의 전체적인 배치를 결정하는 모듈
     override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
-        val leftPadding = 0
-        val rightPadding = 0
-        val topPadding = 0
-        val bottomPadding = 0
+        val defaultLeftPadding = 0
+        val defaultRightPadding = 0
+        val defaultTopPadding = 0
+        val defaultBottomPadding = 0
+
+        val imageLeftPadding = defaultLeftPadding + 50
+        val imageRightPadding = defaultRightPadding + 50
+        val imageTopPadding = defaultTopPadding + 50
+        val imageBottomPadding = defaultBottomPadding + 50
 
         if(changed){
             Log.d(TAG, "# of Children in a view of id $tag: $childCount")
             for(idx in 0..(childCount - 1)){
                 val child : View = getChildAt(idx)
                 Log.d(TAG, "${child.id} -  l: $l, t: $t, r: $r, b: $b")
-                child.layout(leftPadding, topPadding, (r - l) - rightPadding, (b - t) - bottomPadding)
+                if(child is EnhancedNotificationAuraView)
+                    child.layout(defaultLeftPadding, defaultTopPadding, (r - l) - defaultRightPadding, (b - t) - defaultBottomPadding)
+                else
+                    child.layout(imageLeftPadding, imageTopPadding, (r - l) - imageRightPadding, (b - t) - imageBottomPadding)
             }
         }
     }

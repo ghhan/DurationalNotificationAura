@@ -110,6 +110,7 @@ class EnhancedHomeScreenViewModel(application: Application) : AndroidViewModel(a
     var paletteMap: MutableMap<String, Palette> = mutableMapOf()
     var drawableMap: MutableMap<String, Drawable> = mutableMapOf()
 
+    //
     private val bWidth = 80
     private val bHeight = 80
 
@@ -155,7 +156,8 @@ class EnhancedHomeScreenViewModel(application: Application) : AndroidViewModel(a
             "com.android.mms",
             "com.facebook.mlite",
             "com.android.providers.calendar",
-            "com.google.android.apps.maps"
+            "com.google.android.apps.maps",
+            "android"
         )
 
         for(ai in installedApplications){
@@ -170,14 +172,16 @@ class EnhancedHomeScreenViewModel(application: Application) : AndroidViewModel(a
             }
         }
 
+        /*
         for(ai in installedApplications.shuffled()){
             val appName = ai.packageName
             val randInt = random.nextInt()
 
             if(currScreenNum == 5){
-                mutableMap[appName] = AppNotificationsEnhancedData(
-                    appName
-                )
+                if(appName in mustAppList)
+                    continue
+                else
+                    mutableMap[appName] = AppNotificationsEnhancedData(appName)
             }
 
             else{
@@ -204,7 +208,7 @@ class EnhancedHomeScreenViewModel(application: Application) : AndroidViewModel(a
                 }
             }
         }
-
+        */
         setNotificationByApps(mutableMap)
 
         /*

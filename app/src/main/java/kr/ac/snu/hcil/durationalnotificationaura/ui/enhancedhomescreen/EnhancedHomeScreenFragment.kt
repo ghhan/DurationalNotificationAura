@@ -5,12 +5,15 @@ import android.arch.lifecycle.ViewModelProvider
 import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.support.v4.app.Fragment
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.view.animation.LinearInterpolator
 import android.widget.ArrayAdapter
+import android.widget.ImageView
+import com.mikhaellopez.circularimageview.CircularImageView
 import kotlinx.android.synthetic.main.enhanced_home_screen_fragment.*
 import kr.ac.snu.hcil.durationalnotificationaura.R
 import kr.ac.snu.hcil.durationalnotificationaura.visualEffects.AnimationParams
@@ -100,7 +103,12 @@ class EnhancedHomeScreenFragment : Fragment() {
                             (gridLayout.getChildAt(data.positionInScreen.first + data.positionInScreen.second * 4) as EnhancedAppAuraView).let{
                                 view ->
                                 view.tag = packageName
-                                view.background = viewModel.drawableMap[packageName]
+                                //view.background = viewModel.drawableMap[packageName]
+                                view.setImageView(
+                                    CircularImageView(context).apply{
+                                        setImageDrawable(viewModel.drawableMap[packageName])
+                                    }
+                                )
                                 view.setEnhanceData(data)
                                 view.setVisualEffects(List(data.notificationData.size) {index ->
                                     DerivedVisEffect(
