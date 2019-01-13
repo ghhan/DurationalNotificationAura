@@ -9,6 +9,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.support.v4.app.Fragment
@@ -20,13 +21,20 @@ import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.TextView
+import com.github.mikephil.charting.components.XAxis
+import com.github.mikephil.charting.data.Entry
+import com.github.mikephil.charting.data.LineData
+import com.github.mikephil.charting.data.LineDataSet
+import com.github.mikephil.charting.highlight.Highlight
 import kotlinx.android.synthetic.main.control_panel_fragment.*
 import kr.ac.snu.hcil.durationalnotificationaura.data.AppNotificationsEnhancedData
 import kr.ac.snu.hcil.durationalnotificationaura.data.EnhancedNotificationLifeCycle
+import kr.ac.snu.hcil.durationalnotificationaura.data.EnhancementPattern
 import kr.ac.snu.hcil.durationalnotificationaura.data.NotificationEnhancedData
 import kr.ac.snu.hcil.durationalnotificationaura.ui.enhancedhomescreen.EnhancedHomeScreenFragment
 import kr.ac.snu.hcil.durationalnotificationaura.ui.enhancedhomescreen.EnhancedHomeScreenViewModel
 import kr.ac.snu.hcil.durationalnotificationaura.utils.MyNotificationListenerService
+import kr.ac.snu.hcil.durationalnotificationaura.utils.MyXAxisValueFormatter
 import kr.ac.snu.hcil.durationalnotificationaura.utils.NotificationRandomGenerator
 
 class ControlPanelFragment: Fragment(), AdapterView.OnItemSelectedListener {
@@ -210,10 +218,14 @@ class ControlPanelFragment: Fragment(), AdapterView.OnItemSelectedListener {
                     data ->
                 data[packageName]!!.notificationData.let{
                     notifications ->
+
+
+
                     if(notifications.size == 0){
                         statusView.text = "${(it).text}\n" +
                                 "Number of notifications: ${notifications.size}\n"+
                                 "Position: ${data[packageName]!!.positionInScreen}"
+                        lineChart.data = null
                     }
                     else{
                         statusView.text = "${(it).text}\n" +
@@ -222,13 +234,76 @@ class ControlPanelFragment: Fragment(), AdapterView.OnItemSelectedListener {
                                 "Before Interaction: ${notifications[0].firstPattern}, After Interaction: ${notifications[0].secondPattern}\n" +
                                 "Current State: ${notifications[0].lifeCycle}\n" +
                                 "Current Enhancement: ${notifications[0].currEnhancement}"
+
+
+                        // LineChart Logic
+                        val dataSet = LineDataSet(chartDataHelper(notifications[0]), "Model").apply {
+                            setDrawFilled(true)
+                            isHighlightEnabled = true
+                            highLightColor = Color.BLACK
+                            setDrawHighlightIndicators(true)
+                        }
+                        lineChart.run {
+                            setData(LineData(dataSet))
+                            xAxis.position = XAxis.XAxisPosition.BOTTOM
+                            xAxis.valueFormatter = MyXAxisValueFormatter()
+                            axisRight.isEnabled = false
+                            setDrawGridBackground(false)
+                            description = null
+                            highlightValue(Highlight(dataSet.getEntryForIndex(3).x, dataSet.getEntryForIndex(3).y, 3))
+                        }
                     }
                 }
                 }
             }
         }
+
     }
 
+    private fun chartDataHelper(enhancedData: NotificationEnhancedData): ArrayList<Entry> {
+
+        val entries = ArrayList<Entry>()
+
+        entries.run{
+            for (i in 1..4) {
+                if (size == 0) {
+                    add(Entry(enhancedData.initTime.toFloat(), enhancedData.enhanceOffset.toFloat()))
+                } else if (size == 1) {
+                    val firstPeriod = enhancedData.initTime + enhancedData.firstSaturationTime
+                    when (enhancedData.firstPattern) {
+                        EnhancementPattern.EQ -> {
+                            add(Entry(firstPeriod.toFloat(), enhancedData.enhanceOffset.toFloat()))
+                        }
+                        EnhancementPattern.INC -> {
+                            add(Entry(firstPeriod.toFloat(), enhancedData.upperBound.toFloat()))
+                        }
+                        EnhancementPattern.DEC -> {
+                            add(Entry(firstPeriod.toFloat(), enhancedData.lowerBound.toFloat()))
+                        }
+                    }
+                }
+                else if (size == 2) {
+                    val secondPeriod = enhancedData.initTime + enhancedData.firstSaturationTime + enhancedData.secondSaturationTime
+                    when (enhancedData.secondPattern) {
+                        EnhancementPattern.EQ -> {
+                            add(Entry(secondPeriod.toFloat(), enhancedData.enhanceOffset.toFloat()))
+                        }
+                        EnhancementPattern.INC -> {
+                            add(Entry(secondPeriod.toFloat(), enhancedData.upperBound.toFloat()))
+                        }
+                        EnhancementPattern.DEC -> {
+                            add(Entry(secondPeriod.toFloat(), enhancedData.lowerBound.toFloat()))
+                        }
+                    }
+                }
+                else {
+                    add(Entry(System.currentTimeMillis().toFloat(), enhancedData.currEnhancement.toFloat()))
+                }
+            }
+        }
+
+        return entries
+    }
     override fun onNothingSelected(parent: AdapterView<*>?) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
