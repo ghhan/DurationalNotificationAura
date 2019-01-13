@@ -1,10 +1,13 @@
 package kr.ac.snu.hcil.durationalnotificationaura.ui.enhancedhomescreen
 
+import android.app.NotificationManager
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProvider
 import android.arch.lifecycle.ViewModelProviders
+import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.Fragment
+import android.support.v4.app.NotificationManagerCompat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -39,8 +42,23 @@ class EnhancedHomeScreenFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         screenNumber = arguments!!.getInt("screenNumber", -1)
+        val isPermissionAllowed = isNotiPermissionAllowed();
+        if (!isPermissionAllowed) {
+            startActivity(Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS"))
+        }
+
     }
 
+    fun isNotiPermissionAllowed():Boolean {
+        val notiListenerSet = NotificationManagerCompat.getEnabledListenerPackages(context!!);
+        val myPackageName = context!!.packageName;
+        notiListenerSet.forEach { packageName ->
+            if (packageName.equals(myPackageName)) {
+                return true;
+            }
+        }
+        return false;
+    }
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         gridLayout.let{

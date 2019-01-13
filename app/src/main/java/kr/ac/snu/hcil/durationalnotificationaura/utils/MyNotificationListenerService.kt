@@ -1,11 +1,14 @@
 package kr.ac.snu.hcil.durationalnotificationaura.utils
 
+import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationChannelGroup
 import android.content.Intent
+import android.os.IBinder
 import android.os.UserHandle
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
+import android.util.Log
 import java.util.*
 
 class MyNotificationListenerService: NotificationListenerService() {
@@ -17,10 +20,11 @@ class MyNotificationListenerService: NotificationListenerService() {
         super.onListenerConnected()
     }
 
+
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         activeNotifications?.let{
             activeNotis ->
-            sendBroadcast(
+           sendBroadcast(
                     Intent(ACTION).apply{
                         putExtra("event", "Initialized")
                         putExtra("IDs", activeNotis.map{it.id}.toIntArray())
