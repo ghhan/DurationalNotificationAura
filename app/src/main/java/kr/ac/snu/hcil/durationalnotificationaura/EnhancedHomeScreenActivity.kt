@@ -3,6 +3,7 @@ package kr.ac.snu.hcil.durationalnotificationaura
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import kr.ac.snu.hcil.durationalnotificationaura.ui.enhancedhomescreen.EnhancedHomeScreenFragment
+import kr.ac.snu.hcil.durationalnotificationaura.R
 
 class EnhancedHomeScreenActivity : AppCompatActivity() {
 

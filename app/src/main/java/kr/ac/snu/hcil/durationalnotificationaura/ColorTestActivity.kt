@@ -12,6 +12,7 @@ import android.support.v7.graphics.Palette
 import android.widget.ImageView
 import android.widget.TextView
 import kotlinx.android.synthetic.main.activity_color_test.*
+import kr.ac.snu.hcil.durationalnotificationaura.R
 import java.text.DecimalFormat
 
 class ColorTestActivity : AppCompatActivity() {

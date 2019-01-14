@@ -11,6 +11,7 @@ import android.support.v4.view.PagerAdapter
 import android.support.v4.view.ViewPager
 import kr.ac.snu.hcil.durationalnotificationaura.ui.enhancedhomescreen.EnhancedHomeScreenFragment
 import kr.ac.snu.hcil.durationalnotificationaura.ui.enhancedhomescreen.EnhancedHomeScreenViewModel
+import kr.ac.snu.hcil.durationalnotificationaura.R
 
 class ScreenSlidePagerActivity : FragmentActivity() {
 
