@@ -10,6 +10,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.Color
+import android.opengl.Visibility
 import android.os.Build
 import android.os.Bundle
 import android.support.v4.app.Fragment
@@ -47,10 +48,13 @@ class ControlPanelFragment: Fragment(), AdapterView.OnItemSelectedListener {
 
     private lateinit var viewModel: EnhancedHomeScreenViewModel
     private lateinit var packageNameAdapter: ArrayAdapter<String>
+    private lateinit var chartAdapter: ArrayAdapter<String>
     private var currScreenNumber = 0
     private val notificationReceiver = NotificationReceiver()
     private val intentFilter = IntentFilter().also{ it.addAction(ACTION)}
     private var generatedNotificationID = 0
+
+    private lateinit var currentSelectedView : TextView
 
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -59,6 +63,9 @@ class ControlPanelFragment: Fragment(), AdapterView.OnItemSelectedListener {
         packageNameAdapter = ArrayAdapter(context!!, R.layout.simple_spinner_dropdown_item)
         packageNameAdapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item)
         packageNameSpinner.onItemSelectedListener = this
+
+        chartAdapter = ArrayAdapter(context!!, R.layout.simple_spinner_dropdown_item)
+        chartAdapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item)
 
         activity?.startService(Intent(activity, MyNotificationListenerService::class.java))
 
@@ -193,6 +200,30 @@ class ControlPanelFragment: Fragment(), AdapterView.OnItemSelectedListener {
                 viewModel.setNotificationByApps(newData)
             }
         }
+
+        chartSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                val index = currentSelectedView.text.toString().toInt()
+
+                view?.let {
+                    val packageName = (it as TextView).text
+                    viewModel.getNotificationByApps().let { livedata ->
+                        livedata.value?.let { data ->
+                            data[packageName]!!.notificationData.let { notifications ->
+                                drawChart(notifications, index)
+                            }
+                        }
+                    }
+                }
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+                TODO("not implemented")
+
+            }
+
+        }
+
     }
 
     private fun printShortcuts(){
@@ -210,6 +241,7 @@ class ControlPanelFragment: Fragment(), AdapterView.OnItemSelectedListener {
 
     override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
         //해당 packageName으로부터 정보 받아와야 함
+        currentSelectedView = view as TextView
 
         view?.let{
             val packageName = (it as TextView).text
@@ -219,9 +251,9 @@ class ControlPanelFragment: Fragment(), AdapterView.OnItemSelectedListener {
                 data[packageName]!!.notificationData.let{
                     notifications ->
 
-
-
                     if(notifications.size == 0){
+                        chartAdapter.clear()
+                        chartSpinner.visibility = View.INVISIBLE
                         statusView.text = "${(it).text}\n" +
                                 "Number of notifications: ${notifications.size}\n"+
                                 "Position: ${data[packageName]!!.positionInScreen}"
@@ -235,23 +267,14 @@ class ControlPanelFragment: Fragment(), AdapterView.OnItemSelectedListener {
                                 "Current State: ${notifications[0].lifeCycle}\n" +
                                 "Current Enhancement: ${notifications[0].currEnhancement}"
 
-
+                        // LineChart Spinner Logic
+                        chartAdapter.clear()
+                        for (i in 1 .. notifications.size) {
+                            chartAdapter.add(i.toString())
+                        }
+                        chartSpinner.visibility = View.VISIBLE
                         // LineChart Logic
-                        val dataSet = LineDataSet(chartDataHelper(notifications[0]), "Model").apply {
-                            setDrawFilled(true)
-                            isHighlightEnabled = true
-                            highLightColor = Color.BLACK
-                            setDrawHighlightIndicators(true)
-                        }
-                        lineChart.run {
-                            setData(LineData(dataSet))
-                            xAxis.position = XAxis.XAxisPosition.BOTTOM
-                            xAxis.valueFormatter = MyXAxisValueFormatter()
-                            axisRight.isEnabled = false
-                            setDrawGridBackground(false)
-                            description = null
-                            highlightValue(Highlight(dataSet.getEntryForIndex(3).x, dataSet.getEntryForIndex(3).y, 3))
-                        }
+                        drawChart(notifications, 0)
                     }
                 }
                 }
@@ -260,12 +283,32 @@ class ControlPanelFragment: Fragment(), AdapterView.OnItemSelectedListener {
 
     }
 
+    private fun drawChart(notifications: MutableList<NotificationEnhancedData>, index: Int) {
+        val dataArray = chartDataHelper(notifications[index])
+        val dataSet = LineDataSet(dataArray, "Model").apply {
+            setDrawFilled(true)
+            isHighlightEnabled = true
+            highLightColor = Color.BLACK
+            setDrawHighlightIndicators(true)
+        }
+        lineChart.run {
+            setData(LineData(dataSet))
+            xAxis.position = XAxis.XAxisPosition.BOTTOM
+            xAxis.valueFormatter = MyXAxisValueFormatter()
+            axisRight.isEnabled = false
+            setDrawGridBackground(false)
+            description = null
+            highlightValue(Highlight(dataSet.getEntryForIndex(dataArray.size - 1).x,
+                dataSet.getEntryForIndex(dataArray.size - 1).y, 3))
+        }
+    }
+
     private fun chartDataHelper(enhancedData: NotificationEnhancedData): ArrayList<Entry> {
 
         val entries = ArrayList<Entry>()
 
         entries.run{
-            for (i in 1..4) {
+            for (i in 1..5) {
                 if (size == 0) {
                     add(Entry(enhancedData.initTime.toFloat(), enhancedData.enhanceOffset.toFloat()))
                 } else if (size == 1) {
@@ -299,7 +342,12 @@ class ControlPanelFragment: Fragment(), AdapterView.OnItemSelectedListener {
                 else {
                     add(Entry(System.currentTimeMillis().toFloat(), enhancedData.currEnhancement.toFloat()))
                 }
+                if (enhancedData.timeElapsed >= enhancedData.naturalDecay) {
+                    val decayPeriod = enhancedData.initTime + enhancedData.naturalDecay
+                    entries.add(Entry(decayPeriod.toFloat(), enhancedData.lowerBound.toFloat()))
+                }
             }
+
         }
 
         return entries
