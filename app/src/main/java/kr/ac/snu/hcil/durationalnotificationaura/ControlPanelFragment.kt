@@ -27,6 +27,7 @@ import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.highlight.Highlight
+import com.github.mikephil.charting.utils.EntryXComparator
 import kotlinx.android.synthetic.main.control_panel_fragment.*
 import kr.ac.snu.hcil.durationalnotificationaura.data.AppNotificationsEnhancedData
 import kr.ac.snu.hcil.durationalnotificationaura.data.EnhancedNotificationLifeCycle
@@ -37,6 +38,7 @@ import kr.ac.snu.hcil.durationalnotificationaura.ui.enhancedhomescreen.EnhancedH
 import kr.ac.snu.hcil.durationalnotificationaura.utils.MyNotificationListenerService
 import kr.ac.snu.hcil.durationalnotificationaura.utils.MyXAxisValueFormatter
 import kr.ac.snu.hcil.durationalnotificationaura.utils.NotificationRandomGenerator
+import java.util.*
 
 class ControlPanelFragment: Fragment(), AdapterView.OnItemSelectedListener {
 
@@ -241,9 +243,9 @@ class ControlPanelFragment: Fragment(), AdapterView.OnItemSelectedListener {
 
     override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
         //해당 packageName으로부터 정보 받아와야 함
-        currentSelectedView = view as TextView
-
         view?.let{
+            currentSelectedView = view as TextView
+
             val packageName = (it as TextView).text
             viewModel.getNotificationByApps().let{
                     livedata -> livedata.value?.let{
@@ -273,6 +275,7 @@ class ControlPanelFragment: Fragment(), AdapterView.OnItemSelectedListener {
                             chartAdapter.add(i.toString())
                         }
                         chartSpinner.visibility = View.VISIBLE
+
                         // LineChart Logic
                         drawChart(notifications, 0)
                     }
@@ -349,6 +352,7 @@ class ControlPanelFragment: Fragment(), AdapterView.OnItemSelectedListener {
             }
 
         }
+        Collections.sort(entries, EntryXComparator())
 
         return entries
     }
