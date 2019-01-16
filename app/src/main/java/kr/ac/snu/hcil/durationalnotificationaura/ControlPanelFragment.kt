@@ -56,7 +56,7 @@ class ControlPanelFragment: Fragment(), AdapterView.OnItemSelectedListener {
     private val intentFilter = IntentFilter().also{ it.addAction(ACTION)}
     private var generatedNotificationID = 0
 
-    private lateinit var currentSelectedView : TextView
+    private lateinit var currentSelectedNotifications : MutableList<NotificationEnhancedData>
 
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -68,6 +68,7 @@ class ControlPanelFragment: Fragment(), AdapterView.OnItemSelectedListener {
 
         chartAdapter = ArrayAdapter(context!!, R.layout.simple_spinner_dropdown_item)
         chartAdapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item)
+        chartSpinner.adapter = chartAdapter
 
         activity?.startService(Intent(activity, MyNotificationListenerService::class.java))
 
@@ -205,23 +206,20 @@ class ControlPanelFragment: Fragment(), AdapterView.OnItemSelectedListener {
 
         chartSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                val index = currentSelectedView.text.toString().toInt()
-
                 view?.let {
-                    val packageName = (it as TextView).text
-                    viewModel.getNotificationByApps().let { livedata ->
-                        livedata.value?.let { data ->
-                            data[packageName]!!.notificationData.let { notifications ->
-                                drawChart(notifications, index)
-                            }
-                        }
-                    }
+                    val index = (it as TextView).text.toString().toInt()
+                    drawChart(currentSelectedNotifications, index - 1)
                 }
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {
-                TODO("not implemented")
-
+                if (currentSelectedNotifications.size > 0) {
+                    drawChart(currentSelectedNotifications, 0)
+                }
+                else {
+                    lineChart.data = null
+                    lineChart.invalidate()
+                }
             }
 
         }
@@ -244,7 +242,6 @@ class ControlPanelFragment: Fragment(), AdapterView.OnItemSelectedListener {
     override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
         //해당 packageName으로부터 정보 받아와야 함
         view?.let{
-            currentSelectedView = view as TextView
 
             val packageName = (it as TextView).text
             viewModel.getNotificationByApps().let{
@@ -253,13 +250,18 @@ class ControlPanelFragment: Fragment(), AdapterView.OnItemSelectedListener {
                 data[packageName]!!.notificationData.let{
                     notifications ->
 
+                    currentSelectedNotifications = notifications
                     if(notifications.size == 0){
+                        //LineChart Spinner Logic
                         chartAdapter.clear()
+                        chartAdapter.notifyDataSetChanged()
                         chartSpinner.visibility = View.INVISIBLE
+
                         statusView.text = "${(it).text}\n" +
                                 "Number of notifications: ${notifications.size}\n"+
                                 "Position: ${data[packageName]!!.positionInScreen}"
                         lineChart.data = null
+                        lineChart.invalidate()
                     }
                     else{
                         statusView.text = "${(it).text}\n" +
@@ -274,6 +276,7 @@ class ControlPanelFragment: Fragment(), AdapterView.OnItemSelectedListener {
                         for (i in 1 .. notifications.size) {
                             chartAdapter.add(i.toString())
                         }
+                        chartAdapter.notifyDataSetChanged()
                         chartSpinner.visibility = View.VISIBLE
 
                         // LineChart Logic
@@ -286,6 +289,10 @@ class ControlPanelFragment: Fragment(), AdapterView.OnItemSelectedListener {
 
     }
 
+    override fun onNothingSelected(parent: AdapterView<*>?) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
     private fun drawChart(notifications: MutableList<NotificationEnhancedData>, index: Int) {
         val dataArray = chartDataHelper(notifications[index])
         val dataSet = LineDataSet(dataArray, "Model").apply {
@@ -295,11 +302,12 @@ class ControlPanelFragment: Fragment(), AdapterView.OnItemSelectedListener {
             setDrawHighlightIndicators(true)
         }
         lineChart.run {
-            setData(LineData(dataSet))
+            data = LineData(dataSet)
             xAxis.position = XAxis.XAxisPosition.BOTTOM
             xAxis.valueFormatter = MyXAxisValueFormatter()
+            xAxis.setDrawGridLines(false)
+            axisLeft.setDrawGridLines(false)
             axisRight.isEnabled = false
-            setDrawGridBackground(false)
             description = null
             highlightValue(Highlight(dataSet.getEntryForIndex(dataArray.size - 1).x,
                 dataSet.getEntryForIndex(dataArray.size - 1).y, 3))
@@ -355,9 +363,6 @@ class ControlPanelFragment: Fragment(), AdapterView.OnItemSelectedListener {
         Collections.sort(entries, EntryXComparator())
 
         return entries
-    }
-    override fun onNothingSelected(parent: AdapterView<*>?) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     private fun initializeEnhancedAppNotiMap(ids: IntArray, packageNames: Array<String>, postTimes: LongArray):MutableMap<String,AppNotificationsEnhancedData>{
