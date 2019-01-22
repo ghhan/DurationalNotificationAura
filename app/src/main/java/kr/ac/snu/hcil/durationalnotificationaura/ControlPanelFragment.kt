@@ -147,8 +147,9 @@ class ControlPanelFragment: Fragment(), AdapterView.OnItemSelectedListener {
                     if(entry.key == packageNameSpinner.selectedItem){
                         entry.value.apply{
                             notificationData.forEach{
-                                    data -> data.lifeCycle = EnhancedNotificationLifeCycle.STATE_2
+                                    data -> data.lifeCycle = EnhancedNotificationLifeCycle.STATE_3
                             }
+                            drawChart(currentSelectedNotifications, 0)
                         }
                     }
                     else{
@@ -294,13 +295,16 @@ class ControlPanelFragment: Fragment(), AdapterView.OnItemSelectedListener {
     }
 
     private fun drawChart(notifications: MutableList<NotificationEnhancedData>, index: Int) {
-        val dataArray = chartDataHelper(notifications[index])
+        val dataArray = if (notifications.get(0).lifeCycle >= EnhancedNotificationLifeCycle.STATE_3)
+            chartDataInteractionHelper(notifications[index]) else chartDataHelper(notifications[index])
+
         val dataSet = LineDataSet(dataArray, "Model").apply {
             setDrawFilled(true)
             isHighlightEnabled = true
             highLightColor = Color.BLACK
             setDrawHighlightIndicators(true)
         }
+
         lineChart.run {
             data = LineData(dataSet)
             xAxis.position = XAxis.XAxisPosition.BOTTOM
@@ -311,6 +315,7 @@ class ControlPanelFragment: Fragment(), AdapterView.OnItemSelectedListener {
             description = null
             highlightValue(Highlight(dataSet.getEntryForIndex(dataArray.size - 1).x,
                 dataSet.getEntryForIndex(dataArray.size - 1).y, 3))
+            setVisibleXRangeMinimum(100f)
         }
     }
 
@@ -358,6 +363,32 @@ class ControlPanelFragment: Fragment(), AdapterView.OnItemSelectedListener {
                     entries.add(Entry(decayPeriod.toFloat(), enhancedData.lowerBound.toFloat()))
                 }
             }
+
+        }
+        Collections.sort(entries, EntryXComparator())
+
+        return entries
+    }
+
+    private fun chartDataInteractionHelper(enhancedData: NotificationEnhancedData): ArrayList<Entry> {
+
+        if (enhancedData.timeElapsed >= enhancedData.naturalDecay) {
+            return chartDataHelper(enhancedData)
+        }
+
+        val entries = ArrayList<Entry>()
+
+        entries.run{
+            // initial offset
+            add(Entry(enhancedData.initTime.toFloat(), enhancedData.enhanceOffset.toFloat()))
+
+            // until interaction: first pattern
+            val firstPeriod = System.currentTimeMillis()
+            add(Entry(firstPeriod.toFloat(), enhancedData.currEnhancement.toFloat()))
+
+            // after interaction: second pattern
+            val secondPeriod = enhancedData.initTime + enhancedData.firstSaturationTime + enhancedData.secondSaturationTime
+            add(Entry(secondPeriod.toFloat(), enhancedData.lowerBound.toFloat()))
 
         }
         Collections.sort(entries, EntryXComparator())
