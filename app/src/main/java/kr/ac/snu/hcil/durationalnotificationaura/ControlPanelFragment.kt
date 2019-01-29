@@ -140,14 +140,19 @@ class ControlPanelFragment: Fragment(), AdapterView.OnItemSelectedListener {
         }
 
         interactButton.setOnClickListener {
+            Log.i("interaction", currentSelectedNotifications.toString())
             viewModel.getEnhancementDataInCurrentScreen(currScreenNumber).value?.let{
                     currData ->
+                Log.i("interaction", currData.toString())
                 val newData = currData.mapValues {
                         entry ->
                     if(entry.key == packageNameSpinner.selectedItem){
                         entry.value.apply{
                             notificationData.forEach{
-                                    data -> data.lifeCycle = EnhancedNotificationLifeCycle.STATE_3
+                                    data ->
+                                data.lifeCycle = EnhancedNotificationLifeCycle.STATE_3
+                                data.interactionTime = System.currentTimeMillis()
+                                data.interactionEnhancement = data.currEnhancement
                             }
                             drawChart(currentSelectedNotifications, 0)
                         }
@@ -218,7 +223,8 @@ class ControlPanelFragment: Fragment(), AdapterView.OnItemSelectedListener {
                     drawChart(currentSelectedNotifications, 0)
                 }
                 else {
-                    lineChart.data = null
+                    lineChart.clear()
+                    lineChart.notifyDataSetChanged()
                     lineChart.invalidate()
                 }
             }
@@ -261,7 +267,8 @@ class ControlPanelFragment: Fragment(), AdapterView.OnItemSelectedListener {
                         statusView.text = "${(it).text}\n" +
                                 "Number of notifications: ${notifications.size}\n"+
                                 "Position: ${data[packageName]!!.positionInScreen}"
-                        lineChart.data = null
+                        lineChart.clear()
+                        lineChart.notifyDataSetChanged()
                         lineChart.invalidate()
                     }
                     else{
@@ -306,16 +313,19 @@ class ControlPanelFragment: Fragment(), AdapterView.OnItemSelectedListener {
         }
 
         lineChart.run {
+            clear()
+            invalidate()
             data = LineData(dataSet)
             xAxis.position = XAxis.XAxisPosition.BOTTOM
             xAxis.valueFormatter = MyXAxisValueFormatter()
             xAxis.setDrawGridLines(false)
             axisLeft.setDrawGridLines(false)
+            axisLeft.setLabelCount(dataArray.size, true)
             axisRight.isEnabled = false
             description = null
             highlightValue(Highlight(dataSet.getEntryForIndex(dataArray.size - 1).x,
                 dataSet.getEntryForIndex(dataArray.size - 1).y, 3))
-            setVisibleXRangeMinimum(100f)
+            notifyDataSetChanged()
         }
     }
 
@@ -324,46 +334,47 @@ class ControlPanelFragment: Fragment(), AdapterView.OnItemSelectedListener {
         val entries = ArrayList<Entry>()
 
         entries.run{
-            for (i in 1..5) {
-                if (size == 0) {
-                    add(Entry(enhancedData.initTime.toFloat(), enhancedData.enhanceOffset.toFloat()))
-                } else if (size == 1) {
-                    val firstPeriod = enhancedData.initTime + enhancedData.firstSaturationTime
-                    when (enhancedData.firstPattern) {
-                        EnhancementPattern.EQ -> {
-                            add(Entry(firstPeriod.toFloat(), enhancedData.enhanceOffset.toFloat()))
-                        }
-                        EnhancementPattern.INC -> {
-                            add(Entry(firstPeriod.toFloat(), enhancedData.upperBound.toFloat()))
-                        }
-                        EnhancementPattern.DEC -> {
-                            add(Entry(firstPeriod.toFloat(), enhancedData.lowerBound.toFloat()))
-                        }
-                    }
+            // Initial Offset
+            add(Entry(enhancedData.initTime.toFloat(), enhancedData.enhanceOffset.toFloat()))
+
+            // Before Interaction
+            val firstPeriod = enhancedData.initTime + enhancedData.firstSaturationTime
+            when (enhancedData.firstPattern) {
+                EnhancementPattern.EQ -> {
+                    add(Entry(firstPeriod.toFloat(), enhancedData.enhanceOffset.toFloat()))
                 }
-                else if (size == 2) {
-                    val secondPeriod = enhancedData.initTime + enhancedData.firstSaturationTime + enhancedData.secondSaturationTime
-                    when (enhancedData.secondPattern) {
-                        EnhancementPattern.EQ -> {
-                            add(Entry(secondPeriod.toFloat(), enhancedData.enhanceOffset.toFloat()))
-                        }
-                        EnhancementPattern.INC -> {
-                            add(Entry(secondPeriod.toFloat(), enhancedData.upperBound.toFloat()))
-                        }
-                        EnhancementPattern.DEC -> {
-                            add(Entry(secondPeriod.toFloat(), enhancedData.lowerBound.toFloat()))
-                        }
-                    }
+                EnhancementPattern.INC -> {
+                    add(Entry(firstPeriod.toFloat(), enhancedData.upperBound.toFloat()))
                 }
-                else {
-                    add(Entry(System.currentTimeMillis().toFloat(), enhancedData.currEnhancement.toFloat()))
-                }
-                if (enhancedData.timeElapsed >= enhancedData.naturalDecay) {
-                    val decayPeriod = enhancedData.initTime + enhancedData.naturalDecay
-                    entries.add(Entry(decayPeriod.toFloat(), enhancedData.lowerBound.toFloat()))
+                EnhancementPattern.DEC -> {
+                    add(Entry(firstPeriod.toFloat(), enhancedData.lowerBound.toFloat()))
                 }
             }
 
+            // After Interaction
+            if (enhancedData.interactionTime > 0) {
+                val secondPeriod = enhancedData.initTime + enhancedData.firstSaturationTime + enhancedData.secondSaturationTime
+                when (enhancedData.secondPattern) {
+                    EnhancementPattern.EQ -> {
+                        add(Entry(secondPeriod.toFloat(), enhancedData.enhanceOffset.toFloat()))
+                    }
+                    EnhancementPattern.INC -> {
+                        add(Entry(secondPeriod.toFloat(), enhancedData.upperBound.toFloat()))
+                    }
+                    EnhancementPattern.DEC -> {
+                        add(Entry(secondPeriod.toFloat(), enhancedData.lowerBound.toFloat()))
+                    }
+                }
+            }
+
+            // After Decay
+            if (enhancedData.timeElapsed >= enhancedData.naturalDecay) {
+                val decayPeriod = enhancedData.initTime + enhancedData.naturalDecay
+                entries.add(Entry(decayPeriod.toFloat(), enhancedData.lowerBound.toFloat()))
+            }
+
+            // Current Enhancement
+            add(Entry(System.currentTimeMillis().toFloat(), enhancedData.currEnhancement.toFloat()))
         }
         Collections.sort(entries, EntryXComparator())
 
@@ -383,12 +394,14 @@ class ControlPanelFragment: Fragment(), AdapterView.OnItemSelectedListener {
             add(Entry(enhancedData.initTime.toFloat(), enhancedData.enhanceOffset.toFloat()))
 
             // until interaction: first pattern
-            val firstPeriod = System.currentTimeMillis()
-            add(Entry(firstPeriod.toFloat(), enhancedData.currEnhancement.toFloat()))
+            add(Entry(enhancedData.interactionTime.toFloat(), enhancedData.interactionEnhancement.toFloat()))
 
             // after interaction: second pattern
-            val secondPeriod = enhancedData.initTime + enhancedData.firstSaturationTime + enhancedData.secondSaturationTime
+            val secondPeriod = enhancedData.interactionTime + enhancedData.secondSaturationTime
             add(Entry(secondPeriod.toFloat(), enhancedData.lowerBound.toFloat()))
+
+            // Current Enhancement
+            add(Entry(System.currentTimeMillis().toFloat(), enhancedData.currEnhancement.toFloat()))
 
         }
         Collections.sort(entries, EntryXComparator())
@@ -477,7 +490,11 @@ class ControlPanelFragment: Fragment(), AdapterView.OnItemSelectedListener {
             if(packageName == it.key)
                 it.value.apply{
                     notificationData = notificationData.map{
-                            datum -> datum.apply{ lifeCycle = EnhancedNotificationLifeCycle.STATE_3 }
+                            datum -> datum.apply{
+                        lifeCycle = EnhancedNotificationLifeCycle.STATE_3
+                        interactionTime = System.currentTimeMillis()
+                        interactionEnhancement = this.currEnhancement
+                        }
                     }.toMutableList()
                 }
             else

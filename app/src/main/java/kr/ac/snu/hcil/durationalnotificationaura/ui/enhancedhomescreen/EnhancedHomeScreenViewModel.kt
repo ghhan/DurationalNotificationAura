@@ -90,7 +90,7 @@ class EnhancedHomeScreenViewModel(application: Application) : AndroidViewModel(a
     }
     private val autoUpdateRunnable = object: Runnable{
         override fun run() {
-            val nowInMillis = Calendar.getInstance().timeInMillis
+            val nowInMillis = System.currentTimeMillis()
             val prevData = appNotificationLiveData.value
             val newData = prevData?.mapValues{
                 it.value.apply{
@@ -254,7 +254,11 @@ class EnhancedHomeScreenViewModel(application: Application) : AndroidViewModel(a
 
     fun getEnhancementDataInCurrentScreen(position: Int): LiveData<MutableMap<String, AppNotificationsEnhancedData>> =
         Transformations.map(appNotificationLiveData){
-            enhancementMap -> enhancementMap.filter{
+                enhancementMap ->
+            enhancementMap.forEach { (key, value) ->
+                //Log.i("screenNumber", value.packageName+" "+value.screenNumber)
+            }
+            enhancementMap.filter{
                 it.value.screenNumber == position
             }.toMutableMap()
         }

@@ -29,6 +29,8 @@ data class NotificationEnhancedData(
     var slope = 0.0
     var timeElapsed = 0L
     var currEnhancement = enhanceOffset
+    var interactionTime : Long = -1 // never interacted : -1, otherwise : time in millis
+    var interactionEnhancement = 0.0 // Enhancement Value at the interaction time
 }
 
 class AppNotificationsEnhancedData(val packageName: String,
