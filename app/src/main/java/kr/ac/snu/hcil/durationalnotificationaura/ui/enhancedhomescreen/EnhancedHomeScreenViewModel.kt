@@ -252,16 +252,20 @@ class EnhancedHomeScreenViewModel(application: Application) : AndroidViewModel(a
         mHandler.post(autoUpdateRunnable)
     }
 
-    fun getEnhancementDataInCurrentScreen(position: Int): LiveData<MutableMap<String, AppNotificationsEnhancedData>> =
-        Transformations.map(appNotificationLiveData){
-                enhancementMap ->
-            enhancementMap.forEach { (key, value) ->
-                //Log.i("screenNumber", value.packageName+" "+value.screenNumber)
-            }
-            enhancementMap.filter{
+    fun getEnhancementDataInCurrentScreen(position: Int): LiveData<MutableMap<String, AppNotificationsEnhancedData>> {
+        Log.i("Duh", appNotificationLiveData.value?.filter{
+            it.value.screenNumber == position
+        }?.toMutableMap().toString())
+        return Transformations.map(appNotificationLiveData) { enhancementMap ->
+            //enhancementMap.forEach { (key, value) ->
+            //Log.i("screenNumber", value.packageName+" "+value.screenNumber)
+            //}
+
+            enhancementMap.filter {
                 it.value.screenNumber == position
             }.toMutableMap()
         }
+    }
 
     override fun onCleared() {
         super.onCleared()

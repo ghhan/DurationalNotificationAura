@@ -140,10 +140,15 @@ class ControlPanelFragment: Fragment(), AdapterView.OnItemSelectedListener {
         }
 
         interactButton.setOnClickListener {
-            Log.i("interaction", currentSelectedNotifications.toString())
-            viewModel.getEnhancementDataInCurrentScreen(currScreenNumber).value?.let{
-                    currData ->
-                Log.i("interaction", currData.toString())
+            val currDataMap = viewModel.getNotificationByApps().value?.filter{
+                it.value.screenNumber == currScreenNumber
+            }?.toMutableMap()
+            currDataMap?.let{
+                currData ->
+                currData.forEach{
+                        (key, value) ->
+                    Log.i("key", key)
+                }
                 val newData = currData.mapValues {
                         entry ->
                     if(entry.key == packageNameSpinner.selectedItem){
@@ -163,6 +168,32 @@ class ControlPanelFragment: Fragment(), AdapterView.OnItemSelectedListener {
                 }.toMutableMap()
                 viewModel.setNotificationByApps(newData)
             }
+//            viewModel.getEnhancementDataInCurrentScreen(currScreenNumber).value?.let{
+//                    currData ->
+//                Log.i("currData Size", currData.size.toString())
+//                currData.forEach{
+//                    (key, value) ->
+//                    Log.i("key", key)
+//                }
+//                val newData = currData.mapValues {
+//                        entry ->
+//                    if(entry.key == packageNameSpinner.selectedItem){
+//                        entry.value.apply{
+//                            notificationData.forEach{
+//                                    data ->
+//                                data.lifeCycle = EnhancedNotificationLifeCycle.STATE_3
+//                                data.interactionTime = System.currentTimeMillis()
+//                                data.interactionEnhancement = data.currEnhancement
+//                            }
+//                            drawChart(currentSelectedNotifications, 0)
+//                        }
+//                    }
+//                    else{
+//                        entry.value
+//                    }
+//                }.toMutableMap()
+//                viewModel.setNotificationByApps(newData)
+//            }
         }
 
         resetButton.setOnClickListener{
