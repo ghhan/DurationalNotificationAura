@@ -168,36 +168,13 @@ class ControlPanelFragment: Fragment(), AdapterView.OnItemSelectedListener {
                 }.toMutableMap()
                 viewModel.setNotificationByApps(newData)
             }
-//            viewModel.getEnhancementDataInCurrentScreen(currScreenNumber).value?.let{
-//                    currData ->
-//                Log.i("currData Size", currData.size.toString())
-//                currData.forEach{
-//                    (key, value) ->
-//                    Log.i("key", key)
-//                }
-//                val newData = currData.mapValues {
-//                        entry ->
-//                    if(entry.key == packageNameSpinner.selectedItem){
-//                        entry.value.apply{
-//                            notificationData.forEach{
-//                                    data ->
-//                                data.lifeCycle = EnhancedNotificationLifeCycle.STATE_3
-//                                data.interactionTime = System.currentTimeMillis()
-//                                data.interactionEnhancement = data.currEnhancement
-//                            }
-//                            drawChart(currentSelectedNotifications, 0)
-//                        }
-//                    }
-//                    else{
-//                        entry.value
-//                    }
-//                }.toMutableMap()
-//                viewModel.setNotificationByApps(newData)
-//            }
         }
 
         resetButton.setOnClickListener{
-            viewModel.getEnhancementDataInCurrentScreen(currScreenNumber).value?.let{
+            val currDataMap = viewModel.getNotificationByApps().value?.filter{
+                it.value.screenNumber == currScreenNumber
+            }?.toMutableMap()
+            currDataMap?.let{
                     currData ->
                 val newData = currData.mapValues {
                         entry ->
@@ -216,6 +193,25 @@ class ControlPanelFragment: Fragment(), AdapterView.OnItemSelectedListener {
                 }.toMutableMap()
                 viewModel.setNotificationByApps(newData)
             }
+//            viewModel.getEnhancementDataInCurrentScreen(currScreenNumber).value?.let{
+//                    currData ->
+//                val newData = currData.mapValues {
+//                        entry ->
+//                    if(entry.key == packageNameSpinner.selectedItem){
+//                        entry.value.apply{
+//                            notificationData.forEach{
+//                                    data -> data.currEnhancement = data.enhanceOffset
+//                                data.timeElapsed = 0
+//                                data.lifeCycle = EnhancedNotificationLifeCycle.STATE_1
+//                            }
+//                        }
+//                    }
+//                    else{
+//                        entry.value
+//                    }
+//                }.toMutableMap()
+//                viewModel.setNotificationByApps(newData)
+//            }
         }
 
         resetAllButton.setOnClickListener{

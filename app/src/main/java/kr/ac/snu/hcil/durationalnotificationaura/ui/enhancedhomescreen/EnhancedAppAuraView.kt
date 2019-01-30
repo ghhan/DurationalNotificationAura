@@ -40,7 +40,7 @@ class EnhancedAppAuraView(context: Context, attributeSet: AttributeSet?): ViewGr
         return null
     }
     fun setEnhanceData(enhanceData: AppNotificationsEnhancedData) {
-        if(appPackageName == null){
+        if (appPackageName == null){
             appPackageName = enhanceData.packageName
             appPosition = enhanceData.positionInScreen
             enhanceData.notificationData.forEach{

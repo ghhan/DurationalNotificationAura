@@ -8,6 +8,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v4.app.NotificationManagerCompat
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -79,13 +80,17 @@ class EnhancedHomeScreenFragment : Fragment() {
                     appNotiData.map{
                         entry ->
                         val packageName = entry.key
+                        Log.i("packageName update", entry.key)
                         val data = entry.value
                         val targetView = findViewWithPackageName(gridLayout, packageName)
-                        if(targetView != null) {
+                        if (targetView != null) {
                             (targetView as EnhancedAppAuraView).let{
                                 view ->
                                 view.setEnhanceData(data)
+                                Log.e("data.notificationData", data.notificationData.size.toString())
+                                Log.e("targetview childcount", view.childCount.toString())
                                 view.setVisualEffects(List(data.notificationData.size) { index ->
+                                    Log.i("index", index.toString())
                                     DerivedVisEffect(
                                         viewModel.paletteMap[packageName]!!,
                                         view.getChildAt(index),
