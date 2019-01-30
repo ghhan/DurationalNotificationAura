@@ -63,7 +63,8 @@ class EnhancedNotificationAuraView(context: Context, attrs: AttributeSet?): View
 
     override fun onDraw(canvas: Canvas?) {
         canvas?.let{
-            it.drawRGB(200, 200, 200)
+            it.drawARGB(0, 200, 200, 200)
+            // it.drawRGB(200, 200, 200)
             visualData?.let{
                 data -> visualEffect?.drawVisualEffect(data, it)
             }
