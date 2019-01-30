@@ -1,0 +1,154 @@
+package kr.ac.snu.hcil.durationalnotificationaura
+
+import android.content.Context
+import android.net.Uri
+import android.os.Bundle
+import android.support.v4.app.Fragment
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.Button
+import android.widget.FrameLayout
+import com.unity3d.player.UnityPlayer
+import kr.ac.snu.hcil.visualeffecttest.UnityPlayerActivity
+
+
+// TODO: Rename parameter arguments, choose names that match
+// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
+private const val ARG_PARAM1 = "param1"
+private const val ARG_PARAM2 = "param2"
+
+/**
+ * A simple [Fragment] subclass.
+ * Activities that contain this fragment must implement the
+ * [UnityFragment.OnFragmentInteractionListener] interface
+ * to handle interaction events.
+ * Use the [UnityFragment.newInstance] factory method to
+ * create an instance of this fragment.
+ *
+ */
+class UnityFragment : Fragment() {
+    // TODO: Rename and change types of parameters
+    private var param1: String? = null
+    private var param2: String? = null
+    private var listener: OnFragmentInteractionListener? = null
+
+    protected lateinit var mUnityPlayer: UnityPlayer // don't change the name of this variable; referenced from native code
+    //Declare a FrameLayout object
+    internal lateinit var fl_forUnity: FrameLayout
+    //Test Button
+    internal lateinit var button: Button
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        arguments?.let {
+            param1 = it.getString(ARG_PARAM1)
+            param2 = it.getString(ARG_PARAM2)
+        }
+    }
+
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        mUnityPlayer = UnityPlayer(activity)
+        val view = inflater.inflate(R.layout.fragment_unity, container, false)
+
+        //Inflate the frame layout from XML
+        this.fl_forUnity = view.findViewById<View>(R.id.fl_forUnity) as FrameLayout
+
+        //Add the mUnityPlayer view to the FrameLayout, and set it to fill all the area available
+        this.fl_forUnity.addView(
+            mUnityPlayer.view,
+            FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT
+        )
+
+        button = view.findViewById<View>(R.id.button) as Button
+        button.setOnClickListener {
+            //Toast.makeText(view.getContext(), "BOOM!", Toast.LENGTH_SHORT).show();
+        }
+
+        //Requesting the Focus
+        mUnityPlayer.requestFocus()
+
+        //The main fix of resolving BLACK SCREEN PLAYER ISSUE
+        mUnityPlayer.windowFocusChanged(true)//First fix Line
+        // Yes, it's "static" way and should to be more dynamic, anyway, it works well
+        return view
+    }
+
+    // TODO: Rename method, update argument and hook method into UI event
+    fun onButtonPressed(uri: Uri) {
+        listener?.onFragmentInteraction(uri)
+    }
+
+    /*
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        if (context is OnFragmentInteractionListener) {
+            listener = context
+        } else {
+            throw RuntimeException(context.toString() + " must implement OnFragmentInteractionListener")
+        }
+    }
+
+    override fun onDetach() {
+        super.onDetach()
+        listener = null
+    }
+    */
+
+    // Quit Unity
+    override fun onDestroy() {
+        mUnityPlayer.quit()
+        super.onDestroy()
+    }
+
+    // Pause Unity
+    override fun onPause() {
+        super.onPause()
+        mUnityPlayer.pause()
+    }
+
+    // Resume Unity
+    override fun onResume() {
+        super.onResume()
+        mUnityPlayer.resume()
+    }
+
+    /**
+     * This interface must be implemented by activities that contain this
+     * fragment to allow an interaction in this fragment to be communicated
+     * to the activity and potentially other fragments contained in that
+     * activity.
+     *
+     *
+     * See the Android Training lesson [Communicating with Other Fragments]
+     * (http://developer.android.com/training/basics/fragments/communicating.html)
+     * for more information.
+     */
+    interface OnFragmentInteractionListener {
+        // TODO: Update argument type and name
+        fun onFragmentInteraction(uri: Uri)
+    }
+
+    companion object {
+        /**
+         * Use this factory method to create a new instance of
+         * this fragment using the provided parameters.
+         *
+         * @param param1 Parameter 1.
+         * @param param2 Parameter 2.
+         * @return A new instance of fragment UnityFragment.
+         */
+        // TODO: Rename and change types and number of parameters
+        @JvmStatic
+        fun newInstance(param1: String, param2: String) =
+            UnityFragment().apply {
+                arguments = Bundle().apply {
+                    putString(ARG_PARAM1, param1)
+                    putString(ARG_PARAM2, param2)
+                }
+            }
+    }
+}

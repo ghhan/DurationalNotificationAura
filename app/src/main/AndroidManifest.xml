@@ -12,13 +12,7 @@
             android:supportsRtl="true"
             android:theme="@style/AppTheme"
             tools:replace="android:icon,android:theme">
-        <activity android:name=".UnityEffect">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <action android:name="android.intent.action.VIEW"/>
-
-                <category android:name="android.intent.category.LAUNCHER"/>
-            </intent-filter>
+        <activity android:name=".UnityEffectActivity">
         </activity>
         <activity android:name=".EnhancedHomeScreenActivity">
         </activity>
@@ -37,14 +31,12 @@
         <activity android:name=".ColorTestActivity">
         </activity>
         <activity android:name=".ScreenSlidePagerActivity">
-            <!--
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <action android:name="android.intent.action.VIEW"/>
 
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
-            -->
         </activity>
     </application>
 
