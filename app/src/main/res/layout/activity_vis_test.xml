@@ -6,27 +6,38 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context=".VisTestActivity">
-    <kr.ac.snu.hcil.durationalnotificationaura.ui.enhancedhomescreen.EnhancedNotificationAuraView
-            android:id="@+id/testENAV"
-            android:layout_width="425dp" android:layout_height="270dp"
-            app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent"
-            android:layout_marginTop="122dp" app:layout_constraintEnd_toEndOf="parent"
-            app:barrierAllowsGoneWidgets="false" android:background="?android:attr/panelBackground"/>
-    <kr.ac.snu.hcil.durationalnotificationaura.ui.enhancedhomescreen.EnhancedNotificationAuraView
-            android:id="@+id/testENAV2"
-            android:layout_width="200dp"
-            android:layout_height="195dp"
-            android:layout_marginTop="76dp" app:layout_constraintTop_toBottomOf="@+id/testENAV"
-            app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toStartOf="@+id/testENAV3"
-            app:layout_constraintBottom_toBottomOf="parent" android:layout_marginBottom="68dp"
-            app:layout_constraintHorizontal_chainStyle="packed" android:background="?android:attr/panelBackground"/>
-    <kr.ac.snu.hcil.durationalnotificationaura.ui.enhancedhomescreen.EnhancedNotificationAuraView
-            android:id="@+id/testENAV3"
-            android:layout_width="211dp"
-            android:layout_height="195dp"
-            app:layout_constraintStart_toEndOf="@+id/testENAV2" android:layout_marginTop="76dp"
-            app:layout_constraintTop_toBottomOf="@+id/testENAV" app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent" android:layout_marginBottom="68dp"
-            android:background="?android:attr/panelBackground"/>
+    <kr.ac.snu.hcil.durationalnotificationaura.ui.enhancedhomescreen.EnhancedAppAuraView
+            android:id="@+id/testEAAV"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintTop_toTopOf="parent" app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" android:layout_marginBottom="130dp"
+            android:layout_marginEnd="50dp" app:layout_constraintEnd_toEndOf="parent" android:layout_marginStart="50dp"
+            android:layout_marginTop="200dp" android:background="@color/colorAccent">
+        <!--
+        <kr.ac.snu.hcil.durationalnotificationaura.ui.enhancedhomescreen.EnhancedNotificationAuraView
+                android:id="@+id/testENAV"
+                android:layout_width="match_parent" android:layout_height="match_parent"
+                app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent"
+                android:layout_marginTop="122dp" app:layout_constraintEnd_toEndOf="parent"
+                app:barrierAllowsGoneWidgets="false" android:background="?android:attr/panelBackground"/>
+        <kr.ac.snu.hcil.durationalnotificationaura.ui.enhancedhomescreen.EnhancedNotificationAuraView
+                android:id="@+id/testENAV2"
+                android:layout_width="200dp"
+                android:layout_height="195dp"
+                android:layout_marginTop="76dp" app:layout_constraintTop_toBottomOf="@+id/testENAV"
+                app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toStartOf="@+id/testENAV3"
+                app:layout_constraintBottom_toBottomOf="parent" android:layout_marginBottom="68dp"
+                app:layout_constraintHorizontal_chainStyle="packed" android:background="?android:attr/panelBackground"/>
+        <kr.ac.snu.hcil.durationalnotificationaura.ui.enhancedhomescreen.EnhancedNotificationAuraView
+                android:id="@+id/testENAV3"
+                android:layout_width="211dp"
+                android:layout_height="195dp"
+                app:layout_constraintStart_toEndOf="@+id/testENAV2" android:layout_marginTop="76dp"
+                app:layout_constraintTop_toBottomOf="@+id/testENAV" app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent" android:layout_marginBottom="68dp"
+                android:background="?android:attr/panelBackground"/>
+                -->
+    </kr.ac.snu.hcil.durationalnotificationaura.ui.enhancedhomescreen.EnhancedAppAuraView>
 
 </android.support.constraint.ConstraintLayout>

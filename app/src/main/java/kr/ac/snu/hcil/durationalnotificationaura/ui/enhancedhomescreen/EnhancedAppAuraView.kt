@@ -21,7 +21,7 @@ class EnhancedAppAuraView(context: Context, attributeSet: AttributeSet?): ViewGr
     }
 
     init{
-        //clipChildren = false
+        clipChildren = false
         //clipToOutline = false
         //clipToPadding = false
     }
@@ -105,12 +105,18 @@ class EnhancedAppAuraView(context: Context, attributeSet: AttributeSet?): ViewGr
         }
     }
 
+    /*
+    // Obsoleted
     fun addEnhancedNotificationAuraView(visData: NotificationEnhancedData, visEffect: AbstractVisEffect){
         addView(
             EnhancedNotificationAuraView(context, null).also{
                     view -> view.setVisualData(visData); view.setVisualEffect(visEffect)
             } as View
         )
+    }
+    */
+    fun addEnhancedNotificationAuraView(view: View) {
+        addView (view)
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
@@ -119,8 +125,11 @@ class EnhancedAppAuraView(context: Context, attributeSet: AttributeSet?): ViewGr
         val heightpixels = View.MeasureSpec.getSize(heightMeasureSpec)
         val heightmode = View.MeasureSpec.getMode(heightMeasureSpec)
 
+/*
         val columnCount = (parent as GridLayout).columnCount
         //TODO: consider device orientation
+*/
+        val columnCount = 1
 
         super.onMeasure(
             View.MeasureSpec.makeMeasureSpec(widthpixels/columnCount, View.MeasureSpec.EXACTLY),

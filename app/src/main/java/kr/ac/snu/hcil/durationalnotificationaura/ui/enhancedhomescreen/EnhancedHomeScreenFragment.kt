@@ -16,6 +16,7 @@ import kr.ac.snu.hcil.durationalnotificationaura.R
 import kr.ac.snu.hcil.durationalnotificationaura.visualEffects.AnimationParams
 import kr.ac.snu.hcil.durationalnotificationaura.visualEffects.AnimationTypes
 import kr.ac.snu.hcil.durationalnotificationaura.visualEffects.DerivedVisEffect
+import kr.ac.snu.hcil.durationalnotificationaura.visualEffects.DerivedVisEffect2
 
 class EnhancedHomeScreenFragment : Fragment() {
 
@@ -68,7 +69,7 @@ class EnhancedHomeScreenFragment : Fragment() {
                                 view ->
                                 view.setEnhanceData(data)
                                 view.setVisualEffects(List(data.notificationData.size) { index ->
-                                    DerivedVisEffect(
+                                    DerivedVisEffect2(
                                         viewModel.paletteMap[packageName]!!,
                                         view.getChildAt(index),
                                         mapOf(),
@@ -137,7 +138,7 @@ class EnhancedHomeScreenFragment : Fragment() {
                                 view.background = viewModel.drawableMap[packageName]
                                 view.setEnhanceData(data)
                                 view.setVisualEffects(List(data.notificationData.size) {index ->
-                                    DerivedVisEffect(
+                                    DerivedVisEffect2(
                                         viewModel.paletteMap[packageName]!!,
                                         view.getChildAt(index),
                                         mapOf(),

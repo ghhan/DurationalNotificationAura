@@ -129,6 +129,7 @@ abstract class AbstractVisEffect(
     fun getCurrLifeCycle() = currentLifeStage
     fun getPaintMap() = paintMap
     fun getAnimatorSet() = animatorSet
+    fun getVisParams() = visParams
 
     abstract fun drawVisualEffect(data: NotificationEnhancedData, canvas: Canvas)
 }
