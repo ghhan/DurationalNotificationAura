@@ -145,10 +145,10 @@ class ControlPanelFragment: Fragment(), AdapterView.OnItemSelectedListener {
             }?.toMutableMap()
             currDataMap?.let{
                 currData ->
-                currData.forEach{
-                        (key, value) ->
-                    Log.i("key", key)
-                }
+//                currData.forEach{
+//                        (key, value) ->
+//                    Log.i("key", key)
+//                }
                 val newData = currData.mapValues {
                         entry ->
                     if(entry.key == packageNameSpinner.selectedItem){
@@ -166,6 +166,11 @@ class ControlPanelFragment: Fragment(), AdapterView.OnItemSelectedListener {
                         entry.value
                     }
                 }.toMutableMap()
+
+                val notCurrentDataMap = viewModel.getNotificationByApps().value?.filter{
+                    it.value.screenNumber != currScreenNumber
+                }?.toMutableMap()
+                newData.putAll(notCurrentDataMap!!)
                 viewModel.setNotificationByApps(newData)
             }
         }
@@ -178,48 +183,7 @@ class ControlPanelFragment: Fragment(), AdapterView.OnItemSelectedListener {
                     currData ->
                 val newData = currData.mapValues {
                         entry ->
-                    if(entry.key == packageNameSpinner.selectedItem){
-                        entry.value.apply{
-                            notificationData.forEach{
-                                    data -> data.currEnhancement = data.enhanceOffset
-                                data.timeElapsed = 0
-                                data.lifeCycle = EnhancedNotificationLifeCycle.STATE_1
-                            }
-                        }
-                    }
-                    else{
-                        entry.value
-                    }
-                }.toMutableMap()
-                viewModel.setNotificationByApps(newData)
-            }
-//            viewModel.getEnhancementDataInCurrentScreen(currScreenNumber).value?.let{
-//                    currData ->
-//                val newData = currData.mapValues {
-//                        entry ->
-//                    if(entry.key == packageNameSpinner.selectedItem){
-//                        entry.value.apply{
-//                            notificationData.forEach{
-//                                    data -> data.currEnhancement = data.enhanceOffset
-//                                data.timeElapsed = 0
-//                                data.lifeCycle = EnhancedNotificationLifeCycle.STATE_1
-//                            }
-//                        }
-//                    }
-//                    else{
-//                        entry.value
-//                    }
-//                }.toMutableMap()
-//                viewModel.setNotificationByApps(newData)
-//            }
-        }
-
-        resetAllButton.setOnClickListener{
-            viewModel.getEnhancementDataInCurrentScreen(currScreenNumber).value?.let{
-                    currData ->
-                val newData = currData.mapValues {
-                        entry: Map.Entry<String, AppNotificationsEnhancedData>  ->
-                    if(entry.value.screenNumber == currScreenNumber){
+                    if (entry.key == packageNameSpinner.selectedItem){
                         entry.value.apply{
                             notificationData.forEach{
                                     data ->
@@ -233,9 +197,58 @@ class ControlPanelFragment: Fragment(), AdapterView.OnItemSelectedListener {
                         entry.value
                     }
                 }.toMutableMap()
+
+                val notCurrentDataMap = viewModel.getNotificationByApps().value?.filter{
+                    it.value.screenNumber != currScreenNumber
+                }?.toMutableMap()
+                newData.putAll(notCurrentDataMap!!)
                 viewModel.setNotificationByApps(newData)
             }
         }
+
+        resetAllButton.setOnClickListener {
+            viewModel.getNotificationByApps().value?.filter {
+                it.value.screenNumber == currScreenNumber
+            }?.toMutableMap()?.let { currData ->
+                val newData = currData.mapValues { entry ->
+                    Log.e("entry Value", entry.value.packageName)
+                    entry.value.apply {
+                        notificationData.forEach { data ->
+                            data.currEnhancement = data.enhanceOffset
+                            data.timeElapsed = 0
+                            data.lifeCycle = EnhancedNotificationLifeCycle.STATE_1
+                        }
+                    }
+                }.toMutableMap()
+
+                val notCurrentDataMap = viewModel.getNotificationByApps().value?.filter{
+                    it.value.screenNumber != currScreenNumber
+                }?.toMutableMap()
+                newData.putAll(notCurrentDataMap!!)
+                viewModel.setNotificationByApps(newData)
+            }
+        }
+//            viewModel.getEnhancementDataInCurrentScreen(currScreenNumber).value?.let{
+//                    currData ->
+//                val newData = currData.mapValues {
+//                        entry: Map.Entry<String, AppNotificationsEnhancedData>  ->
+//                    if(entry.value.screenNumber == currScreenNumber){
+//                        entry.value.apply{
+//                            notificationData.forEach{
+//                                    data ->
+//                                data.currEnhancement = data.enhanceOffset
+//                                data.timeElapsed = 0
+//                                data.lifeCycle = EnhancedNotificationLifeCycle.STATE_1
+//                            }
+//                        }
+//                    }
+//                    else{
+//                        entry.value
+//                    }
+//                }.toMutableMap()
+//                viewModel.setNotificationByApps(newData)
+//            }
+//        }
 
         chartSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {

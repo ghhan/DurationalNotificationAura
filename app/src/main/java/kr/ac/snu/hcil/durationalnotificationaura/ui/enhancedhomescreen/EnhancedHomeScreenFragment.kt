@@ -80,7 +80,7 @@ class EnhancedHomeScreenFragment : Fragment() {
                     appNotiData.map{
                         entry ->
                         val packageName = entry.key
-                        Log.i("packageName update", entry.key)
+                        Log.e("packageName update", entry.key)
                         val data = entry.value
                         val targetView = findViewWithPackageName(gridLayout, packageName)
                         if (targetView != null) {
