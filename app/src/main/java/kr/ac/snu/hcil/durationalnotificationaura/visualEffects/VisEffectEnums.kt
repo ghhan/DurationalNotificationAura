@@ -17,3 +17,10 @@ enum class AnimationTypes {
     TRANSLATION_X,
     TRANSLATION_Y
 }
+
+enum class Shapes {
+    OVAL,
+    CIRCLE,
+    RECT,
+    ROUND_RECT
+}

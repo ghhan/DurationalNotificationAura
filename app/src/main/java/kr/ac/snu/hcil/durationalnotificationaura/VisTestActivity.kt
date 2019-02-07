@@ -15,12 +15,10 @@ import kotlinx.android.synthetic.main.activity_vis_test.*
 import kr.ac.snu.hcil.durationalnotificationaura.data.NotificationEnhancedData
 import kr.ac.snu.hcil.durationalnotificationaura.ui.enhancedhomescreen.EnhancedHomeScreenViewModel
 import kr.ac.snu.hcil.durationalnotificationaura.ui.enhancedhomescreen.EnhancedNotificationAuraView
-import kr.ac.snu.hcil.durationalnotificationaura.visualEffects.AnimationParams
-import kr.ac.snu.hcil.durationalnotificationaura.visualEffects.AnimationTypes
-import kr.ac.snu.hcil.durationalnotificationaura.visualEffects.DerivedVisEffect
-import kr.ac.snu.hcil.durationalnotificationaura.visualEffects.DerivedVisEffect2
+import kr.ac.snu.hcil.durationalnotificationaura.visualEffects.*
 import java.util.*
 import kotlin.math.roundToLong
+import kotlin.random.Random
 
 class VisTestActivity : AppCompatActivity() {
 
@@ -118,7 +116,7 @@ class VisTestActivity : AppCompatActivity() {
         */
 
         Log.d("AURA_TEST", "onCreate")
-        installedApplications.map { applicationInfo ->
+        installedApplications.subList(0, 10).map { applicationInfo ->
             val appName = applicationInfo.packageName
             val iconDrawable = pm.getApplicationIcon(appName)
             val bitmap = getBitmapFromDrawable(iconDrawable)
@@ -140,10 +138,18 @@ class VisTestActivity : AppCompatActivity() {
                                     it.timeElapsed = (0.8 * it.naturalDecay).roundToLong()
                                 })
                             view.setVisualEffect(
-                                DerivedVisEffect2(
+                                DerivedVisEffect3(
                                     palette,
                                     view,
-                                    mapOf(),
+                                    mapOf("shape" to (installedApplications.indexOf(applicationInfo) % 3).toFloat(),
+                                        "centerX" to installedApplications.indexOf(applicationInfo).toFloat() * 100f + 50f,
+                                        "radiusX" to (2 - (installedApplications.indexOf(applicationInfo) % 3 / 2)) * 25f,
+                                        "centerY" to 359f,
+                                        "radiusY" to (2 - (installedApplications.indexOf(applicationInfo) % 3 / 2)) * 25f,
+                                        "left" to installedApplications.indexOf(applicationInfo).toFloat() * 100f,
+                                        "right" to (installedApplications.indexOf(applicationInfo).toFloat() + 1f) * 100f,
+                                        "top" to 409f,
+                                        "bottom" to 309f),
                                     mapOf(
                                         AnimationTypes.ALPHA to
                                                 AnimationParams(
@@ -153,20 +159,14 @@ class VisTestActivity : AppCompatActivity() {
                                                 ),
                                         AnimationTypes.SCALE_X to
                                                 AnimationParams(
-                                                    arrayOf(0f, 2f).toFloatArray(),
-                                                    3000,
-                                                    LinearInterpolator()
-                                                ),
-                                        AnimationTypes.SCALE_Y to
-                                                AnimationParams(
-                                                    arrayOf(0f, 2f).toFloatArray(),
+                                                    arrayOf(0f, 1f).toFloatArray(),
                                                     3000,
                                                     LinearInterpolator()
                                                 ),
                                         AnimationTypes.TRANSLATION_X to
                                                 AnimationParams(
-                                                    arrayOf(-500f, 500f).toFloatArray(),
-                                                    100 * (installedApplications.indexOf(applicationInfo)).toLong(),
+                                                    arrayOf(-100f, 300f).toFloatArray(),
+                                                    1000 * (installedApplications.indexOf(applicationInfo)).toLong(),
                                                     LinearInterpolator()
                                                 )
                                         )
