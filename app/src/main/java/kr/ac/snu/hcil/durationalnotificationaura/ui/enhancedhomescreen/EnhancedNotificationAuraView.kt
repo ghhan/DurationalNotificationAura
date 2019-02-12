@@ -15,7 +15,7 @@ class EnhancedNotificationAuraView(context: Context, attrs: AttributeSet?): View
     }
 
     init{
-        //clipToOutline = false
+        clipToOutline = false
     }
 
     private var visualData: NotificationEnhancedData? = null

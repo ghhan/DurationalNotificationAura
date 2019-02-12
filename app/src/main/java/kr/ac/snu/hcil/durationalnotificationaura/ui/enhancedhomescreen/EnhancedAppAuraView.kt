@@ -35,6 +35,8 @@ class EnhancedAppAuraView(context: Context, attributeSet: AttributeSet?): ViewGr
         val currentSize = childCount
         for(index:Int in 0..(currentSize-1)){
             val child = getChildAt(index)
+            if(!(child is EnhancedNotificationAuraView))
+                continue
             if(child.id == id)
                 return child
         }
@@ -95,7 +97,8 @@ class EnhancedAppAuraView(context: Context, attributeSet: AttributeSet?): ViewGr
                                 ViewGroup.LayoutParams.MATCH_PARENT
                             )
                         }
-                , childCount - 1)
+                //, childCount - 1
+                )
             }
 
             //TODO: remove logic

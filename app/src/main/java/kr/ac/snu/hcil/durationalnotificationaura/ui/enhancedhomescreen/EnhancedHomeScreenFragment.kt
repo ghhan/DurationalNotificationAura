@@ -85,6 +85,7 @@ class EnhancedHomeScreenFragment : Fragment() {
                             (targetView as EnhancedAppAuraView).let{
                                 view ->
                                 view.setEnhanceData(data)
+                                /*
                                 view.setVisualEffects(List(data.notificationData.size) { index ->
                                     DerivedVisEffect(
                                         viewModel.paletteMap[packageName]!!,
@@ -112,6 +113,7 @@ class EnhancedHomeScreenFragment : Fragment() {
                                         )
                                     )
                                 })
+                                */
                             }
                         }
                         else {
@@ -119,11 +121,6 @@ class EnhancedHomeScreenFragment : Fragment() {
                                 view ->
                                 view.tag = packageName
                                 //view.background = viewModel.drawableMap[packageName]
-                                view.setImageView(
-                                    CircularImageView(context).apply{
-                                        setImageDrawable(viewModel.drawableMap[packageName])
-                                    }
-                                )
                                 view.setEnhanceData(data)
                                 view.setVisualEffects(List(data.notificationData.size) {index ->
                                     DerivedVisEffect(
@@ -152,6 +149,13 @@ class EnhancedHomeScreenFragment : Fragment() {
                                         )
                                     )
                                 })
+
+                                view.setImageView(
+                                    CircularImageView(context).apply{
+                                        setImageDrawable(viewModel.drawableMap[packageName])
+                                        alpha = 0.5f
+                                    }
+                                )
                             }
                         }
                     }

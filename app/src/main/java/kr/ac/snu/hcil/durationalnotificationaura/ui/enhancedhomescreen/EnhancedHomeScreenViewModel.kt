@@ -128,6 +128,7 @@ class EnhancedHomeScreenViewModel(application: Application) : AndroidViewModel(a
         val installedPackages = pm.getInstalledPackages(PackageManager.GET_ACTIVITIES)
         val installedApplications = pm.getInstalledApplications(PackageManager.GET_META_DATA)
 
+        /*
         installedApplications.map{
             applicationInfo ->
             val appName = applicationInfo.packageName
@@ -172,7 +173,7 @@ class EnhancedHomeScreenViewModel(application: Application) : AndroidViewModel(a
             }
         }
 
-        /*
+
         for(ai in installedApplications.shuffled()){
             val appName = ai.packageName
             val randInt = random.nextInt()
@@ -208,10 +209,10 @@ class EnhancedHomeScreenViewModel(application: Application) : AndroidViewModel(a
                 }
             }
         }
-        */
-        setNotificationByApps(mutableMap)
 
-        /*
+        setNotificationByApps(mutableMap)
+*/
+
         installedPackages.map{
             pi ->
             val packageName = pi.packageName
@@ -232,26 +233,56 @@ class EnhancedHomeScreenViewModel(application: Application) : AndroidViewModel(a
         var currScreenNum = 0
         var currPosNum = 0
 
+        val mustAppList = listOf(
+            "kr.ac.snu.hcil.durationalnotificationaura",
+            "com.kakao.talk",
+            "com.android.phone",
+            "com.google.android.gm",
+            "com.android.mms",
+            "com.facebook.mlite",
+            "com.android.providers.calendar",
+            "com.google.android.apps.maps",
+            "android"
+        )
+
+        for(pi in installedPackages){
+            val appName = pi.packageName
+            if(appName in mustAppList){
+                mutableMap[appName] = AppNotificationsEnhancedData(
+                    appName,
+                    currScreenNum,
+                    Pair( currPosNum % 4, currPosNum / 4)
+                )
+                currPosNum++
+            }
+        }
+
+        /*
         for(pi in installedPackages.shuffled()){
-            val packageName = pi.packageName
+            val appName = pi.packageName
             val randInt = random.nextInt()
 
             if(currScreenNum == 5){
-                mutableMap[packageName] = AppNotificationsEnhancedData(
-                    packageName
-                )
+                if(appName in mustAppList)
+                    continue
+                else
+                    mutableMap[appName] = AppNotificationsEnhancedData(appName)
             }
+
             else{
+                if(appName in mustAppList)
+                    continue
+
                 if(randInt % 2 == 0){
-                    mutableMap[packageName] = AppNotificationsEnhancedData(
-                        packageName,
+                    mutableMap[appName] = AppNotificationsEnhancedData(
+                        appName,
                         currScreenNum,
                         Pair( currPosNum % 4, currPosNum / 4)
                     )
                 }
                 else{
-                    mutableMap[packageName] = AppNotificationsEnhancedData(
-                        packageName
+                    mutableMap[appName] = AppNotificationsEnhancedData(
+                        appName
                     )
                 }
 
@@ -262,8 +293,10 @@ class EnhancedHomeScreenViewModel(application: Application) : AndroidViewModel(a
                 }
             }
         }
-        setNotificationByApps(mutableMap)
         */
+
+        setNotificationByApps(mutableMap)
+
     }
 
     fun getCurrentScreenNumber():LiveData<Int>{
