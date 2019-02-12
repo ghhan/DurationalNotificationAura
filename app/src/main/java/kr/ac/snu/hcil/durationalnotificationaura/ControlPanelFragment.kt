@@ -10,6 +10,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.Color
+import android.opengl.Visibility
 import android.os.Build
 import android.os.Bundle
 import android.support.v4.app.Fragment
@@ -26,6 +27,7 @@ import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.highlight.Highlight
+import com.github.mikephil.charting.utils.EntryXComparator
 import kotlinx.android.synthetic.main.control_panel_fragment.*
 import kr.ac.snu.hcil.durationalnotificationaura.data.AppNotificationsEnhancedData
 import kr.ac.snu.hcil.durationalnotificationaura.data.EnhancedNotificationLifeCycle
@@ -36,6 +38,7 @@ import kr.ac.snu.hcil.durationalnotificationaura.ui.enhancedhomescreen.EnhancedH
 import kr.ac.snu.hcil.durationalnotificationaura.utils.MyNotificationListenerService
 import kr.ac.snu.hcil.durationalnotificationaura.utils.MyXAxisValueFormatter
 import kr.ac.snu.hcil.durationalnotificationaura.utils.NotificationRandomGenerator
+import java.util.*
 
 class ControlPanelFragment: Fragment(), AdapterView.OnItemSelectedListener {
 
@@ -47,10 +50,13 @@ class ControlPanelFragment: Fragment(), AdapterView.OnItemSelectedListener {
 
     private lateinit var viewModel: EnhancedHomeScreenViewModel
     private lateinit var packageNameAdapter: ArrayAdapter<String>
+    private lateinit var chartAdapter: ArrayAdapter<String>
     private var currScreenNumber = 0
     private val notificationReceiver = NotificationReceiver()
     private val intentFilter = IntentFilter().also{ it.addAction(ACTION)}
     private var generatedNotificationID = 0
+
+    private lateinit var currentSelectedNotifications : MutableList<NotificationEnhancedData>
 
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -59,6 +65,10 @@ class ControlPanelFragment: Fragment(), AdapterView.OnItemSelectedListener {
         packageNameAdapter = ArrayAdapter(context!!, R.layout.simple_spinner_dropdown_item)
         packageNameAdapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item)
         packageNameSpinner.onItemSelectedListener = this
+
+        chartAdapter = ArrayAdapter(context!!, R.layout.simple_spinner_dropdown_item)
+        chartAdapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item)
+        chartSpinner.adapter = chartAdapter
 
         activity?.startService(Intent(activity, MyNotificationListenerService::class.java))
 
@@ -130,53 +140,50 @@ class ControlPanelFragment: Fragment(), AdapterView.OnItemSelectedListener {
         }
 
         interactButton.setOnClickListener {
-            viewModel.getEnhancementDataInCurrentScreen(currScreenNumber).value?.let{
-                    currData ->
+            val currDataMap = viewModel.getNotificationByApps().value?.filter{
+                it.value.screenNumber == currScreenNumber
+            }?.toMutableMap()
+            currDataMap?.let{
+                currData ->
+//                currData.forEach{
+//                        (key, value) ->
+//                    Log.i("key", key)
+//                }
                 val newData = currData.mapValues {
                         entry ->
                     if(entry.key == packageNameSpinner.selectedItem){
                         entry.value.apply{
                             notificationData.forEach{
-                                    data -> data.lifeCycle = EnhancedNotificationLifeCycle.STATE_2
+                                    data ->
+                                data.lifeCycle = EnhancedNotificationLifeCycle.STATE_3
+                                data.interactionTime = System.currentTimeMillis()
+                                data.interactionEnhancement = data.currEnhancement
                             }
+                            drawChart(currentSelectedNotifications, 0)
                         }
                     }
                     else{
                         entry.value
                     }
                 }.toMutableMap()
+
+                val notCurrentDataMap = viewModel.getNotificationByApps().value?.filter{
+                    it.value.screenNumber != currScreenNumber
+                }?.toMutableMap()
+                newData.putAll(notCurrentDataMap!!)
                 viewModel.setNotificationByApps(newData)
             }
         }
 
         resetButton.setOnClickListener{
-            viewModel.getEnhancementDataInCurrentScreen(currScreenNumber).value?.let{
+            val currDataMap = viewModel.getNotificationByApps().value?.filter{
+                it.value.screenNumber == currScreenNumber
+            }?.toMutableMap()
+            currDataMap?.let{
                     currData ->
                 val newData = currData.mapValues {
                         entry ->
-                    if(entry.key == packageNameSpinner.selectedItem){
-                        entry.value.apply{
-                            notificationData.forEach{
-                                    data -> data.currEnhancement = data.enhanceOffset
-                                data.timeElapsed = 0
-                                data.lifeCycle = EnhancedNotificationLifeCycle.STATE_1
-                            }
-                        }
-                    }
-                    else{
-                        entry.value
-                    }
-                }.toMutableMap()
-                viewModel.setNotificationByApps(newData)
-            }
-        }
-
-        resetAllButton.setOnClickListener{
-            viewModel.getEnhancementDataInCurrentScreen(currScreenNumber).value?.let{
-                    currData ->
-                val newData = currData.mapValues {
-                        entry: Map.Entry<String, AppNotificationsEnhancedData>  ->
-                    if(entry.value.screenNumber == currScreenNumber){
+                    if (entry.key == packageNameSpinner.selectedItem){
                         entry.value.apply{
                             notificationData.forEach{
                                     data ->
@@ -190,9 +197,80 @@ class ControlPanelFragment: Fragment(), AdapterView.OnItemSelectedListener {
                         entry.value
                     }
                 }.toMutableMap()
+
+                val notCurrentDataMap = viewModel.getNotificationByApps().value?.filter{
+                    it.value.screenNumber != currScreenNumber
+                }?.toMutableMap()
+                newData.putAll(notCurrentDataMap!!)
                 viewModel.setNotificationByApps(newData)
             }
         }
+
+        resetAllButton.setOnClickListener {
+            viewModel.getNotificationByApps().value?.filter {
+                it.value.screenNumber == currScreenNumber
+            }?.toMutableMap()?.let { currData ->
+                val newData = currData.mapValues { entry ->
+                    Log.e("entry Value", entry.value.packageName)
+                    entry.value.apply {
+                        notificationData.forEach { data ->
+                            data.currEnhancement = data.enhanceOffset
+                            data.timeElapsed = 0
+                            data.lifeCycle = EnhancedNotificationLifeCycle.STATE_1
+                        }
+                    }
+                }.toMutableMap()
+
+                val notCurrentDataMap = viewModel.getNotificationByApps().value?.filter{
+                    it.value.screenNumber != currScreenNumber
+                }?.toMutableMap()
+                newData.putAll(notCurrentDataMap!!)
+                viewModel.setNotificationByApps(newData)
+            }
+        }
+//            viewModel.getEnhancementDataInCurrentScreen(currScreenNumber).value?.let{
+//                    currData ->
+//                val newData = currData.mapValues {
+//                        entry: Map.Entry<String, AppNotificationsEnhancedData>  ->
+//                    if(entry.value.screenNumber == currScreenNumber){
+//                        entry.value.apply{
+//                            notificationData.forEach{
+//                                    data ->
+//                                data.currEnhancement = data.enhanceOffset
+//                                data.timeElapsed = 0
+//                                data.lifeCycle = EnhancedNotificationLifeCycle.STATE_1
+//                            }
+//                        }
+//                    }
+//                    else{
+//                        entry.value
+//                    }
+//                }.toMutableMap()
+//                viewModel.setNotificationByApps(newData)
+//            }
+//        }
+
+        chartSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                view?.let {
+                    val index = (it as TextView).text.toString().toInt()
+                    drawChart(currentSelectedNotifications, index - 1)
+                }
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+                if (currentSelectedNotifications.size > 0) {
+                    drawChart(currentSelectedNotifications, 0)
+                }
+                else {
+                    lineChart.clear()
+                    lineChart.notifyDataSetChanged()
+                    lineChart.invalidate()
+                }
+            }
+
+        }
+
     }
 
     private fun printShortcuts(){
@@ -210,8 +288,8 @@ class ControlPanelFragment: Fragment(), AdapterView.OnItemSelectedListener {
 
     override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
         //해당 packageName으로부터 정보 받아와야 함
-
         view?.let{
+
             val packageName = (it as TextView).text
             viewModel.getNotificationByApps().let{
                     livedata -> livedata.value?.let{
@@ -219,13 +297,19 @@ class ControlPanelFragment: Fragment(), AdapterView.OnItemSelectedListener {
                 data[packageName]!!.notificationData.let{
                     notifications ->
 
-
-
+                    currentSelectedNotifications = notifications
                     if(notifications.size == 0){
+                        //LineChart Spinner Logic
+                        chartAdapter.clear()
+                        chartAdapter.notifyDataSetChanged()
+                        chartSpinner.visibility = View.INVISIBLE
+
                         statusView.text = "${(it).text}\n" +
                                 "Number of notifications: ${notifications.size}\n"+
                                 "Position: ${data[packageName]!!.positionInScreen}"
-                        lineChart.data = null
+                        lineChart.clear()
+                        lineChart.notifyDataSetChanged()
+                        lineChart.invalidate()
                     }
                     else{
                         statusView.text = "${(it).text}\n" +
@@ -235,29 +319,54 @@ class ControlPanelFragment: Fragment(), AdapterView.OnItemSelectedListener {
                                 "Current State: ${notifications[0].lifeCycle}\n" +
                                 "Current Enhancement: ${notifications[0].currEnhancement}"
 
+                        // LineChart Spinner Logic
+                        chartAdapter.clear()
+                        for (i in 1 .. notifications.size) {
+                            chartAdapter.add(i.toString())
+                        }
+                        chartAdapter.notifyDataSetChanged()
+                        chartSpinner.visibility = View.VISIBLE
 
                         // LineChart Logic
-                        val dataSet = LineDataSet(chartDataHelper(notifications[0]), "Model").apply {
-                            setDrawFilled(true)
-                            isHighlightEnabled = true
-                            highLightColor = Color.BLACK
-                            setDrawHighlightIndicators(true)
-                        }
-                        lineChart.run {
-                            setData(LineData(dataSet))
-                            xAxis.position = XAxis.XAxisPosition.BOTTOM
-                            xAxis.valueFormatter = MyXAxisValueFormatter()
-                            axisRight.isEnabled = false
-                            setDrawGridBackground(false)
-                            description = null
-                            highlightValue(Highlight(dataSet.getEntryForIndex(3).x, dataSet.getEntryForIndex(3).y, 3))
-                        }
+                        drawChart(notifications, 0)
                     }
                 }
                 }
             }
         }
 
+    }
+
+    override fun onNothingSelected(parent: AdapterView<*>?) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    private fun drawChart(notifications: MutableList<NotificationEnhancedData>, index: Int) {
+        val dataArray = if (notifications.get(0).lifeCycle >= EnhancedNotificationLifeCycle.STATE_3)
+            chartDataInteractionHelper(notifications[index]) else chartDataHelper(notifications[index])
+
+        val dataSet = LineDataSet(dataArray, "Model").apply {
+            setDrawFilled(true)
+            isHighlightEnabled = true
+            highLightColor = Color.BLACK
+            setDrawHighlightIndicators(true)
+        }
+
+        lineChart.run {
+            clear()
+            invalidate()
+            data = LineData(dataSet)
+            xAxis.position = XAxis.XAxisPosition.BOTTOM
+            xAxis.valueFormatter = MyXAxisValueFormatter()
+            xAxis.setDrawGridLines(false)
+            axisLeft.setDrawGridLines(false)
+            axisLeft.setLabelCount(dataArray.size, true)
+            axisRight.isEnabled = false
+            description = null
+            highlightValue(Highlight(dataSet.getEntryForIndex(dataArray.size - 1).x,
+                dataSet.getEntryForIndex(dataArray.size - 1).y, 3))
+            notifyDataSetChanged()
+        }
     }
 
     private fun chartDataHelper(enhancedData: NotificationEnhancedData): ArrayList<Entry> {
@@ -265,47 +374,79 @@ class ControlPanelFragment: Fragment(), AdapterView.OnItemSelectedListener {
         val entries = ArrayList<Entry>()
 
         entries.run{
-            for (i in 1..4) {
-                if (size == 0) {
-                    add(Entry(enhancedData.initTime.toFloat(), enhancedData.enhanceOffset.toFloat()))
-                } else if (size == 1) {
-                    val firstPeriod = enhancedData.initTime + enhancedData.firstSaturationTime
-                    when (enhancedData.firstPattern) {
-                        EnhancementPattern.EQ -> {
-                            add(Entry(firstPeriod.toFloat(), enhancedData.enhanceOffset.toFloat()))
-                        }
-                        EnhancementPattern.INC -> {
-                            add(Entry(firstPeriod.toFloat(), enhancedData.upperBound.toFloat()))
-                        }
-                        EnhancementPattern.DEC -> {
-                            add(Entry(firstPeriod.toFloat(), enhancedData.lowerBound.toFloat()))
-                        }
-                    }
+            // Initial Offset
+            add(Entry(enhancedData.initTime.toFloat(), enhancedData.enhanceOffset.toFloat()))
+
+            // Before Interaction
+            val firstPeriod = enhancedData.initTime + enhancedData.firstSaturationTime
+            when (enhancedData.firstPattern) {
+                EnhancementPattern.EQ -> {
+                    add(Entry(firstPeriod.toFloat(), enhancedData.enhanceOffset.toFloat()))
                 }
-                else if (size == 2) {
-                    val secondPeriod = enhancedData.initTime + enhancedData.firstSaturationTime + enhancedData.secondSaturationTime
-                    when (enhancedData.secondPattern) {
-                        EnhancementPattern.EQ -> {
-                            add(Entry(secondPeriod.toFloat(), enhancedData.enhanceOffset.toFloat()))
-                        }
-                        EnhancementPattern.INC -> {
-                            add(Entry(secondPeriod.toFloat(), enhancedData.upperBound.toFloat()))
-                        }
-                        EnhancementPattern.DEC -> {
-                            add(Entry(secondPeriod.toFloat(), enhancedData.lowerBound.toFloat()))
-                        }
-                    }
+                EnhancementPattern.INC -> {
+                    add(Entry(firstPeriod.toFloat(), enhancedData.upperBound.toFloat()))
                 }
-                else {
-                    add(Entry(System.currentTimeMillis().toFloat(), enhancedData.currEnhancement.toFloat()))
+                EnhancementPattern.DEC -> {
+                    add(Entry(firstPeriod.toFloat(), enhancedData.lowerBound.toFloat()))
                 }
             }
+
+            // After Interaction
+            if (enhancedData.interactionTime > 0) {
+                val secondPeriod = enhancedData.initTime + enhancedData.firstSaturationTime + enhancedData.secondSaturationTime
+                when (enhancedData.secondPattern) {
+                    EnhancementPattern.EQ -> {
+                        add(Entry(secondPeriod.toFloat(), enhancedData.enhanceOffset.toFloat()))
+                    }
+                    EnhancementPattern.INC -> {
+                        add(Entry(secondPeriod.toFloat(), enhancedData.upperBound.toFloat()))
+                    }
+                    EnhancementPattern.DEC -> {
+                        add(Entry(secondPeriod.toFloat(), enhancedData.lowerBound.toFloat()))
+                    }
+                }
+            }
+
+            // After Decay
+            if (enhancedData.timeElapsed >= enhancedData.naturalDecay) {
+                val decayPeriod = enhancedData.initTime + enhancedData.naturalDecay
+                entries.add(Entry(decayPeriod.toFloat(), enhancedData.lowerBound.toFloat()))
+            }
+
+            // Current Enhancement
+            add(Entry(System.currentTimeMillis().toFloat(), enhancedData.currEnhancement.toFloat()))
         }
+        Collections.sort(entries, EntryXComparator())
 
         return entries
     }
-    override fun onNothingSelected(parent: AdapterView<*>?) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+
+    private fun chartDataInteractionHelper(enhancedData: NotificationEnhancedData): ArrayList<Entry> {
+
+        if (enhancedData.timeElapsed >= enhancedData.naturalDecay) {
+            return chartDataHelper(enhancedData)
+        }
+
+        val entries = ArrayList<Entry>()
+
+        entries.run{
+            // initial offset
+            add(Entry(enhancedData.initTime.toFloat(), enhancedData.enhanceOffset.toFloat()))
+
+            // until interaction: first pattern
+            add(Entry(enhancedData.interactionTime.toFloat(), enhancedData.interactionEnhancement.toFloat()))
+
+            // after interaction: second pattern
+            val secondPeriod = enhancedData.interactionTime + enhancedData.secondSaturationTime
+            add(Entry(secondPeriod.toFloat(), enhancedData.lowerBound.toFloat()))
+
+            // Current Enhancement
+            add(Entry(System.currentTimeMillis().toFloat(), enhancedData.currEnhancement.toFloat()))
+
+        }
+        Collections.sort(entries, EntryXComparator())
+
+        return entries
     }
 
     private fun initializeEnhancedAppNotiMap(ids: IntArray, packageNames: Array<String>, postTimes: LongArray):MutableMap<String,AppNotificationsEnhancedData>{
@@ -389,7 +530,11 @@ class ControlPanelFragment: Fragment(), AdapterView.OnItemSelectedListener {
             if(packageName == it.key)
                 it.value.apply{
                     notificationData = notificationData.map{
-                            datum -> datum.apply{ lifeCycle = EnhancedNotificationLifeCycle.STATE_3 }
+                            datum -> datum.apply{
+                        lifeCycle = EnhancedNotificationLifeCycle.STATE_3
+                        interactionTime = System.currentTimeMillis()
+                        interactionEnhancement = this.currEnhancement
+                        }
                     }.toMutableList()
                 }
             else
