@@ -19,9 +19,9 @@ class DerivedVisEffect3(
         canvas.let{
             /*
              * shape
-             * 0.5 미만: Oval 또는 Circle
-             * 1.5 미만: Rect
-             * 2.5 미만: RoundRect
+             * 0.5f 미만(0f): Oval 또는 Circle
+             * 1.5f 미만(1f): Rect
+             * 2.5f 미만(2f): RoundRect
              */
             var shape = 0
             var shapeType = Shapes.OVAL
@@ -30,7 +30,7 @@ class DerivedVisEffect3(
             else if (shape == 2) shapeType = Shapes.ROUND_RECT
 
             /*
-             * cx, cy, top, left, right, bottom
+             * centerX, centerY, top, left, right, bottom
              * 1.0f보다 작거나 같을 경우 화면 대비 비율에 따른 상대적 좌표로 사용(0.0f ~ 1.0f)
              * 1.0f보다 클 경우 절대적 좌표로 사용
              */
@@ -51,6 +51,14 @@ class DerivedVisEffect3(
              */
             var radiusX = 0.1f    // cx와 함께 사용, shape가 Circle 또는 RoundRect일 때 필수
             var radiusY = 0.1f    // cy와 함께 사용, shape가 Circle 또는 RoundRect일 때 필수
+
+            /*
+             * brightness
+             * 0.5f 미만(0f): dark_vibrant
+             * 1.5f 미만(1f): vibrant
+             * 2.5f 미만(2f): light_vibrant
+             */
+            var colorBrightness = paintMap[ColorSwatches.DARK_VIBRANT]!!
 
             var isLR = false
             var isTB = false
@@ -82,6 +90,18 @@ class DerivedVisEffect3(
                 }
             }
 
+            if (getVisParams().containsKey("brightness")) {
+                if (getVisParams()["brightness"]!!.roundToInt() == 0) {
+                    colorBrightness = paintMap[ColorSwatches.DARK_VIBRANT]!!
+                }
+                else if (getVisParams()["brightness"]!!.roundToInt() == 1) {
+                    colorBrightness = paintMap[ColorSwatches.VIBRANT]!!
+                }
+                else if (getVisParams()["brightness"]!!.roundToInt() == 2) {
+                    colorBrightness = paintMap[ColorSwatches.LIGHT_VIBRANT]!!
+                }
+            }
+
             // 상대적 좌표를 절대적 좌표로 변환
             if (cx <= 1.0f) cx *= it.width.toFloat()
             if (cy <= 1.0f) cy *= it.height.toFloat()
@@ -99,12 +119,8 @@ class DerivedVisEffect3(
             // 그리기
             if (shapeType == Shapes.CIRCLE) {
                 it.drawCircle(
-                    cx, cy, radiusX * data.currEnhancement.toFloat(),
-                    paintMap[ColorSwatches.LIGHT_VIBRANT]!!
-                )
-                it.drawCircle(
-                    cx, cy, radiusX * 0.9f * data.currEnhancement.toFloat(),
-                    paintMap[ColorSwatches.DARK_VIBRANT]!!.apply{}
+                    cx, cy, radiusX,
+                    colorBrightness
                 )
             }
             else if (shapeType == Shapes.OVAL) {
@@ -118,7 +134,7 @@ class DerivedVisEffect3(
                 }
                 it.drawOval(
                     left, top, right, bottom,
-                    paintMap[ColorSwatches.DARK_VIBRANT]!!
+                    colorBrightness
                 )
             }
             else if (shapeType == Shapes.RECT) {
@@ -132,14 +148,14 @@ class DerivedVisEffect3(
                 }
                 it.drawRect(
                     left, top, right, bottom,
-                    paintMap[ColorSwatches.DARK_VIBRANT]!!
+                    colorBrightness
                 )
             }
             else if (shapeType == Shapes.ROUND_RECT) {
                 it.drawRoundRect(
                     left, top, right, bottom,
                     radiusX, radiusY,
-                    paintMap[ColorSwatches.DARK_VIBRANT]!!
+                    colorBrightness
                 )
             }
             Log.d("AURA_EFFECT",  shapeType.name + " cx:" + cx.toString() + " cy:" + cy.toString() + " rx:" + radiusX.toString() +

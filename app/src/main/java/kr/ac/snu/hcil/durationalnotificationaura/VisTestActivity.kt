@@ -167,26 +167,6 @@ class VisTestActivity : AppCompatActivity() {
                                         it.currEnhancement = 0.8
                                         it.timeElapsed = (0.8 * it.naturalDecay).roundToLong()
                                     })
-                                it.notificationData.add(
-                                    NotificationEnhancedData(
-                                        installedApplications.indexOf(applicationInfo),
-                                        "default",
-                                        Calendar.getInstance().timeInMillis,
-                                        1000L * 60 * 2
-                                    ).also {
-                                        it.currEnhancement = 0.8
-                                        it.timeElapsed = (0.8 * it.naturalDecay).roundToLong()
-                                    })
-                                it.notificationData.add(
-                                    NotificationEnhancedData(
-                                        installedApplications.indexOf(applicationInfo),
-                                        "default",
-                                        Calendar.getInstance().timeInMillis,
-                                        1000L * 60 * 2
-                                    ).also {
-                                        it.currEnhancement = 0.8
-                                        it.timeElapsed = (0.8 * it.naturalDecay).roundToLong()
-                                    })
                             }.let {
                                 ANED ->
                                 val centerX = imageView.x + imageView.width.toFloat() / 2
@@ -195,7 +175,7 @@ class VisTestActivity : AppCompatActivity() {
 
                                 testEAAV.pivotX = centerX - testEAAV.x
                                 testEAAV.pivotY = centerY - testEAAV.y
-                                textView2.text = ANED.notificationData.size.toString()
+                                textView2.text = (ANED.notificationData.size + 2).toString()
                                 view.setEnhanceData(ANED)
                                 view.setVisualEffects(
                                     List(ANED.notificationData.size) { index ->
@@ -205,11 +185,12 @@ class VisTestActivity : AppCompatActivity() {
                                             view.getChildAt(index),
                                             mapOf(
                                                 // imageView와의 중심 거리가 상대좌표로 0.26일 때 잘 보임
+                                                "brightness" to 2f,
                                                 "shape" to 0f,
                                                 "centerX" to testEAAV.pivotX / testEAAV.width.toFloat() + 0.41f * cos(theta),
-                                                "radiusX" to 60f * ANED.notificationData[index].currEnhancement.toFloat(),
+                                                "radiusX" to 11f + index * 10f,
                                                 "centerY" to testEAAV.pivotY / testEAAV.height.toFloat() + 0.41f / testEAAV.height.toFloat() * testEAAV.width.toFloat() * sin(theta),
-                                                "radiusY" to 60f * ANED.notificationData[index].currEnhancement.toFloat()/*,
+                                                "radiusY" to 11f + index * 10f/*,
                                     "left" to installedApplications.indexOf(applicationInfo).toFloat() * 100f,
                                     "right" to (installedApplications.indexOf(applicationInfo).toFloat() + 1f) * 100f,
                                     "top" to 409f,
@@ -238,6 +219,27 @@ class VisTestActivity : AppCompatActivity() {
                                                         */
                                             )
                                         )
+                                    }.mapIndexed { index, derivedVisEffect3 ->
+                                        if (index == 0) {
+                                            DerivedVisEffect3(
+                                                palette,
+                                                view.getChildAt(index),
+                                                mapOf(
+                                                    // imageView와의 중심 거리가 상대좌표로 0.26일 때 잘 보임
+                                                    "brightness" to 2f,
+                                                    "shape" to 1f,
+                                                    "centerX" to testEAAV.pivotX / testEAAV.width.toFloat() + 0.41f * cos(
+                                                        2 * PI.toFloat() / ANED.notificationData.size.toFloat() * index
+                                                    ),
+                                                    "radiusX" to 40f,
+                                                    "centerY" to testEAAV.pivotY / testEAAV.height.toFloat() + 0.41f / testEAAV.height.toFloat() * testEAAV.width.toFloat() * sin(
+                                                        2 * PI.toFloat() / ANED.notificationData.size.toFloat() * index
+                                                    ),
+                                                    "radiusY" to 40f
+                                                ),
+                                                mapOf()
+                                            )
+                                        } else derivedVisEffect3
                                     }
                                 )
                                 /*
