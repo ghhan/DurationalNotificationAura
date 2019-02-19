@@ -58,6 +58,8 @@ class EnhancedAppAuraView(context: Context, attributeSet: AttributeSet?): ViewGr
                         }
                 )
             }
+            invalidate()
+            requestLayout()
         }
         else{
             //update logic
@@ -117,6 +119,7 @@ class EnhancedAppAuraView(context: Context, attributeSet: AttributeSet?): ViewGr
     */
     fun addEnhancedNotificationAuraView(view: View) {
         addView (view)
+
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
@@ -125,10 +128,10 @@ class EnhancedAppAuraView(context: Context, attributeSet: AttributeSet?): ViewGr
         val heightpixels = View.MeasureSpec.getSize(heightMeasureSpec)
         val heightmode = View.MeasureSpec.getMode(heightMeasureSpec)
 
-/*
+        /*
         val columnCount = (parent as GridLayout).columnCount
         //TODO: consider device orientation
-*/
+        */
         val columnCount = 1
 
         super.onMeasure(
@@ -154,14 +157,17 @@ class EnhancedAppAuraView(context: Context, attributeSet: AttributeSet?): ViewGr
         val topPadding = 0
         val bottomPadding = 0
 
-        if(changed){
-            Log.d(TAG, "# of Children in a view of id $tag: $childCount")
-            for(idx in 0..(childCount - 1)){
-                val child : View = getChildAt(idx)
-                Log.d(TAG, "${child.id} -  l: $l, t: $t, r: $r, b: $b")
-                child.layout(leftPadding, topPadding, (r - l) - rightPadding, (b - t) - bottomPadding)
-            }
+        Log.d(TAG, "# of Children in a view of id $tag: $childCount")
+        for(idx in 0..(childCount - 1)){
+            val child : View = getChildAt(idx)
+            Log.d(TAG, "${child.id} -  l: $l, t: $t, r: $r, b: $b")
+            child.layout(leftPadding, topPadding, (r - l) - rightPadding, (b - t) - bottomPadding)
         }
+        /*
+        if(changed){
+
+        }
+        */
     }
 
 }
