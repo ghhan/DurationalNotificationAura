@@ -117,10 +117,6 @@ class EnhancedAppAuraView(context: Context, attributeSet: AttributeSet?): ViewGr
         )
     }
     */
-    fun addEnhancedNotificationAuraView(view: View) {
-        addView (view)
-
-    }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         val widthpixels = View.MeasureSpec.getSize(widthMeasureSpec)
