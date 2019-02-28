@@ -105,6 +105,46 @@ class VisTestActivity : AppCompatActivity() {
                                         it.currEnhancement = 0.8
                                         it.timeElapsed = (0.8 * it.naturalDecay).roundToLong()
                                     })
+                                it.notificationData.add(
+                                    NotificationEnhancedData(
+                                        installedApplications.indexOf(applicationInfo),
+                                        "default",
+                                        Calendar.getInstance().timeInMillis,
+                                        1000L * 60 * 2
+                                    ).also {
+                                        it.currEnhancement = 0.8
+                                        it.timeElapsed = (0.8 * it.naturalDecay).roundToLong()
+                                    })
+                                it.notificationData.add(
+                                    NotificationEnhancedData(
+                                        installedApplications.indexOf(applicationInfo),
+                                        "default",
+                                        Calendar.getInstance().timeInMillis,
+                                        1000L * 60 * 2
+                                    ).also {
+                                        it.currEnhancement = 0.8
+                                        it.timeElapsed = (0.8 * it.naturalDecay).roundToLong()
+                                    })
+                                it.notificationData.add(
+                                    NotificationEnhancedData(
+                                        installedApplications.indexOf(applicationInfo),
+                                        "default",
+                                        Calendar.getInstance().timeInMillis,
+                                        1000L * 60 * 2
+                                    ).also {
+                                        it.currEnhancement = 0.8
+                                        it.timeElapsed = (0.8 * it.naturalDecay).roundToLong()
+                                    })
+                                it.notificationData.add(
+                                    NotificationEnhancedData(
+                                        installedApplications.indexOf(applicationInfo),
+                                        "default",
+                                        Calendar.getInstance().timeInMillis,
+                                        1000L * 60 * 2
+                                    ).also {
+                                        it.currEnhancement = 0.8
+                                        it.timeElapsed = (0.8 * it.naturalDecay).roundToLong()
+                                    })
                             }.let {
                                 ANED ->
                                 val centerX = imageView.x + imageView.width.toFloat() / 2
@@ -129,15 +169,22 @@ class VisTestActivity : AppCompatActivity() {
                                                 "colorRed" to 0f,
                                                 "colorGreen" to 0f,
                                                 "colorBlue" to 255f,
-                                                "shape" to 0f,
-                                                "centerX" to testEAAV.pivotX / testEAAV.width.toFloat() + 0.41f * cos(theta),
-                                                "radiusX" to 11f + index * 10f,
-                                                "centerY" to testEAAV.pivotY / testEAAV.height.toFloat() + 0.41f / testEAAV.height.toFloat() * testEAAV.width.toFloat() * sin(theta),
-                                                "radiusY" to 11f + index * 10f/*,
+                                                "shape" to (index % 3).toFloat(),
+                                                "pivotX" to testEAAV.pivotX,
+                                                "pivotY" to testEAAV.pivotY,
+                                                "posRadius" to 324f,
+                                                "posAngle" to 360f / ANED.notificationData.size.toFloat() * index.toFloat(),
+                                                "roundX" to 0.33f,
+                                                "roundY" to 0.33f,
+                                                "size" to 11f + index * 5f
+                                                //"centerX" to testEAAV.pivotX / testEAAV.width.toFloat() + 0.41f * cos(theta),
+                                                //"radiusX" to 11f + index * 10f,
+                                                //"centerY" to testEAAV.pivotY / testEAAV.height.toFloat() + 0.41f / testEAAV.height.toFloat() * testEAAV.width.toFloat() * sin(theta),
+                                                /*"radiusY" to 11f + index * 10f/*,
                                                 "left" to installedApplications.indexOf(applicationInfo).toFloat() * 100f,
                                                 "right" to (installedApplications.indexOf(applicationInfo).toFloat() + 1f) * 100f,
                                                 "top" to 409f,
-                                                "bottom" to 309f*/
+                                                "bottom" to 309f*/*/
                                             ),
                                             mapOf(
                                                 /*
@@ -185,13 +232,6 @@ class VisTestActivity : AppCompatActivity() {
                                         } else derivedVisEffect3
                                     }
                                 )
-                                /*
-                                RotateAnimation(180f, 360f, Animation.RELATIVE_TO_SELF, centerX, Animation.RELATIVE_TO_SELF, centerY).let {
-                                    rotate ->
-                                    rotate.duration = 500
-                                    testEAAV.startAnimation(rotate)
-                                }
-                                */
                                 ObjectAnimator.ofFloat(testEAAV, "rotation", 0f, 360f).let {
                                     anim ->
                                     anim.setDuration(10000)

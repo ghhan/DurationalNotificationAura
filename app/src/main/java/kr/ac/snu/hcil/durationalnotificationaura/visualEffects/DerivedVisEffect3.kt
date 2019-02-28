@@ -5,8 +5,9 @@ import android.graphics.Color
 import android.support.v7.graphics.Palette
 import android.util.Log
 import android.view.View
+import kotlinx.android.synthetic.main.activity_vis_test.*
 import kr.ac.snu.hcil.durationalnotificationaura.data.NotificationEnhancedData
-import kotlin.math.roundToInt
+import kotlin.math.*
 
 class DerivedVisEffect3(
     palette: Palette,
@@ -31,12 +32,32 @@ class DerivedVisEffect3(
             else if (shape == 2) shapeType = Shapes.ROUND_RECT
 
             /*
+             * pivotX, pivotY
+             * 앱 아이콘의 중심 좌표를 절대적 좌표로 지정
+             */
+            var pivotX = 0.5f * it.width.toFloat()  // 'pivotY'와 함께 사용
+            var pivotY = 0.5f * it.height.toFloat() // 'pivotX'와 함께 사용
+
+            /*
+             * posRadius
+             * 앱 아이콘 중심과 새로 그릴 도형의 중심과의 거리를 절대적 크기로 지정
+             *
+             * posAngle
+             * 앱 아이콘 중심을 기준으로 새로 그릴 도형의 각 위치 지정(0f ~ 360f)
+             *
+             * 전부 'centerX', 'centerY', 'top', 'left', 'right', 'bottom'과 함께 사용 불가
+             */
+            var posRadius = 0f  // 'pivotX', 'pivotY'와 함께 사용
+            var posAngle = 0.0f   // 'pivotX', 'pivotY', 'posRadius'와 함께 사용
+
+            /*
              * centerX, centerY, top, left, right, bottom
              * 1.0f보다 작거나 같을 경우 화면 대비 비율에 따른 상대적 좌표로 사용(0.0f ~ 1.0f)
              * 1.0f보다 클 경우 절대적 좌표로 사용
+             * 전부 'posRadius'와 함께 사용 불가
              */
-            var cx = 0.5f       // 'radiusX'와 함께 사용, 'shape'가 RoundRect일 때 사용 불가
-            var cy = 0.5f       // 'radiusY'와 함께 사용, 'shape'가 RoundRect일 때 사용 불가
+            var cx = 0.5f       // 'radiusX' 또는 'size'와 함께 사용
+            var cy = 0.5f       // 'radiusY' 또는 'size'와 함께 사용
             var top = 0.9f      // 'bottom'과 함께 사용, 'centerY'와 사용 불가
             var left = 0.1f     // 'right'과 함께 사용, 'centerX'와 사용 불가
             var right = 0.9f    // 'left'와 함께 사용, 'centerX'와 사용 불가
@@ -46,12 +67,29 @@ class DerivedVisEffect3(
              * radiusX, radiusY
              * 1.0f보다 작거나 같을 경우 화면 대비 비율에 따른 상대적 크기로 사용(0.0f ~ 1.0f)
              * 1.0f보다 클 경우 절대적 크기로 사용
-             * shape가 RoundRect이면 둘 다 항상 필요 (꼭지점의 둥근 부분의 반지름을 나타냄)
              * shape가 Circle이려면 Oval에서 top, left, right, bottom을 사용하지 않고
-             *     radiusX와 radiusY를 절대적 크기로 같아지도록 설정해야 함
+             *     radiusX와 radiusY를 절대적 크기로 같아지도록 설정해야 한다.
+             *     또는 size를 설정해야 한다.
+             *
+             * roundX, roundY
+             * 1.0f보다 작거나 같을 경우 도형의 가로 길이와 세로 길이 중
+             *     작은 길이에 대한 상대적 크기로 사용(0.0f ~ 1.0f)
+             * 1.0f보다 클 경우 절대적 크기로 사용
+             * shape가 RoundRect일 때만 사용하며, 꼭지점의 둥근 부분의 반지름을 지정
              */
-            var radiusX = 0.1f    // 'centerX'와 함께 사용, 'shape'가 Circle 또는 RoundRect일 때 필수
-            var radiusY = 0.1f    // 'centerY'와 함께 사용, 'shape'가 Circle 또는 RoundRect일 때 필수
+            var radiusX = 0.1f    // 'centerX'와 함께 사용, 'size'와 사용 불가
+            var radiusY = 0.1f    // 'centerY'와 함께 사용, 'size'와 사용 불가
+            var roundX = 0.25f
+            var roundY = 0.25f
+
+            /*
+             * size
+             * 원의 지름 또는 정사각형의 한 변의 길이를 지정
+             * 1.0f보다 작거나 같을 경우 화면 너비(width) 대비 비율에 따른 상대적 크기로 사용(0.0f ~ 1.0f)
+             * 1.0f보다 클 경우 절대적 크기로 사용
+             *
+             */
+            var size = 0.1f     // 'radiusX', 'radiusY'와 사용 불가
 
             /*
              * brightness
@@ -70,34 +108,74 @@ class DerivedVisEffect3(
             var colorGreen = 0
             var colorBlue = 0
 
+            var isPolar = true
             var isLR = false
             var isTB = false
-            if (getVisParams().containsKey("centerX") && getVisParams().containsKey("radiusX") &&
-                    shapeType != Shapes.ROUND_RECT) {
-                cx = getVisParams()["centerX"]!!
-                radiusX = getVisParams()["radiusX"]!!
+            var isRegular = true
+
+            /*
+             * 위치 우선순위
+             * 1. posRadius, posAngle (pivotX, pivotY 필요)
+             * 2. centerX / centerY
+             * 3. left, right / top, bottom
+             *
+             * 크기 우선순위
+             * 1. size
+             * 2. radiusX / radiusY
+             * 3. left, right / top, bottom
+             */
+            if (getVisParams().containsKey("pivotX") && getVisParams().containsKey("pivotY")) {
+                pivotX = getVisParams()["pivotX"]!!
+                pivotY = getVisParams()["pivotY"]!!
             }
-            else if (getVisParams().containsKey("left") && getVisParams().containsKey("right")) {
-                left = getVisParams()["left"]!!
-                right = getVisParams()["right"]!!
-                isLR = true
-                if (shapeType == Shapes.ROUND_RECT && getVisParams().containsKey("radiusX")) {
+
+            if (getVisParams().containsKey("size")) {
+                size = getVisParams()["size"]!!
+            }
+            else {
+                isRegular = false
+                if (getVisParams().containsKey("radiusX")) {
                     radiusX = getVisParams()["radiusX"]!!
+                }
+                if (getVisParams().containsKey("radiusY")) {
+                    radiusY = getVisParams()["radiusY"]!!
                 }
             }
 
-            if (getVisParams().containsKey("centerY") && getVisParams().containsKey("radiusY") &&
-                    shapeType != Shapes.ROUND_RECT) {
-                cy = getVisParams()["centerY"]!!
-                radiusY = getVisParams()["radiusY"]!!
-            }
-            else if (getVisParams().containsKey("top") && getVisParams().containsKey("bottom")) {
-                bottom = getVisParams()["bottom"]!!
-                top = getVisParams()["top"]!!
-                isTB = true
-                if (shapeType == Shapes.ROUND_RECT && getVisParams().containsKey("radiusY")) {
-                    radiusY = getVisParams()["radiusY"]!!
+            if (getVisParams().containsKey("posRadius")) {
+                posRadius = getVisParams()["posRadius"]!!
+                if (getVisParams().containsKey("posAngle")) {
+                    posAngle = getVisParams()["posAngle"]!!
                 }
+            }
+            else {
+                isPolar = false
+                if (getVisParams().containsKey("centerX") &&
+                    (isRegular || getVisParams().containsKey("radiusX"))) {
+                    cx = getVisParams()["centerX"]!!
+                }
+                else if (getVisParams().containsKey("left") && getVisParams().containsKey("right")) {
+                    left = getVisParams()["left"]!!
+                    right = getVisParams()["right"]!!
+                    isLR = true
+                }
+
+                if (getVisParams().containsKey("centerY") &&
+                    (isRegular || getVisParams().containsKey("radiusY"))) {
+                    cy = getVisParams()["centerY"]!!
+                }
+                else if (getVisParams().containsKey("top") && getVisParams().containsKey("bottom")) {
+                    bottom = getVisParams()["bottom"]!!
+                    top = getVisParams()["top"]!!
+                    isTB = true
+                }
+            }
+
+            if (getVisParams().containsKey("roundX")) {
+                roundX = getVisParams()["roundX"]!!
+            }
+            if (getVisParams().containsKey("roundY")) {
+                roundY = getVisParams()["roundY"]!!
             }
 
             if (!getVisParams().containsKey("brightness") ||
@@ -122,21 +200,37 @@ class DerivedVisEffect3(
                 }
             }
 
-            // 상대적 좌표를 절대적 좌표로 변환
-            if (cx <= 1.0f) cx *= it.width.toFloat()
-            if (cy <= 1.0f) cy *= it.height.toFloat()
-            if (left <= 1.0f) left *= it.width.toFloat()
-            if (right <= 1.0f) right *= it.width.toFloat()
-            if (top <= 1.0f) top *= it.height.toFloat()
-            if (bottom <= 1.0f) bottom *= it.height.toFloat()
+            if (isPolar) {
+                //cx = pivotX + posRadius * cos(posAngle * PI.toFloat() / 180f)
+                //cy = pivotY + posRadius * sin(posAngle * PI.toFloat() / 180f)
+                cx = pivotX + posRadius * cos(0f)
+                cy = pivotY + posRadius * sin(0f)
+            }
+            else {
+                // 상대적 좌표를 절대적 좌표로 변환
+                if (cx <= 1.0f) cx *= it.width.toFloat()
+                if (cy <= 1.0f) cy *= it.height.toFloat()
+                if (left <= 1.0f) left *= it.width.toFloat()
+                if (right <= 1.0f) right *= it.width.toFloat()
+                if (top <= 1.0f) top *= it.height.toFloat()
+                if (bottom <= 1.0f) bottom *= it.height.toFloat()
+            }
+            if (size <= 1.0f) size *= it.width.toFloat()
             if (radiusX <= 1.0f) radiusX *= it.width.toFloat()
             if (radiusY <= 1.0f) radiusY *= it.height.toFloat()
 
+            if (isRegular) {
+                radiusX = size
+                radiusY = size
+            }
+
             // Circle인지 확인
-            if (shapeType == Shapes.OVAL && !isLR && !isTB && radiusX == radiusY)
+            if (shapeType == Shapes.OVAL && (isRegular || !isLR && !isTB && radiusX == radiusY))
                 shapeType = Shapes.CIRCLE
 
             // 그리기
+            it.save()
+            it.rotate(posAngle, pivotX, pivotY)
             if (shapeType == Shapes.CIRCLE) {
                 it.drawCircle(
                     cx, cy, radiusX,
@@ -172,12 +266,23 @@ class DerivedVisEffect3(
                 )
             }
             else if (shapeType == Shapes.ROUND_RECT) {
+                if (!isLR) {
+                    left = cx - radiusX
+                    right = cx + radiusX
+                }
+                if (!isTB) {
+                    bottom = cy - radiusY
+                    top = cy + radiusY
+                }
+                if (roundX <= 1.0f) roundX *= min(top - bottom, right - left)
+                if (roundY <= 1.0f) roundY *= min(top - bottom, right - left)
                 it.drawRoundRect(
                     left, top, right, bottom,
-                    radiusX, radiusY,
+                    roundX, roundY,
                     color
                 )
             }
+            it.restore()
             Log.d("AURA_EFFECT",  shapeType.name + " cx:" + cx.toString() + " cy:" + cy.toString() + " rx:" + radiusX.toString() +
                     " ry:" + radiusY.toString() + " width:" + it.width.toString() + " height:" + it.height.toString())
         }
