@@ -188,7 +188,7 @@ class DerivedVisEffect3(
                     colorGreen = getVisParams()["colorGreen"]!!.roundToInt().coerceIn(0, 255)
                 if (getVisParams().containsKey("colorAlpha"))
                     colorBlue = getVisParams()["colorBlue"]!!.roundToInt().coerceIn(0, 255)
-                color.color = colorAlpha * 16777216 + colorRed * 65536 + colorGreen * 256 + colorBlue
+                color.color = colorAlpha * 0x1000000 + colorRed * 0x10000 + colorGreen * 0x100 + colorBlue
             }
             else {
                 if (getVisParams()["brightness"]!!.roundToInt() == 1) {

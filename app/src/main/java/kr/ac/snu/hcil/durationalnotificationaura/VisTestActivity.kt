@@ -49,6 +49,7 @@ class VisTestActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_vis_test)
     }
+
     override fun onResume() {
         super.onResume()
         /*
@@ -61,7 +62,6 @@ class VisTestActivity : AppCompatActivity() {
 
         val installedApplications2 = installedApplications.filter{ it.packageName == "kr.ac.snu.hcil.durationalnotificationaura" }//"com.google.android.youtube" }
 
-        Log.d("AURA_TEST", "onCreate")
         installedApplications2.map { applicationInfo ->
             val appName = applicationInfo.packageName
             val iconDrawable = pm.getApplicationIcon(appName)
@@ -187,7 +187,6 @@ class VisTestActivity : AppCompatActivity() {
                                                 "bottom" to 309f*/*/
                                             ),
                                             mapOf(
-                                                /*
                                                 AnimationTypes.ALPHA to
                                                         AnimationParams(
                                                             arrayOf(0f, 1f).toFloatArray(),
@@ -199,14 +198,13 @@ class VisTestActivity : AppCompatActivity() {
                                                             arrayOf(0f, 1f).toFloatArray(),
                                                             3000,
                                                             LinearInterpolator()
-                                                        ),
-                                                AnimationTypes.TRANSLATION_X to
-                                                        AnimationParams(
-                                                            arrayOf(-100f, 300f).toFloatArray(),
-                                                            1000 * (installedApplications.indexOf(applicationInfo)).toLong(),
-                                                            LinearInterpolator()
                                                         )
-                                                        */
+//                                                AnimationTypes.TRANSLATION_X to
+//                                                        AnimationParams(
+//                                                            arrayOf(0f, 300f).toFloatArray(),
+//                                                            1000 * (installedApplications.indexOf(applicationInfo)).toLong(),
+//                                                            LinearInterpolator()
+//                                                        )
                                             )
                                         )
                                     }.mapIndexed { index, derivedVisEffect3 ->
@@ -232,13 +230,14 @@ class VisTestActivity : AppCompatActivity() {
                                         } else derivedVisEffect3
                                     }
                                 )
-                                ObjectAnimator.ofFloat(testEAAV, "rotation", 0f, 360f).let {
-                                    anim ->
-                                    anim.setDuration(10000)
-                                    anim.repeatCount = ValueAnimator.INFINITE
-                                    anim.interpolator = LinearInterpolator()
-                                    anim.start()
-                                }
+                                // currently, the notification container (app aura view) itself is rotating!
+//                                ObjectAnimator.ofFloat(testEAAV, "rotation", 0f, 360f).let {
+//                                    anim ->
+//                                    anim.setDuration(10000)
+//                                    anim.repeatCount = ValueAnimator.INFINITE
+//                                    anim.interpolator = LinearInterpolator()
+//                                    anim.start()
+//                                }
                                 Log.d("AURA_TEST", "addENAV");
                             }
                         }
