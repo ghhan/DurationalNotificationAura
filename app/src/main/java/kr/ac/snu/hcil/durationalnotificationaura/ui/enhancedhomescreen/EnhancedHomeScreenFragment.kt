@@ -71,6 +71,7 @@ class EnhancedHomeScreenFragment : Fragment() {
                                 view.setVisualEffects(List(data.notificationData.size) { index ->
                                     DerivedVisEffect2(
                                         viewModel.paletteMap[packageName]!!,
+                                        view,
                                         view.getChildAt(index),
                                         mapOf(),
                                         mapOf(
@@ -140,6 +141,7 @@ class EnhancedHomeScreenFragment : Fragment() {
                                 view.setVisualEffects(List(data.notificationData.size) {index ->
                                     DerivedVisEffect2(
                                         viewModel.paletteMap[packageName]!!,
+                                        view,
                                         view.getChildAt(index),
                                         mapOf(),
                                         mapOf(

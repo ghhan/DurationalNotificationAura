@@ -7,10 +7,11 @@ import kr.ac.snu.hcil.durationalnotificationaura.data.NotificationEnhancedData
 
 class DerivedVisEffect(
     palette: Palette,
+    parentView: View,
     targetView: View,
     visParams: Map<String, Float>,
     animParams: Map<AnimationTypes, AnimationParams>)
-    :AbstractVisEffect(palette, targetView, visParams, animParams){
+    :AbstractVisEffect(palette, targetView, parentView, visParams, animParams){
 
 
     override fun drawVisualEffect(data: NotificationEnhancedData, canvas: Canvas) {

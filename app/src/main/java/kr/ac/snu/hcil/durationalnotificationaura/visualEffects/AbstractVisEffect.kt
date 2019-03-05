@@ -1,16 +1,19 @@
 package kr.ac.snu.hcil.durationalnotificationaura.visualEffects
 
 import android.animation.*
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.Paint
+import android.graphics.*
 import android.support.v7.graphics.Palette
+import android.util.Log
 import android.view.View
+import android.view.ViewGroup
+import android.view.animation.PathInterpolator
+import kotlinx.android.synthetic.main.activity_vis_test.*
 import kr.ac.snu.hcil.durationalnotificationaura.data.EnhancedNotificationLifeCycle
 import kr.ac.snu.hcil.durationalnotificationaura.data.NotificationEnhancedData
 
 abstract class AbstractVisEffect(
     private var palette: Palette,
+    private var parentView: View,
     private var targetView: View,
     private var visParams: Map<String, Float>,
     private var animParams: Map<AnimationTypes, AnimationParams>
@@ -70,12 +73,31 @@ abstract class AbstractVisEffect(
             entry ->
             entry.value.sustained.map{
                 myMap[it]!!.add(
-                    ObjectAnimator.ofFloat(targetView, animTypeToProp[entry.key], *entry.value.values)
-                        .apply{
+                    if (animTypeToProp[entry.key] == View.TRANSLATION_X) {
+                        ObjectAnimator.ofFloat(targetView, View.TRANSLATION_X, View.TRANSLATION_Y,
+                            Path().apply{
+//                                Log.e("rectf", mutableListOf(parentView.x, parentView.y, parentView.x + parentView.width,
+//                                    parentView.y + parentView.height).toString())
+                                moveTo(parentView.pivotX, parentView.pivotY)
+                                var startangle = 360f / 9 * (parentView as ViewGroup).indexOfChild(targetView)
+                                arcTo(RectF(parentView.pivotX - 324f, parentView.pivotY - 324f,
+                                    parentView.pivotY + 324f, parentView.pivotY + 324f),
+                                    startangle, startangle + 60f, true)
+//                                addCircle(parentView.pivotX, parentView.pivotY, 324f, Path.Direction.CW)
+                            }).apply{
                             repeatMode = entry.value.repeatMode
                             repeatCount = entry.value.repeatCount
-                            duration = entry.value.duration
+                            duration = 2000
                         }
+                    } else {
+                        ObjectAnimator.ofFloat(targetView, animTypeToProp[entry.key], *entry.value.values)
+                            .apply {
+                                interpolator = entry.value.interpolator
+                                repeatMode = entry.value.repeatMode
+                                repeatCount = entry.value.repeatCount
+                                duration = entry.value.duration
+                            }
+                    }
                 )
             }
         }
