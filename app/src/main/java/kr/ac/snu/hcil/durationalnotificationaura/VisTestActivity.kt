@@ -161,7 +161,7 @@ class VisTestActivity : AppCompatActivity() {
                                         val theta = 2 * PI.toFloat() / ANED.notificationData.size.toFloat() * index.toFloat()
                                         DerivedVisEffect3(
                                             palette,
-                                            imageView,
+                                            testEAAV,
                                             view.getChildAt(index),
                                             mapOf(
                                                 // imageView와의 중심 거리가 상대좌표로 0.26일 때 잘 보임

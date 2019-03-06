@@ -2,6 +2,7 @@ package kr.ac.snu.hcil.durationalnotificationaura.visualEffects
 
 import android.animation.*
 import android.graphics.*
+import android.support.v4.view.ViewGroupCompat
 import android.support.v7.graphics.Palette
 import android.util.Log
 import android.view.View
@@ -78,16 +79,15 @@ abstract class AbstractVisEffect(
                             Path().apply{
 //                                Log.e("rectf", mutableListOf(parentView.x, parentView.y, parentView.x + parentView.width,
 //                                    parentView.y + parentView.height).toString())
-                                moveTo(parentView.pivotX, parentView.pivotY)
-                                var startangle = 360f / 9 * (parentView as ViewGroup).indexOfChild(targetView)
-                                arcTo(RectF(parentView.pivotX - 324f, parentView.pivotY - 324f,
-                                    parentView.pivotY + 324f, parentView.pivotY + 324f),
-                                    startangle, startangle + 60f, true)
-//                                addCircle(parentView.pivotX, parentView.pivotY, 324f, Path.Direction.CW)
+                                var startangle = 360f / 7 * (parentView as ViewGroup).indexOfChild(targetView)
+                                arcTo(RectF(parentView.x - 162f, parentView.y - 162f,
+                                    parentView.x + 162f, parentView.y + 162f),
+                                    startangle, 60f, true)
+//                                addCircle(parentView.pivotX - 324f, parentView.pivotY - 324f, 324f, Path.Direction.CW)
                             }).apply{
                             repeatMode = entry.value.repeatMode
                             repeatCount = entry.value.repeatCount
-                            duration = 2000
+                            duration = 3000
                         }
                     } else {
                         ObjectAnimator.ofFloat(targetView, animTypeToProp[entry.key], *entry.value.values)
